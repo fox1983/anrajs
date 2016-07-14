@@ -1,0 +1,187 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=580,user-scalable=no, maximum-scale=1"/>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: white;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: none;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+            -webkit-user-select: none
+        }
+
+    </style>
+    <script src="js/Base.js"></script>
+    <script src="js/anra.common.js"></script>
+    <script src="js/anra.canvas.js"></script>
+    <script src="js/anra.canvas.grid.js"></script>
+    <script src="js/maze.config.js"></script>
+    <script>
+        var MouseListener = anra.Listener.extend({
+            handleEvent:function (e) {
+                if (e.type == anra.EVENT.MouseUp) {
+                    if (this.func != null) {
+                        this.func(e);
+                    }
+                }
+            }
+        });
+
+
+        window.onload = function () {
+            document.querySelector('body').addEventListener('touchstart', function (ev) {
+                ev.preventDefault();
+            });
+
+            var painter = new anra.Painter();
+            var canvas = new anra.Canvas("maze");
+            var image = anra.ImageRegistry.regist("images/maze/dire.jpg");
+            /*添加场景*/
+            var sc1 = new anra.Scene();
+            canvas.element.width = document.body.clientWidth;
+            canvas.element.height = document.body.clientHeight;
+
+            /*设置地形绘制器*/
+            sc1.landPainter = new anra.LandPainter();
+            canvas.scenes.push(sc1);
+            image.width = IMAGE_WIDTH;
+            image.height = IMAGE_HEIGHT;
+            painter.frameRate = FRAME_RATE;
+            var zoom = canvas.element.width / image.width * ZOOM;
+            var imageWidth = image.width * zoom;
+            var imageHeight = image.height * zoom;
+            var cellSize = imageWidth / config.length;
+            sc1.cellSize = cellSize;
+
+            var playerSpeed = PLAYER_SPEED * zoom;
+            var playerSize = cellSize - PLAYER_SPACE * zoom;
+            var itemSize = cellSize - ITEM_SPACE * zoom;
+
+            var maxH = imageHeight > canvas.p2y(100) ? imageHeight - canvas.p2y(100) : 0;
+            var maxW = imageWidth > canvas.p2x(100) ? imageWidth - canvas.p2x(100) : 0;
+            sc1.x = -canvas.p2x(45) + cellSize * 4;
+            sc1.y = -canvas.p2y(45) + cellSize * 24;
+
+            //触控参数
+            var upLine = canvas.p2y(TC_CEIL_LINE_PER);
+            var downLine = canvas.p2y(TC_BOTTOM_LINE_PER);
+            var duration = TC_EXEC_FREQUENT;
+
+            var item = new anra.Role();
+            item.camp = 0;
+            item.width = itemSize;
+            item.height = itemSize;
+            item.image = anra.ImageRegistry.regist(ITEM_IMAGE);
+            sc1.addRole(item);
+
+
+            sc1.refresh = function () {
+                item.x = 18 * cellSize - sc1.x;
+                item.y = 24 * cellSize - sc1.y;
+                if (item.isActive) {
+                    if (player != null)
+                        if ((player.x > item.x ? (player.x - item.x < player.width) : (item.x - player.x < item.width))
+                                && (player.y > item.y ? (player.y - item.y < player.height) : (item.y - player.y < item.height))) {
+                            item.isActive = false;
+                            alert("碰撞");
+                        }
+                }
+            }
+            sc1.refresh();
+            var hoffset = -10 * zoom;
+            var voffset = -2 * zoom;
+
+            var maze = anra.Land.extend({
+                id:0,
+                imageURL:"images/maze/maze.jpg",
+                paint:function (o, gc, scene) {
+                    gc.drawImage(anra.ImageRegistry.get(this.imageURL), 0, 0, image.width, image.width, -sc1.x + hoffset, -sc1.y + voffset, imageWidth, imageWidth);
+                }
+            });
+            var tempX = sc1.x, tempY = sc1.y;
+
+            maze = new maze();
+            anra.ImageRegistry.regist(maze.imageURL);
+
+            var landRegistry = new anra.LandRegistry();
+            landRegistry.regist(maze);
+            sc1.landPainter.registry = landRegistry;
+            sc1.landPainter.config = [
+                [0]
+            ];
+
+            var player = new Player();
+            player.id = "player";
+            player.camp = 1;
+            player.speed = playerSpeed;
+            player.x = canvas.p2x(45);
+            player.y = canvas.p2y(45);
+            player.width = playerSize;
+            player.height = playerSize;
+            player.image = anra.ImageRegistry.regist("images/anime/move1.png");
+
+            sc1.addRole(player);
+
+            //添加方向键控制器
+            var dKeys = new DirectionKeys(player);
+            sc1.addRole(dKeys);
+
+            var operBar = new anra.OperateBar(player);
+            var SIZE = 200;
+//            var w = canvas.p2x(100);
+//            var h = canvas.p2y(100);
+//            operBar.width = SIZE > w ? w : SIZE;
+//            operBar.height = SIZE > h ? h : SIZE;
+//            operBar.x = 0;
+//            operBar.y = h > SIZE ? h - SIZE : 0;
+            operBar.x=0;
+            operBar.y=0;
+            operBar.width=canvas.p2x(100);
+            operBar.height=canvas.p2y(100);
+
+            sc1.addRole(operBar);
+
+
+            var anime = new anra.Animation();
+            anime.addImage("images/anime/move1.png");
+            anime.addImage("images/anime/move2.png");
+            anime.duration = 10;
+            player.animations.set(anra.status.WAITING, anime);
+
+
+            anime = new anra.Animation();
+            anime.addImage("images/anime/move3.png");
+            anime.addImage("images/anime/move4.png");
+            anime.duration = 60;
+
+            //信息面板
+            sc1.updateInfo = function (o, gc) {
+                gc.save();
+                gc.fillStyle = 'red';
+                gc.font = "15px 微软雅黑";
+                gc.fillText("玩家状态 " + player.status, 30, 55);
+                gc.fillStyle = 'black';
+                gc.font = "15px 微软雅黑";
+                gc.restore();
+            };
+
+            painter.setCanvas(canvas);
+            painter.start();
+
+        }
+        ;
+
+    </script>
+</head>
+<body href=javascript:void(0) style="-webkit-touch-callout:none;">
+<canvas id="maze" tabindex="0" href=javascript:void(0) style="-webkit-touch-callout:none;"></canvas>
+</body>
+</html>

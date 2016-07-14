@@ -1,0 +1,120 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=580,user-scalable=no, maximum-scale=1,target-densitydpi=device-dpi"/>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: black;
+        }
+    </style>
+    <script src="js/Base.js"></script>
+    <script src="js/anra.common.js"></script>
+    <script src="js/anra.canvas.js"></script>
+    <script src="js/anra.canvas.grid.js"></script>
+    <script src="js/landformConfig.example.js"></script>
+    <script>
+        window.onload = function () {
+            var canvas = new anra.Canvas("drum");
+            /*添加场景*/
+            var sc1 = new anra.Scene();
+            canvas.element.width = document.body.clientWidth;
+            canvas.element.height = document.body.clientHeight;
+
+            /*设置地形绘制器*/
+            sc1.landPainter = new anra.LandPainter();
+
+            canvas.scenes.push(sc1);
+
+            var stage = anra.Land.extend({
+                id:0,
+                imageURL:"images/ed/stage.jpg",
+                paint:function (o, gc, scene) {
+                    var image = anra.ImageRegistry.get(this.imageURL);
+                    gc.drawImage(image, 0, 0, canvas.p2x(100), canvas.p2y(100));
+                }
+            });
+            stage = new stage();
+            anra.ImageRegistry.regist(stage.imageURL);
+
+            var landRegistry = new anra.LandRegistry();
+            landRegistry.regist(stage);
+            sc1.landPainter.registry = landRegistry;
+            sc1.landPainter.config = [
+                [0]
+            ];
+
+            //鼓
+            var drum = new anra.Role();
+            drum.id = "drum";
+            drum.camp = 0;
+            drum.x = canvas.p2x(80);
+            drum.y = canvas.p2y(80);
+            drum.width = canvas.p2x(10);
+            drum.height = canvas.p2x(10);
+            drum.image = anra.ImageRegistry.regist("images/ed/drum.jpg");
+
+
+            var elephant = new anra.Role();
+            elephant.id = "elephant";
+            elephant.camp = 1;
+            elephant.x = canvas.p2x(40);
+            elephant.y = canvas.p2y(70);
+            elephant.width = canvas.p2x(10);
+            elephant.height = canvas.p2x(10);
+            elephant.image = anra.ImageRegistry.regist("images/anime/move1.png");
+
+
+            var anime = new anra.Animation();
+            anime.addImage("images/anime/move1.png");
+            anime.addImage("images/anime/move2.png");
+            anime.duration = 10;
+            elephant.animations.set(10, anime);
+
+
+            anime = new anra.Animation();
+            anime.addImage("images/anime/move3.png");
+            anime.addImage("images/anime/move4.png");
+            anime.duration = 11;
+            elephant.animations.set(11, anime);
+
+
+            anime = new anra.Animation();
+            anime.addImage("images/anime/move6.png");
+            anime.addImage("images/anime/move5.png");
+            anime.duration = 12;
+            elephant.animations.set(12, anime);
+
+            var a = [10, 11, 12];
+            var i = 0;
+            var MouseListener = anra.Listener.extend({
+                handleEvent:function (e) {
+                    if (e.type == anra.EVENT.MouseDown) {
+                        if (i == 3)
+                            i = 0;
+                        elephant.setStatus(a[i++]);
+                    }
+                }
+            });
+            drum.addMouseListener(new MouseListener());
+
+
+            sc1.addRole(drum);
+            sc1.addRole(elephant);
+
+
+            var painter = new anra.Painter();
+            painter.setCanvas(canvas);
+            painter.start();
+        };
+
+    </script>
+</head>
+<body style="height: 100%;width: 100%;margin: 0;padding: 0;">
+<canvas id="drum"></canvas>
+</body>
+</html>

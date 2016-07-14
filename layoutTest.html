@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="js/Base.js"></script>
+    <script src="js/anra.common.js"></script>
+    <script src="js/anra.svg.js"></script>
+    <script src="js/anra.layout.js"></script>
+    <script>
+        window.onload = function () {
+            var display = new anra.SVG("svgContainer");
+
+            var parent = new anra.svg.Rect();
+            parent.setBounds({
+                x:100,
+                y:120,
+                width:330,
+                height:410
+            });
+            display.addChild(parent);
+
+            parent.layoutManager=new anra.svg.GridLayout(2,false);
+
+
+            var w=20;
+            var h=20;
+            for(var i= 0;i<4;i++){
+                var c1=new anra.svg.Rect();
+                c1.layoutData=new anra.svg.GridData();
+                parent.addChild(c1);
+            }
+
+
+        }
+
+    </script>
+</head>
+<body>
+<div id="svgContainer"
+     style="position: absolute;top: 0;left: 10%;width: 50%;height: 100%;background-color: yellow;"></div>
+</body>
+</html>

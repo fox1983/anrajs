@@ -1,0 +1,174 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: black;
+        }
+
+        #div1 {
+            background: white;
+            width: 600px;
+            margin: 20px auto
+        }
+    </style>
+    <script src="js/Base.js"></script>
+    <script src="js/anra.common.js"></script>
+    <script src="js/anra.canvas.js"></script>
+    <script src="js/anra.canvas.grid.js"></script>
+    <script src="js/landformConfig.example.js"></script>
+    <script>
+        window.onload = function () {
+            var canvas = new anra.Canvas("c1");
+            /*添加场景*/
+            var sc1 = new anra.grid.GridScene();
+
+            /*设置地形绘制器*/
+            sc1.landPainter = new anra.grid.LandPainter();
+            /*初始化地形绘制器*/;
+            sc1.landPainter.registry = landRegistry;
+            sc1.landPainter.config = landformConfig
+
+            var ML = anra.Listener.extend({
+                handleEvent:function (e) {
+                    var s=e.widget.selection;
+                    //TODO
+                    if(e.type==anra.EVENT.MouseDown)
+                    if(s!=null){
+                        s.move(e.x, e.y);
+                    }
+                }
+            });
+
+            sc1.addMouseListener(new ML());
+
+            /*添加玩家角色*/
+            var player = new anra.Role();
+            sc1.setSelection(player);
+            //player.
+            player.id = "player";
+            {
+                player.router = new anra.grid.AStarRouter();
+
+                //初始化地形通过难度值，未被记录的地形视为无法通过
+                player.router.levels.set(0, [10, 15]);
+                player.router.levels.set(1, [20, 30]);
+                player.router.levels.set(2, [30, 45]);
+                // this.levels.set(3,[500,700]);
+                player.router.levels.set(4, [10, 15]);
+                //player.router=new anra.grid.GridRouter);
+                player.x = 210;
+                player.y = 270;
+                player.width = 30;
+                player.height = 30;
+                player.speed = 300;
+
+                var waitAnime = new anra.Animation();
+                waitAnime.addImage("images/anime/move1.png");
+                waitAnime.addImage("images/anime/move2.png");
+                waitAnime.addImage("images/anime/move3.png");
+                waitAnime.addImage("images/anime/move4.png");
+                waitAnime.addImage("images/anime/move6.png");
+                waitAnime.addImage("images/anime/move5.png");
+                waitAnime.duration = 10;
+
+                player.animations.set(anra.status.WAITING, waitAnime);
+
+
+                var moveAnime = new anra.Animation();
+                moveAnime.addImage("images/anime/move4.png");
+                moveAnime.addImage("images/anime/move5.png");
+                moveAnime.addImage("images/anime/move6.png");
+                moveAnime.duration = 10;
+
+                player.animations.set(anra.status.MOVING, moveAnime);
+
+
+                var player1 = new anra.Role();
+                //player.
+                player1.id = "player1";
+                player1.x = 310;
+                player1.y = 510;
+                player1.camp = 1;
+
+                player.crush = function (t) {
+                    t.destory();
+                };
+
+                var MouseListener = anra.Listener.extend({
+                    handleEvent:function (e) {
+                        if (e.type == anra.EVENT.MouseDoubleClick) {
+                            var widget = e.widget;
+                            widget.parent.setSelection(widget);
+                            //TODO
+                          //  console.log("player");
+                        }
+                    }
+                });
+                player.addMouseListener(new MouseListener());
+
+                player1.paint = function (o, gc) {
+                };
+                player1.speed = 20;
+                player1.router = new anra.grid.AStarRouter();
+
+                sc1.addRole(player1);
+                sc1.addRole(player);
+                canvas.scenes.push(sc1);
+
+                var painter = new anra.Painter();
+                painter.setCanvas(canvas);
+
+
+                painter.start();
+                sc1.actChanged = function (evt) {
+                    //console.log(evt.type);
+                    if (evt.type == anra.status.MOVING) {
+                        //sc1.screenY+=20*evt.source.router.y_position;
+                    }
+                };
+                player.addActListener(sc1);
+                player.addActListener(new anra.CrushListener());
+
+//                canvas.element.ondblclick = function (ev) {
+//                    var ev = ev || window.event;
+//                    var x = ev.clientX - canvas.element.offsetLeft + Math.floor(window.pageXOffset);
+//                    var y = ev.clientY - canvas.element.offsetTop + Math.floor(window.pageYOffset);
+//                    player.move(x, y);
+//                    mX = x;
+//                    mY = y;
+//                };
+
+                var mX = 0, mY = 0;
+                sc1.updateInfo = function (o, gc) {
+                    gc.save();
+                    gc.fillStyle = 'red';
+                    gc.font = "15px 微软雅黑";
+                    gc.fillText("玩家坐标 " + player.router.i + ":" + player.router.j, 30, 35);
+                    gc.fillText("玩家状态 " + player.status, 30, 55);
+                    gc.fillStyle = 'black';
+                    gc.font = "15px 微软雅黑";
+                    for (var i = 0; i < 20; i++) {
+                        gc.fillText(i, 10, i * 30 + 30);
+                        if (i > 0)
+                            gc.fillText(i, i * 30, 30);
+                    }
+                    gc.restore();
+                };
+            }
+        }
+    </script>
+</head>
+
+<body>
+<div id="div1">
+    <canvas id="c1" width="600" height="600"></canvas>
+</div>
+</body>
+
+</html>
