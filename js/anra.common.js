@@ -158,8 +158,8 @@ anra.Rectangle = {
     contains:function (rect, x, y) {
         return (x >= rect.x) && (y >= rect.y) && x < (rect.x + rect.width) && y < (rect.y + rect.height);
     },
-    distance:function(r1,r2){
-        return Math.sqrt((r1[0]-r2[0])*(r1[0]-r2[0])+(r1[1]-r2[1])*(r1[1]-r2[1]));
+    distance:function (r1, r2) {
+        return Math.sqrt((r1[0] - r2[0]) * (r1[0] - r2[0]) + (r1[1] - r2[1]) * (r1[1] - r2[1]));
     }
 };
 
@@ -226,6 +226,13 @@ anra.Widget = Base.extend({
         this.eventTable.unhook(eventType, listener);
     },
     notifyListeners:function (eventType, event, isGlobalEvent) {
+        if (this.parent != null && this.eventTable != null && !isGlobalEvent && anra.BubbleEvent.contains(eventType)) {
+            var ls = this.eventTable.getListeners(eventType);
+            if (ls == null || ls.length == 0) {
+                this.parent.notifyListeners(eventType, event, isGlobalEvent);
+                return;
+            }
+        }
         if (event == null) event = new anra.event.Event();
         event.type = eventType;
         event.widget = this;
@@ -314,7 +321,7 @@ anra.Action = Base.extend({id:"", run:function () {
  *事件定义
  */
 anra.event = anra.event || {};
-anra.EVENT= {
+anra.EVENT = {
     NONE:0,
     MouseDown:1,
     MouseUp:2,
@@ -330,6 +337,14 @@ anra.EVENT= {
     TouchMove:12,
     TouchEnd:13
 };
+var E = anra.EVENT;
+/**
+ *以下事件，如果当前元素没有监听，则冒泡到父级
+ * @type {Array}
+ */
+anra.BubbleEvent = [
+    E.MouseDown, E.MouseUp, E.MouseMove, E.MouseDoubleClick
+];
 
 anra.event.Event = Base.extend({
     widget:null,
@@ -417,8 +432,12 @@ anra.event.EventTable = Base.extend({
         if (event.type == anra.EVENT.NONE)return;
         for (var i = 0; i < this.types.length; i++) {
             if (this.types[i] == event.type) {
-                var listener = this.listeners[i];
-                if (listener != null)listener.handleEvent(event);
+                var l = this.listeners[i];
+                if (l != null)
+                    if (typeof(l) == 'function') {
+                        l(event);
+                    } else
+                        l.handleEvent(event);
             }
         }
     },

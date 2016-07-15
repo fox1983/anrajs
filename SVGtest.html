@@ -5,11 +5,12 @@
     <script src="js/Base.js"></script>
     <script src="js/anra.common.js"></script>
     <script src="js/anra.svg.js"></script>
+    <script src="js/anra.gef.js"></script>
     <script>
         window.onload = function () {
             var display = new anra.SVG("svgContainer");
 
-            var rect = new anra.svg.Rect();
+            var rect = new anra.gef.Figure();
             rect.setBounds({
                 x:0,
                 y:120,
@@ -18,7 +19,7 @@
             });
             display.addChild(rect);
 
-            rect = new anra.svg.Rect();
+            rect = new anra.gef.Figure();
             rect.setBounds({
                 x:100,
                 y:20,
@@ -35,33 +36,20 @@
                 height:130
             });
             circle.setStyle({
-                'fill':'green',
-                'stroke':'blue',
-                'stroke-width':3
+                'fill':'#DDCCDD'
             });
+            circle.addListener(anra.EVENT.MouseDown,function(event){
+                console.log(event);
+            });
+
             rect.addChild(circle);
 
-            var r=new anra.svg.Ellipse();
+            var r=new anra.gef.Figure();
             r.setBounds({
                 x:20,
                 y:0,
                 width:50,
                 height:30
-            });
-//            r.addListener(anra.EVENT.MouseDrag,{
-//                handleEvent:function (event) {
-//                    console.log(event);
-//                }
-//            });
-            r.addMouseListener({
-                handleEvent:function (event) {
-                    console.log(1);
-                }
-            });
-            r.addMouseListener({
-                handleEvent:function (event) {
-                    console.log(2);
-                }
             });
             circle.addChild(r);
         }
@@ -70,6 +58,6 @@
 </head>
 <body>
 <div id="svgContainer"
-     style="position: absolute;top: 0;left: 10%;width: 50%;height: 100%;background-color: yellow;"></div>
+     style="position: absolute;top: 0;left: 10%;width: 50%;height: 100%;background-color: #EEEEEE;"></div>
 </body>
 </html>

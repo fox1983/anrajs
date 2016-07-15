@@ -9,10 +9,37 @@ anra.gef = {};
  * @type {*}
  */
 anra.gef.Figure = anra.svg.Composite.extend({
+    strokeIn:'blue',
+    stroke:'black',
+    constructor:function () {
+        this._Figure();
+    },
+    _Figure:function () {
+        this._Control();
+        var f = this;
+        this.addListener(anra.EVENT.MouseIn, function (e) {
+            f.mouseIn();
+        });
+        this.addListener(anra.EVENT.MouseOut, function (e) {
+            f.mouseOut();
+        });
+        this.addListener(anra.EVENT.MouseDown, function (e) {
+            f.selected();
+        });
+    },
+    mouseIn:function () {
+        this.setAttribute('stroke', this.strokeIn);
+    },
+    mouseOut:function () {
+        this.setAttribute('stroke', this.stroke);
+    },
+    selected:function () {
+
+    }
 
 });
 
-anra.gef.LineFigure = anra.svg.Figure.extend({
+anra.gef.LineFigure = anra.gef.Figure.extend({
 
 });
 
@@ -110,6 +137,13 @@ anra.gef.EditPart = Base.extend({
         }
 
     },
+    getFigure:function () {
+
+    },
+    getSourceConnections:function () {
+    },
+    getTargetConnections:function () {
+    },
     isActive:function () {
         return this.getFlag(FLAG_ACTIVE);
     },
@@ -205,5 +239,3 @@ anra.gef.Policy = Base.extend({
 
 anra.gef.Policy.prototype.class = "anra.gef.Policy ";
 anra.gef.Request = Base.extend({});
-
-anra.gef.GEFEditor = anra.Scene.extend({});
