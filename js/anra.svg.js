@@ -160,7 +160,7 @@ Control.prototype.setParent = function (s) {
         }
         this.parent = s;
         this.svg = this.parent.svg;
-        this.svg.appendChild(this.owner);
+        this.svg.owner.appendChild(this.owner);
         this.applyBounds();
         this.paint();
     }
@@ -189,10 +189,17 @@ Control.prototype.locArea = function () {
 anra.svg.Composite = Control.extend({
     children:null,
     layoutManager:null,
+    selection:null,
+    setSelection:function (o) {
+        if (this.selection != null)
+            this.selection.selected(false);
+        this.selection = o;
+        this.selection.selected(true);
+    },
     removeChild:function (c) {
         if ('anra.svg.Control' == c.class) {
             this.children.removeObject(c);
-            this.svg.remove(c.owner);
+            this.svg.owner.remove(c.owner);
         } else {
             console.log('can not remove ' + c.toString() + ' from Composite');
         }
@@ -227,13 +234,12 @@ anra.svg.Composite = Control.extend({
 var Composite = anra.svg.Composite;
 
 anra.SVG = Composite.extend({
-    parent:null,
     dispatcher:null,
     constructor:function (id) {
-        this.parent = document.getElementById(id);
-        if (this.parent != null) {
+        this.element = document.getElementById(id);
+        if (this.element != null) {
             this.init();
-            this.parent.appendChild(this.svg);
+            this.element.appendChild(this.svg.owner);
         } else {
             this.error("SVG parent can not be null");
         }
@@ -246,8 +252,7 @@ anra.SVG = Composite.extend({
         this.owner.style.left = 0;
         this.owner.style.width = '100%';
         this.owner.style.height = '100%';
-        this.svg = this.owner;
-        this.element = this.parent;
+        this.svg = this;
         this.dispatcher = new anra.svg.EventDispatcher(this);
         var d = this.dispatcher;
         var t = this;
@@ -292,13 +297,14 @@ anra.svg.Rect = Composite.extend({
 anra.svg.Circle = Composite.extend({
     tagName:'circle',
     getClientArea:function () {
-        return [this.fattr('cx') - this.fattr('r'), this.fattr('cy') - this.fattr('r')];
+        return [this.fattr('cx') - this.fattr('r'), this.fattr('cy') - this.fattr('r'), this.fattr['r'] * 2];
     },
     applyBounds:function () {
         var l = this.locArea();
-        this.setAttribute('r', this.bounds.width / 2);
-        this.setAttribute('cx', this.bounds.x + this.fattr('r ') + l[0]);
-        this.setAttribute('cy', this.bounds.y + this.fattr('r') + l[1]);
+        var r = this.bounds.width / 2;
+        this.setAttribute('r', r);
+        this.setAttribute('cx', this.bounds.x + r + l[0]);
+        this.setAttribute('cy', this.bounds.y + r + l[1]);
     }
 });
 
@@ -396,8 +402,10 @@ anra.svg.EventDispatcher = Base.extend({
         this.focusOwner.notifyListeners(anra.EVENT.MouseIn, e);
     },
     dispatchMouseOut:function (event) {
-        var location = this.getRelativeLocation(event);
-        var e = new anra.event.Event(anra.EVENT.MouseOut, location);
+        var loc = this.getRelativeLocation(event);
+        if (anra.Rectangle.contains(this.focusOwner.bounds, loc[0], loc[1]))
+            return;
+        var e = new anra.event.Event(anra.EVENT.MouseOut, loc);
         this.focusOwner.notifyListeners(anra.EVENT.MouseOut, e);
     },
     dispatchMouseOutScreen:function (event) {

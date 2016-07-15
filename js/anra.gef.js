@@ -11,6 +11,8 @@ anra.gef = {};
 anra.gef.Figure = anra.svg.Composite.extend({
     strokeIn:'blue',
     stroke:'black',
+    strokeSelected:'green',
+    isSelected:false,
     constructor:function () {
         this._Figure();
     },
@@ -24,20 +26,32 @@ anra.gef.Figure = anra.svg.Composite.extend({
             f.mouseOut();
         });
         this.addListener(anra.EVENT.MouseDown, function (e) {
-            f.selected();
+            if (f.parent != null) {
+                f.parent.setSelection(f);
+            }
         });
     },
     mouseIn:function () {
-        this.setAttribute('stroke', this.strokeIn);
+        if (!this.isSelected)
+            this.setAttribute('stroke', this.strokeIn);
     },
     mouseOut:function () {
-        this.setAttribute('stroke', this.stroke);
+        if (!this.isSelected)
+            this.setAttribute('stroke', this.stroke);
     },
-    selected:function () {
-
+    selected:function (s) {
+        this.isSelected = s;
+        if (s) {
+            //TODO 选中
+            this.setAttribute('stroke', this.strokeSelected);
+        } else {
+            //TODO 反选
+            this.setAttribute('stroke', this.stroke);
+        }
     }
 
-});
+})
+;
 
 anra.gef.LineFigure = anra.gef.Figure.extend({
 

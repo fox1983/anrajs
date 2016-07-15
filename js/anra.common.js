@@ -226,8 +226,8 @@ anra.Widget = Base.extend({
         this.eventTable.unhook(eventType, listener);
     },
     notifyListeners:function (eventType, event, isGlobalEvent) {
-        if (this.parent != null && this.eventTable != null && !isGlobalEvent && anra.BubbleEvent.contains(eventType)) {
-            var ls = this.eventTable.getListeners(eventType);
+        if (this.parent != null && !isGlobalEvent && anra.BubbleEvent.contains(eventType)) {
+            var ls = this.eventTable == null ? null : this.eventTable.getListeners(eventType);
             if (ls == null || ls.length == 0) {
                 this.parent.notifyListeners(eventType, event, isGlobalEvent);
                 return;
@@ -269,6 +269,8 @@ anra.Control = anra.Widget.extend({
         this.addListener(anra.EVENT.TouchStart, listener);
         this.addListener(anra.EVENT.TouchMove, listener);
         this.addListener(anra.EVENT.TouchEnd, listener);
+    },
+    selected:function (s) {
     }
 });
 anra.Composite = anra.Control.extend({
@@ -277,7 +279,10 @@ anra.Composite = anra.Control.extend({
     findWidgetOnXY:function (x, y) {
     },
     setSelection:function (o) {
+        if (this.selection != null)
+            this.selection.setSelected(false);
         this.selection = o;
+        this.selection.setSelected(true);
     }
 });
 
