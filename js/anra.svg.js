@@ -213,6 +213,7 @@ anra.svg.Composite = Control.extend({
                 this.children.push(c);
                 c.init();
                 c.setParent(this);
+                this.paint();
             }
         } else {
             console.log('can not add ' + c.toString() + ' to Composite');
