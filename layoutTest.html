@@ -19,16 +19,77 @@
             });
             display.addChild(parent);
 
-            parent.layoutManager=new anra.svg.GridLayout(2,false);
-            var w=20;
-            var h=20;
-            for(var i= 0;i<4;i++){
-                var c1=new anra.svg.Rect();
-                c1.layoutData=new anra.svg.GridData();
-                parent.addChild(c1);
-            }
+            parent.layoutManager=new anra.svg.GridLayout(4,true);
+            //parent.layoutManager.initial();
+//            parent.layoutManager.arg.numColumns=4;
+//            parent.layoutManager.arg.makeColumnsEqualWidth=true;
+            //alert("% "+parent.layoutManager.arg.numColumns);
 
 
+
+            var c1=new anra.svg.Rect();
+            c1.layoutData=new anra.svg.GridData();
+            c1.layoutData.cumpute(c1,parent);
+            //parent.addChild(c1);
+
+
+            var c2=new anra.svg.Rect();
+            c2.layoutData=new anra.svg.GridData();
+            c2.layoutData.cumpute(c2,parent);
+            //parent.addChild(c2);
+
+
+            var c3=new anra.svg.Rect();
+            c3.layoutData=new anra.svg.GridData();
+            c3.layoutData.cumpute(c3,parent);
+            //parent.addChild(c3);
+
+
+            var c4=new anra.svg.Rect();
+            c4.layoutData=new anra.svg.GridData();
+            c4.layoutData.cumpute(c4,parent);
+            //parent.addChild(c4);
+
+
+            var c4=new anra.svg.Rect();
+            c4.setBounds({
+                width:10,
+                height:10
+            });
+            c4.layoutData=new anra.svg.GridData();
+            c4.layoutData.cumpute(c4,parent);
+            //parent.addChild(c4);
+
+
+
+            var c4=new anra.svg.Rect();
+            c4.setBounds({
+                width:180,
+                height:150
+            });
+            c4.layoutData=new anra.svg.GridData();
+            c4.layoutData.cumpute(c4,parent);
+
+//
+            var c4=new anra.svg.Rect();
+            c4.setBounds({
+                width:50,
+                height:40
+            });
+            c4.layoutData=new anra.svg.GridData();
+            c4.layoutData.cumpute(c4,parent);
+
+            var c10=new anra.svg.Rect();
+            c10.setBounds({
+                width:50,
+                height:40
+            });
+            c10.layoutData=new anra.svg.GridData();
+            c10.layoutData.cumpute(c10,parent);
+
+            //alert("44");
+            //parent.remo
+            //alert(parent.layoutManager.arg.XYArr[0].child.getBounds().x+","+parent.layoutManager.arg.XYArr[0].child.getBounds().y);
         }
 
     </script>
