@@ -251,5 +251,52 @@ anra.gef.Policy = Base.extend({
     }
 });
 
-anra.gef.Policy.prototype.class = "anra.gef.Policy ";
+anra.gef.Palette = anra.gef.Figure.extend({});
+
+anra.gef.Policy.prototype.class = "anra.gef.Policy";
 anra.gef.Request = Base.extend({});
+anra.gef.Editor = Base.extend({
+    canvas:null,
+    input:null,
+    palette:null,
+    element:null,
+    _Editor:function () {
+    },
+    setInput:function (input) {
+        this.input = input;
+        //初始化EditPart
+
+    },
+    createContent:function (parentId) {
+        this.element = document.getElementById(parentId);
+        if (this.element == null)
+            console.log('GEF的父级元素不能为空');
+        this.palette = this.createPalette(parentId);
+        this.canvas = this.createCanvas(parentId);
+    },
+    createPalette:function (id) {
+        var i = id + 'Plt';
+        var div = document.createElement('div');
+        div.setAttribute('id', i);
+        div.style.position = 'relative';
+        div.style.width = '20%';
+        div.style.height = '100%';
+        div.style.backgroundColor = '#CC78A7';
+        this.element.appendChild(div);
+        return new anra.gef.Palette(i);
+    },
+    createCanvas:function (id) {
+        var i = id + 'Cav';
+        var div = document.createElement('div');
+        div.setAttribute('id', i);
+        div.style.position = 'relative';
+        div.style.left = '20%';
+        div.style.width = '80%';
+        div.style.height = '100%';
+        div.style.backgroundColor = '#AAFFBB';
+        this.element.appendChild(div);
+        this.element.appendChild(div);
+        return  new anra.svg.SVG(i);
+    }
+})
+;

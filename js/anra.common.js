@@ -35,10 +35,17 @@ function Map() {
     };
 
     this.set = function (key, value) {
-        size++;
+        if (!mapObj.hasOwnProperty(key))
+            size++;
         mapObj[key] = value;
     };
-
+    this.putAll = function (json) {
+        if (typeof(json) == 'object') {
+            for (var k in json) {
+                set(k, json[k]);
+            }
+        }
+    };
     this.remove = function (key) {
         if (mapObj.hasOwnProperty(key)) {
             delete mapObj[key];
@@ -47,10 +54,7 @@ function Map() {
     };
 
     this.get = function (key) {
-        if (mapObj.hasOwnProperty(key)) {
-            return mapObj[key];
-        }
-        return null;
+        return mapObj.hasOwnProperty(key) ? mapObj[key] : null;
     };
 
     this.keys = function () {
@@ -405,6 +409,9 @@ anra.event.EventTable = Base.extend({
     constructor:function () {
         this.types = [];
         this.listeners = [];
+    },
+    containsEvent:function (eventType) {
+
     },
     getListeners:function (eventType) {
         var result = [];
