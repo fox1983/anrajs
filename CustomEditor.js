@@ -4,6 +4,7 @@ NodeEditPart = anra.gef.EditPart.extend({
             var b = this.model['bounds'];
             if (b != null)
                 this.figure.setBounds({x:b[0], y:b[1], width:b[2], height:b[3] });
+
         }
     }
 });

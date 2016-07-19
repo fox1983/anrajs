@@ -227,8 +227,11 @@ anra.gef.EditPart = Base.extend({
     },
     getFigure:function () {
         if (this.figure == null)
-            this.figure = new anra.gef.Figure();
+            this.figure = this.createFigure();
         return this.figure;
+    },
+    createFigure:function(){
+        return new anra.gef.Figure();
     },
     getSourceConnections:function () {
     },
