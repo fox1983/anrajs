@@ -29,46 +29,34 @@ anra.svg.GridLayout = anra.svg.Layout.extend({
 
         "marginTopUsed":0,
         "marginLeftUsed":0,
-        "currentWidth":0,
-        "currentHeight":0,
+
         "maxColumnWidth":0,
         "maxColumnHeight":0,
+        "currentColumnNum":0
 
-        "XYArr":[]
     },
 
-
-
-    constructor:function(numColumns, makeColumnsEqualWidth) {
-
-        if (numColumns && makeColumnsEqualWidth) {
-            this.arg.numColumns = numColumns;
-            this.arg.makeColumnsEqualWidth = makeColumnsEqualWidth;
-
-        }
-        this.arg.marginTopUsed = this.arg.marginTop;
-        this.arg.marginLeftUsed = this.arg.marginLeft;
-
-    }
-
-});
-
-/**
- *提供给Control
- * @type {*}
- */
-anra.svg.GridData = Base.extend({
     getMaxColumnWH:function(chBounds,parArg){
         if(parArg.maxColumnWidth < chBounds.width){
             parArg.maxColumnWidth = chBounds.width;
-            //调用由于列最大宽度改变而更新x,y
         }
         if(parArg.maxColumnHeight < chBounds.height){
+
             parArg.maxColumnHeight = chBounds.height;
-            //调用由于列最大高度改变而更新x,y
         }
+    },
 
+    getMaxColumnW:function(chBounds,parArg){
+        if(parArg.maxColumnWidth < chBounds.width){
+            parArg.maxColumnWidth = chBounds.width;
+        }
+    },
 
+    getMaxColumnH:function(chBounds,parArg){
+        if(parArg.maxColumnHeight < chBounds.height){
+
+            parArg.maxColumnHeight = chBounds.height;
+        }
     },
 
     getAvailableWidth:function(p){
@@ -77,84 +65,91 @@ anra.svg.GridData = Base.extend({
     },
 
     getAvailableHeight:function(p){
-        //alert(p.getBounds().height+" "+p.layoutManager.arg.marginBottom+" "+p.layoutManager.arg.marginTopUsed);
         return p.getBounds().height - p.layoutManager.arg.marginBottom
             - p.layoutManager.arg.marginTopUsed;
     },
 
     getXY:function(parArg, chBounds){
-        //debugger
-        if(parArg.marginLeftUsed == parArg.marginLeft &&
-            parArg.marginTopUsed == parArg.marginTop){    //这是第一行第一个
-            chBounds.x = parArg.marginLeftUsed;
-            chBounds.y = parArg.marginTopUsed;
-        }else if(parArg.marginLeftUsed == parArg.marginLeft){           //这是第一列的
-            chBounds.x = parArg.marginLeftUsed;
-            chBounds.y = parArg.marginTopUsed + parArg.verticalSpacing;
-        }else if(parArg.marginTopUsed == parArg.marginTop){             //这是第一行的
-            chBounds.x = parArg.marginLeftUsed + parArg.horizontalSpacing;
-            chBounds.y = parArg.marginTopUsed;
-        }else{
-            chBounds.x = parArg.marginLeftUsed + parArg.horizontalSpacing;
-            chBounds.y = parArg.marginTopUsed + parArg.verticalSpacing;
-        }
+
+            if(parArg.marginLeftUsed == parArg.marginLeft &&
+                parArg.marginTopUsed == parArg.marginTop){    //这是第一行第一个
+
+                chBounds.x = parArg.marginLeftUsed;
+                chBounds.y = parArg.marginTopUsed;
+
+            }else if(parArg.marginLeftUsed == parArg.marginLeft){           //这是第一列的
+
+                chBounds.x = parArg.marginLeftUsed;
+                chBounds.y = parArg.marginTopUsed + parArg.verticalSpacing;
+
+            }else if(parArg.marginTopUsed == parArg.marginTop){             //这是第一行的
+
+                chBounds.x = parArg.marginLeftUsed + parArg.horizontalSpacing;
+                chBounds.y = parArg.marginTopUsed;
+
+            }else{
+
+                chBounds.x = parArg.marginLeftUsed + parArg.horizontalSpacing;
+                chBounds.y = parArg.marginTopUsed + parArg.verticalSpacing;
+
+            }
 
     },
 
-    updateXY:function(p){
-        //清空
 
-    },
-    cumpute:function(c,p){
+
+    compute:function(c,p){
         var chBounds = c.getBounds();
         var parArg = p.layoutManager.arg;
         //var
         var marginTopNext ;
         var marginLeftNext;
 
+        var changeLine = false;
+
+        var availableWidth = this.getAvailableWidth(p);   //求得本行可用宽度
+        var availableHeight = this.getAvailableHeight(p);
+
+        if(availableHeight<=0){
+            c.getBounds().width = 0;
+            c.getBounds().height = 0;
+            return;
+        }
 
         if(parArg.makeColumnsEqualWidth){    //列等宽
-            var availableWidth = this.getAvailableWidth(p);   //求得本行可用宽度
-            var availableHeight = this.getAvailableHeight(p);
 
-            if(availableHeight<=0){
-                alert("return");
-                return;
-            }
-
-            //求得每个单位格子的宽和高
             this.getMaxColumnWH(chBounds,parArg);
-
-            //alert("可用宽度："+availableWidth+","+"列最大宽度："+parArg.maxColumnWidth);   //讨论可用宽度
-            if(availableWidth<= parArg.maxColumnWidth+ 2*parArg.horizontalSpacing){
-
+            if(parArg.currentColumnNum+1 >= parArg.numColumns
+                            || availableWidth<= parArg.maxColumnWidth+ 2*parArg.horizontalSpacing){   //如果一行达到想要的数目则换行
+                changeLine = true;
                 marginTopNext = parArg.marginTopUsed +
-                parArg.maxColumnHeight + parArg.verticalSpacing;
+                            parArg.maxColumnHeight + parArg.verticalSpacing;
                 marginLeftNext = parArg.marginLeft;
 
                 if(chBounds.width > availableWidth-parArg.horizontalSpacing){
-                    chBounds.width = availableWidth- parArg.horizontalSpacing;
+                    if(parArg.currentColumnNum > 0){
+                        chBounds.width = availableWidth- parArg.horizontalSpacing;
+                    }else{
+                        chBounds.width = availableWidth;
+                    }
                 }
             }
+
             if(availableHeight< parArg.maxColumnHeight){
                 if(chBounds.height > availableHeight-parArg.verticalSpacing){
                     chBounds.height = availableHeight- parArg.verticalSpacing;
                 }
 
             }
-
             this.getXY(parArg,chBounds);
 
             //更新
             if(marginTopNext && marginLeftNext){
-                //debugger
-                //alert("ddd");
                 parArg.marginLeftUsed = marginLeftNext;
                 parArg.marginTopUsed = marginTopNext;
             }else{
                 if(parArg.marginLeftUsed == parArg.marginLeft){
-                    parArg.marginLeftUsed = parArg.marginLeftUsed+
-                        /*parArg.horizontalSpacing+*/ parArg.maxColumnWidth;
+                    parArg.marginLeftUsed = parArg.marginLeftUsed+ parArg.maxColumnWidth;
                 }else{
                     parArg.marginLeftUsed = parArg.marginLeftUsed+
                     parArg.horizontalSpacing+ parArg.maxColumnWidth;
@@ -162,19 +157,94 @@ anra.svg.GridData = Base.extend({
 
             }
 
-            p.addChild(c);
-            //p.removeChild(c);
+            if(changeLine){    //换行
+                parArg.currentColumnNum = 0;
+            }else{
+                parArg.currentColumnNum ++;
+            }
 
-            parArg.XYArr.push(
-                {
-                    child:c
-                }
-            );
+        }else{          //不等宽
+            this.getMaxColumnH(chBounds,parArg);
 
-        }else{
+            if(parArg.currentColumnNum == parArg.numColumns || availableWidth == 0
+                                || availableWidth == parArg.horizontalSpacing ||
+                                    (availableWidth > 0 && availableWidth < parArg.horizontalSpacing)){  //本次换行
+                changeLine = true;
+                parArg.marginLeftUsed = parArg.marginLeft;
+                parArg.marginTopUsed += parArg.maxColumnHeight;
 
+                availableWidth = this.getAvailableWidth(p);
+                availableHeight = this.getAvailableHeight(p);
+            }
+
+            this.getXY(parArg,chBounds);
+            //限定单位方格宽度不能超过parent
+            if(chBounds.width > availableWidth){
+                chBounds.width = availableWidth;
+            }
+
+            //限定单位方格高度不能超过parent
+            if(chBounds.height > availableHeight){
+                chBounds.height = availableHeight;
+            }
+            if(parArg.marginLeftUsed == parArg.marginLeft){
+                parArg.marginLeftUsed = parArg.marginLeftUsed+ chBounds.width;
+            }else{
+                parArg.marginLeftUsed = parArg.marginLeftUsed + parArg.horizontalSpacing + chBounds.width;
+            }
+
+            if(changeLine){    //换行
+                parArg.currentColumnNum = 1;
+            }else{
+                parArg.currentColumnNum ++;
+            }
+
+        }
+    },
+
+    layout:function(p){
+
+        var parArg = p.layoutManager.arg;
+
+        parArg.currentColumnNum=0;
+        parArg.marginLeftUsed = parArg.marginLeft;
+        parArg.marginTopUsed = parArg.marginTop;
+
+
+        for(var i = 0; i < p.children.length; i ++){
+            var c = p.children[i];
+            c.getBounds().x = 0;
+            c.getBounds().y = 0;
+            this.compute(c,p);
+            c.applyBounds();
+           //alert("*******"+ c.getBounds().x+","+c.getBounds().y+"***********");
         }
 
 
+    },
+
+    constructor:function(numColumns, makeColumnsEqualWidth) {
+        debugger
+        if (numColumns /*&& makeColumnsEqualWidth || numColumns && !makeColumnsEqualWidth*/) {
+            this.arg.numColumns = numColumns;
+            this.arg.makeColumnsEqualWidth = makeColumnsEqualWidth;
+
+        }
+        this.arg.marginTopUsed = this.arg.marginTop;
+        this.arg.marginLeftUsed = this.arg.marginLeft;
     }
+});
+
+/**
+ *提供给Control
+ * @type {*}
+ */
+anra.svg.GridData = Base.extend({
+
+    constructor:function(p,c){
+        p.layoutManager.compute(c,p);
+        c.applyBounds();
+        //alert(c.getBounds().x+","+ c.getBounds().y);
+    }
+
 });

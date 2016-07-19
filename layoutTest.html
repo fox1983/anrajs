@@ -14,82 +14,81 @@
             parent.setBounds({
                 x:100,
                 y:120,
-                width:330,
-                height:410
+                width:530,
+                height:510
             });
             display.addChild(parent);
 
-            parent.layoutManager=new anra.svg.GridLayout(4,true);
-            //parent.layoutManager.initial();
-//            parent.layoutManager.arg.numColumns=4;
-//            parent.layoutManager.arg.makeColumnsEqualWidth=true;
-            //alert("% "+parent.layoutManager.arg.numColumns);
+            parent.layoutManager=new anra.svg.GridLayout(4,true);    //能初始化数据
 
-
-
-            var c1=new anra.svg.Rect();
-            c1.layoutData=new anra.svg.GridData();
-            c1.layoutData.cumpute(c1,parent);
-            //parent.addChild(c1);
-
-
-            var c2=new anra.svg.Rect();
-            c2.layoutData=new anra.svg.GridData();
-            c2.layoutData.cumpute(c2,parent);
-            //parent.addChild(c2);
-
-
-            var c3=new anra.svg.Rect();
-            c3.layoutData=new anra.svg.GridData();
-            c3.layoutData.cumpute(c3,parent);
-            //parent.addChild(c3);
-
-
-            var c4=new anra.svg.Rect();
-            c4.layoutData=new anra.svg.GridData();
-            c4.layoutData.cumpute(c4,parent);
-            //parent.addChild(c4);
-
-
+            //这是创建一个控件
             var c4=new anra.svg.Rect();
             c4.setBounds({
                 width:10,
                 height:10
             });
-            c4.layoutData=new anra.svg.GridData();
-            c4.layoutData.cumpute(c4,parent);
-            //parent.addChild(c4);
+            c4.layoutData=new anra.svg.GridData(parent,c4);   //在这里做计算
+            parent.addChild(c4);
+             
 
-
-
-            var c4=new anra.svg.Rect();
-            c4.setBounds({
-                width:180,
-                height:150
-            });
-            c4.layoutData=new anra.svg.GridData();
-            c4.layoutData.cumpute(c4,parent);
 
 //
-            var c4=new anra.svg.Rect();
-            c4.setBounds({
-                width:50,
-                height:40
-            });
-            c4.layoutData=new anra.svg.GridData();
-            c4.layoutData.cumpute(c4,parent);
+//            var c1=new anra.svg.Rect();
+//            c1.setBounds({
+//                width:1000,
+//                height:10
+//            });
+//            c1.layoutData=new anra.svg.GridData(parent,c1);
+//            parent.addChild(c1);
+             
 
-            var c10=new anra.svg.Rect();
-            c10.setBounds({
-                width:50,
-                height:40
-            });
-            c10.layoutData=new anra.svg.GridData();
-            c10.layoutData.cumpute(c10,parent);
+//
+//            var c2=new anra.svg.Rect();
+//            c2.setBounds({
+//                width:30,
+//                height:150
+//            });
+//            c2.layoutData=new anra.svg.GridData(parent,c2);
+//            parent.addChild(c2);
+             
 
-            //alert("44");
-            //parent.remo
-            //alert(parent.layoutManager.arg.XYArr[0].child.getBounds().x+","+parent.layoutManager.arg.XYArr[0].child.getBounds().y);
+
+//            var c3=new anra.svg.Rect();
+//            c3.setBounds({
+//                width:18,
+//                height:10
+//            });
+//            c3.layoutData=new anra.svg.GridData(parent,c3);
+//            parent.addChild(c3);
+//
+//
+//
+//
+//            var c4=new anra.svg.Rect();
+//            c4.setBounds({
+//                width:10,
+//                height:10
+//            });
+//            c4.layoutData=new anra.svg.GridData(parent,c4);
+//            parent.addChild(c4);
+             
+
+
+
+////
+//            var c4=new anra.svg.Rect();
+//            c4.setBounds({
+//                width:10,
+//                height:111
+//            });
+//            c4.layoutData=new anra.svg.GridData(parent,c4);
+//            parent.addChild(c4);
+//
+
+            //   
+           alert(parent.layoutManager.arg.maxColumnWidth+" "+parent.layoutManager.arg.maxColumnHeight);
+            //alert();
+
         }
 
     </script>
