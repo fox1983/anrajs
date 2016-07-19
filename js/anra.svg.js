@@ -168,7 +168,7 @@ Control.prototype.setParent = function (s) {
     }
 };
 Control.prototype.setBounds = function (b) {
-    if (b != null) {
+    if (typeof(b)=='object') {
         for (var k in b) {
             this.bounds[k] = b[k];
         }

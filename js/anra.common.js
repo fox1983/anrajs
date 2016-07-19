@@ -15,21 +15,21 @@ Array.prototype.removeObject = function (val) {
         this.remove(index);
     }
 };
-Object.prototype.equals = function (o) {
-    if (this == o)return true;
-    if (typeof(o) == 'object') {
-        var tp = Object.getOwnPropertyNames(this);
-        var op = Object.getOwnPropertyNames(o);
-        if (tp.length != op.length)return false;
-        for (var i = 0; i < tp.length; i++) {
-            var n = tp[i];
-            if (this[n] != o[n])
-                return false;
-        }
-        return true;
-    }
-    return false;
-};
+//Object.prototype.equals = function (o) {
+//    if (this == o)return true;
+//    if (typeof(o) == 'object') {
+//        var tp = Object.getOwnPropertyNames(this);
+//        var op = Object.getOwnPropertyNames(o);
+//        if (tp.length != op.length)return false;
+//        for (var i = 0; i < tp.length; i++) {
+//            var n = tp[i];
+//            if (this[n] != o[n])
+//                return false;
+//        }
+//        return true;
+//    }
+//    return false;
+//};
 
 Array.prototype.contains = function (obj) {
     var i = this.length;

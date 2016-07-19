@@ -88,19 +88,20 @@ anra.gef.EditPart = Base.extend({
         this.tConns = [];
         this.children = [];
         this.modelChildren = [];
+        this.policies = [];
     },
     refreshChildren:function () {
         //TODO refreshChildren
+        var i;
         if (this.children == null)
             return;
-        var size = this.children.length;
         var map = new Map();
         //增量修改当前children
         for (var e in this.children) {
             map.set(e.model, e);
         }
         var model, editPart;
-        for (var i = 0; i < this.modelChildren.length; i++) {
+        for (i = 0; i < this.modelChildren.length; i++) {
             model = this.modelChildren[i];
             if (i < this.children.length
                 && this.children.get(i).model == model)
@@ -112,6 +113,17 @@ anra.gef.EditPart = Base.extend({
             else {
                 editPart = this.createChild(model);
                 this.addChild(editPart, i);
+            }
+        }
+
+        var size = this.children.length
+        if (i < size) {
+            var trash = [];
+            for (; i < size; i++)
+                trash.push(this.children[i]);
+            for (i = 0; i < trash.size(); i++) {
+                var ep = trash[i];
+                this.removeChild(ep);
             }
         }
     },
@@ -142,8 +154,10 @@ anra.gef.EditPart = Base.extend({
         this.addChildVisual(editpart, index);
     },
     removeChildVisual:function (editPart) {
+        this.getFigure().removeChild(editPart.getFigure());
     },
     addChildVisual:function (editPart, index) {
+        this.getFigure().addChild(editPart.getFigure());
     },
     deactivate:function () {
         var i;
@@ -212,7 +226,9 @@ anra.gef.EditPart = Base.extend({
 
     },
     getFigure:function () {
-
+        if (this.figure == null)
+            this.figure = new anra.gef.Figure();
+        return this.figure;
     },
     getSourceConnections:function () {
     },
@@ -332,8 +348,6 @@ anra.gef.Editor = Base.extend({
     },
     setInput:function (input) {
         this.input = input;
-        //初始化EditPart
-
     },
     createContent:function (parentId) {
         this.element = document.getElementById(parentId);
@@ -349,7 +363,10 @@ anra.gef.Editor = Base.extend({
         this.initRootEditPart(this.rootEditPart);
     },
     createRootEditPart:function () {
-        return new anra.gef.EditPart();
+        var root = new anra.gef.EditPart();
+        root.figure = this.canvas;
+        root.model = this.input;
+        return root;
     },
     createEditPart:function (context, model) {
         var part = new anra.gef.EditPart();
@@ -366,6 +383,7 @@ anra.gef.Editor = Base.extend({
         div.style.position = 'relative';
         div.style.width = '20%';
         div.style.height = '100%';
+        div.style.float = 'left';
         div.style.backgroundColor = '#CC78A7';
         this.element.appendChild(div);
         return new anra.gef.Palette(i);
@@ -375,13 +393,13 @@ anra.gef.Editor = Base.extend({
         var div = document.createElement('div');
         div.setAttribute('id', i);
         div.style.position = 'relative';
-        div.style.left = '20%';
         div.style.width = '80%';
         div.style.height = '100%';
+        div.style.float = 'right';
         div.style.backgroundColor = '#AAFFBB';
         this.element.appendChild(div);
         this.element.appendChild(div);
-        return  new anra.svg.SVG(i);
+        return  new anra.SVG(i);
     }
 })
 ;
