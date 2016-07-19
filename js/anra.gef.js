@@ -77,20 +77,80 @@ anra.gef.EditPart = Base.extend({
     tConns:null,
     policies:null,
     children:null,
+    modelChildren:null,
     flags:0,
+    editor:null,
     constructor:function () {
+        this._EditPart();
+    },
+    _EditPart:function () {
         this.sConns = [];
         this.tConns = [];
         this.children = [];
+        this.modelChildren = [];
+    },
+    refreshChildren:function () {
+        //TODO refreshChildren
+        if (this.children == null)
+            return;
+        var size = this.children.length;
+        var map = new Map();
+        //增量修改当前children
+        for (var e in this.children) {
+            map.set(e.model, e);
+        }
+        var model, editPart;
+        for (var i = 0; i < this.modelChildren.length; i++) {
+            model = this.modelChildren[i];
+            if (i < this.children.length
+                && this.children.get(i).model == model)
+                continue;
+
+            editPart = map.get(model);
+            if (editPart != null)
+                this.reorderChild(editPart, i);
+            else {
+                editPart = this.createChild(model);
+                this.addChild(editPart, i);
+            }
+        }
+    },
+    createChild:function (model) {
+        //TODO
+        if (this.editor == null) {
+            console.log("EditPart的editor不能为空");
+            return null;
+        }
+        return  this.editor.createEditPart(this, model);
+    },
+    addChild:function (child, index) {
+        if (index == null)
+            index = getChildren().size();
+        if (this.children == null)
+            this.children = [];
+
+        this.children[index] = child;
+        child.setParent(this);
+        this.addChildVisual(child, index);
+        child.addNotify();
+        child.activate();
+    },
+    reorderChild:function (editpart, index) {
+        this.removeChildVisual(editpart);
+        this.children.removeObject(editpart);
+        this.children[index] = editpart;
+        this.addChildVisual(editpart, index);
+    },
+    removeChildVisual:function (editPart) {
+    },
+    addChildVisual:function (editPart, index) {
     },
     deactivate:function () {
         var i;
         for (i = 0; i < this.children.length; i++) {
             this.children[i].deactivate();
         }
-
-        this.
-            deactivePolicies();
+        this.deactivePolicies();
         for (i = 0; i < this.sConns.length; i++) {
             this.sConns[i].deactivate();
         }
@@ -173,22 +233,29 @@ anra.gef.EditPart = Base.extend({
     addEditPartListener:function () {
     },
     addNotify:function () {
+        this.register();
+        this.createEditPolicies();
+        for (var i = 0; i < this.children.length; i++)
+            this.children[i].addNotify();
+        this.refresh();
+    },
+    register:function () {
+    },
+    createEditPolicies:function () {
     },
     eraseSourceFeedBack:function (request) {
     },
     eraseTargetFeedBack:function (request) {
+    },
+    showSourceFeedback:function (request) {
+    },
+    showTargetFeedback:function (request) {
     },
     getCommand:function (request) {
     },
     getDragTracker:function (request) {
     },
     getEditPolicy:function (key) {
-    },
-    getModel:function () {
-        return this.model;
-    },
-    getParent:function () {
-        return this.parent;
     },
     getSelected:function () {
     },
@@ -204,6 +271,10 @@ anra.gef.EditPart = Base.extend({
     performRequest:function (request) {
     },
     refresh:function () {
+        this.refreshVisual();
+        this.refreshChildren();
+    },
+    refreshVisual:function () {
     },
     removeEditPartListener:function () {
     },
@@ -228,10 +299,6 @@ anra.gef.EditPart = Base.extend({
     },
     setSelected:function (value) {
         this.selected = value;
-    },
-    showSourceFeedback:function (request) {
-    },
-    showTargetFeedback:function (request) {
     },
     understandsRequest:function (req) {
         var iter = getEditPolicyIterator();
@@ -260,6 +327,7 @@ anra.gef.Editor = Base.extend({
     input:null,
     palette:null,
     element:null,
+    rootEditPart:null,
     _Editor:function () {
     },
     setInput:function (input) {
@@ -269,10 +337,27 @@ anra.gef.Editor = Base.extend({
     },
     createContent:function (parentId) {
         this.element = document.getElementById(parentId);
-        if (this.element == null)
+        if (this.element == null) {
             console.log('GEF的父级元素不能为空');
+            return;
+        }
         this.palette = this.createPalette(parentId);
         this.canvas = this.createCanvas(parentId);
+
+        this.rootEditPart = this.createRootEditPart();
+        this.rootEditPart.editor = this;
+        this.initRootEditPart(this.rootEditPart);
+    },
+    createRootEditPart:function () {
+        return new anra.gef.EditPart();
+    },
+    createEditPart:function (context, model) {
+        var part = new anra.gef.EditPart();
+        part.model = model;
+        return part;
+    },
+    initRootEditPart:function (editPart) {
+        editPart.refresh();
     },
     createPalette:function (id) {
         var i = id + 'Plt';

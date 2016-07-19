@@ -42,6 +42,7 @@ anra.svg.Control = anra.Control.extend({
     parent:null,
     _attr:null,
     _style:null,
+    ready:false,
     constructor:function () {
         this._Control();
     },
@@ -148,6 +149,7 @@ Control.prototype.init = function () {
             dispatcher.setFocusOwner(o);
             dispatcher.dispatchDoubleClick(event);
         };
+        this.ready = true;
         this.initProp();
     }
     this.paint();
@@ -171,6 +173,8 @@ Control.prototype.setBounds = function (b) {
             this.bounds[k] = b[k];
         }
     }
+    if (this.ready)
+        this.applyBounds();
 };
 Control.prototype.locArea = function () {
     var xo = 0, yo = 0;
