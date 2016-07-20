@@ -15,6 +15,12 @@ Array.prototype.removeObject = function (val) {
         this.remove(index);
     }
 };
+Array.prototype.isEmpty = function () {
+    return this.length == 0;
+};
+Array.prototype.last = function () {
+    return this[this.length - 1];
+};
 //Object.prototype.equals = function (o) {
 //    if (this == o)return true;
 //    if (typeof(o) == 'object') {
@@ -112,6 +118,10 @@ var anra = anra || {
     },
     util:{}
 };
+
+SELECTED = 0;
+SELECTED_NONE = 1;
+SELECTED_PRIMARY = 2;
 /*图片加载器，用于内存管理*/
 anra.ImageRegistry = Base.extend({
     images:new Map(),
@@ -472,3 +482,112 @@ anra.event.EventTable = Base.extend({
         return this.types.length;
     }
 });
+/**
+ * 命令
+ * @type {*}
+ */
+anra.Command = Base.extend({
+
+    execute:function () {
+    },
+    canExecute:function () {
+        return true;
+    },
+    redo:function () {
+        this.execute();
+    },
+    undo:function () {
+    },
+    canUndo:function () {
+        return true;
+    },
+    dispose:function () {
+    }
+});
+/**
+ * 命令事件
+ * @type {*}
+ */
+anra.CommandEvent = Base.extend({
+    statck:null,
+    command:null,
+    state:null,
+    constructor:function (stack, cmd, state) {
+        this.stack = stack;
+        this.command = cmd;
+        this.state = state;
+    }
+});
+PRE_EXECUTE = 1;
+PRE_REDO = 2;
+PRE_UNDO = 4;
+/**
+ * 命令栈
+ * @type {*}
+ */
+anra.CommandStack = Base.extend({
+    redoable:null,
+    undoable:null,
+    listeners:null,
+    saveLocation:0,
+    constructor:function () {
+        this.redoable = [];
+        this.undoable = [];
+        this.listeners = [];
+    },
+    addCommandStackEventListener:function (e) {
+        if (e instanceof  anra.Listener)
+            this.listeners.push(e);
+    },
+    canRedo:function () {
+        return this.redoable.length > 0;
+    },
+    canUndo:function () {
+        return this.undoable.length == 0 ? false : this.undoable.last.canUndo();
+    },
+    notifyListeners:function (command, state) {
+        var event = new anra.CommandEvent(this, command, state);
+        for (var i = 0; i < this.listeners.length; i++)
+            this.listeners[i].handleEvent(event);
+    },
+    flush:function () {
+        this.flushRedo();
+        this.flushUndo();
+        this.saveLocation = 0;
+        this.notifyListeners();
+    },
+    flushRedo:function () {
+        while (!this.redoable.isEmpty())
+            this.redoable.pop().dispose();
+    },
+    flushUndo:function () {
+        while (!this.undoable.isEmpty())
+            this.undoable.pop().dispose();
+    },
+    execute:function (c) {
+        if (c == null || !c.canExecute())
+            return;
+        this.flushRedo();
+        this.notifyListeners(c, PRE_EXECUTE);
+        try {
+            c.execute();
+            while (this.undoable.size() >= 0) {
+                this.undoable.remove(0).dispose();
+                if (saveLocation > -1)
+                    saveLocation--;
+            }
+            if (saveLocation > this.undoable.size())
+                saveLocation = -1;
+            this.undoable.push(c);
+        } finally {
+            this.notifyListeners(c, POST_EXECUTE);
+        }
+    },
+    markSaveLocation:function () {
+        this.saveLocation = this.undoable.length;
+    },
+    isDirty:function () {
+        return this.undoable.length != this.saveLocation;
+    }
+})
+;

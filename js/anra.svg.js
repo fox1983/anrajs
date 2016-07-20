@@ -30,7 +30,8 @@ anra.svg.Util = {
 var Util = anra.svg.Util;
 
 /**
- *控件基类
+ *控件基类，生命周期。
+ * 构建，
  * @type {*}
  */
 anra.svg.Control = anra.Control.extend({
@@ -112,7 +113,6 @@ anra.svg.Control = anra.Control.extend({
     }
 })
 ;
-anra.svg.Control.prototype.class = 'anra.svg.Control';
 var Control = anra.svg.Control;
 //初始化控件
 Control.prototype.init = function () {
@@ -168,7 +168,7 @@ Control.prototype.setParent = function (s) {
     }
 };
 Control.prototype.setBounds = function (b) {
-    if (typeof(b)=='object') {
+    if (typeof(b) == 'object') {
         for (var k in b) {
             this.bounds[k] = b[k];
         }
@@ -196,12 +196,12 @@ anra.svg.Composite = Control.extend({
     selection:null,
     setSelection:function (o) {
         if (this.selection != null)
-            this.selection.selected(false);
+            this.selection.setSelected(false);
         this.selection = o;
-        this.selection.selected(true);
+        this.selection.setSelected(true);
     },
     removeChild:function (c) {
-        if ('anra.svg.Control' == c.class) {
+        if (c instanceof anra.svg.Control) {
             this.children.removeObject(c);
             this.svg.owner.remove(c.owner);
         } else {
@@ -212,7 +212,7 @@ anra.svg.Composite = Control.extend({
         if (this.children == null) {
             this.children = [];
         }
-        if ('anra.svg.Control' == c.class) {
+        if (c instanceof  anra.svg.Control) {
             if (!this.children.contains(c)) {
                 this.children.push(c);
                 c.init();
@@ -220,7 +220,7 @@ anra.svg.Composite = Control.extend({
                 this.paint();
             }
         } else {
-            console.log('can not add ' + c.toString() + ' to Composite');
+            console.log('can not add [' + c + '] to Composite');
         }
     },
     paint:function () {
@@ -291,11 +291,27 @@ anra.SVG = Composite.extend({
     },
     getRelativeLocation:function (event) {
         var ev = event || window.event;
-        var x = ev.clientX - this.element.offsetLeft + Math.floor(window.pageXOffset);
-        var y = ev.clientY - this.element.offsetTop + Math.floor(window.pageYOffset);
+        var x = ev.clientX - getX(this.element) + Math.floor(window.pageXOffset);
+        var y = ev.clientY - getY(this.element) + Math.floor(window.pageYOffset);
         return [x, y];
     }
 });
+function getX(obj){
+    var parObj=obj;
+    var left=obj.offsetLeft;
+    while(parObj=parObj.offsetParent){
+        left+=parObj.offsetLeft;
+    }
+    return left;
+}
+function getY(obj){
+    var parObj=obj;
+    var top=obj.offsetTop;
+    while(parObj = parObj.offsetParent){
+        top+=parObj.offsetTop;
+    }
+    return top;
+}
 
 anra.svg.Rect = Composite.extend({
 });
@@ -350,7 +366,6 @@ anra.svg.GridLayout = anra.svg.Layout.extend({
 
 anra.svg.GridData = Base.extend({
 });
-anra.svg.GridData.prototype.class = 'anra.svg.GridData';
 /**
  * 事件分发器
  * @type {*}

@@ -25,11 +25,6 @@ anra.gef.Figure = anra.svg.Composite.extend({
         this.addListener(anra.EVENT.MouseOut, function (e) {
             f.mouseOut();
         });
-        this.addListener(anra.EVENT.MouseDown, function (e) {
-            if (f.parent != null) {
-                f.parent.setSelection(f);
-            }
-        });
     },
     mouseIn:function () {
         if (!this.isSelected)
@@ -39,13 +34,13 @@ anra.gef.Figure = anra.svg.Composite.extend({
         if (!this.isSelected)
             this.setAttribute('stroke', this.stroke);
     },
-    selected:function (s) {
+    setSelected:function (s) {
         this.isSelected = s;
-        if (s) {
-            //TODO 选中
+        if (s == SELECTED_PRIMARY) {
             this.setAttribute('stroke', this.strokeSelected);
+        } else if (s == SELECTED) {
+            this.setAttribute('stroke', '#CC7755');
         } else {
-            //TODO 反选
             this.setAttribute('stroke', this.stroke);
         }
     }
@@ -65,13 +60,10 @@ var MAX_FLAG = FLAG_FOCUS;
  * @type {*}
  */
 anra.gef.EditPart = Base.extend({
-    SELECTED:0,
-    SELECTED_NONE:1,
-    SELECTED_PRIMARY:2,
     selectable:true,
     model:null,
     parent:null,
-    selected:this.SELECTED_NONE,
+    selected:SELECTED_NONE,
     figure:null,
     sConns:null,
     tConns:null,
@@ -91,7 +83,6 @@ anra.gef.EditPart = Base.extend({
         this.policies = [];
     },
     refreshChildren:function () {
-        //TODO refreshChildren
         var i;
         if (this.children == null)
             return;
@@ -128,7 +119,6 @@ anra.gef.EditPart = Base.extend({
         }
     },
     createChild:function (model) {
-        //TODO
         if (this.editor == null) {
             console.log("EditPart的editor不能为空");
             return null;
@@ -200,7 +190,7 @@ anra.gef.EditPart = Base.extend({
             anra.Platform.error("Edit Policies must be installed with key");
             return;
         }
-        if (p == null || p.class == null || p.class != anra.gef.Policy.class) {
+        if (p == null || !(p instanceof anra.gef.Policy)) {
             anra.Platform.error("Edit Policies must be installed with key");
             return;
         }
@@ -226,11 +216,31 @@ anra.gef.EditPart = Base.extend({
 
     },
     getFigure:function () {
-        if (this.figure == null)
+        if (this.figure == null) {
             this.figure = this.createFigure();
+            this._initFigureListeners();
+        }
         return this.figure;
     },
-    createFigure:function(){
+    _initFigureListeners:function () {
+        if (this.figure != null) {
+            var _ep = this;
+            this.figure.addListener(anra.EVENT.MouseDown, function (e) {
+                //TODO
+                if (_ep.editor != null && _ep.editor.getDefaultTool() != null)
+                    _ep.editor.getDefaultTool().mouseDown(e, _ep);
+            });
+            this.figure.addListener(anra.EVENT.MouseDrag, function (e) {
+                if (_ep.editor != null && _ep.editor.getDefaultTool() != null)
+                    _ep.editor.getDefaultTool().mouseDrag(e, _ep);
+            });
+            this.figure.addListener(anra.EVENT.MouseUp, function (e) {
+                if (_ep.editor != null && _ep.editor.getDefaultTool() != null)
+                    _ep.editor.getDefaultTool().mouseUp(e, _ep);
+            });
+        }
+    },
+    createFigure:function () {
         return new anra.gef.Figure();
     },
     getSourceConnections:function () {
@@ -273,6 +283,9 @@ anra.gef.EditPart = Base.extend({
     getCommand:function (request) {
     },
     getDragTracker:function (request) {
+        if (this.dragTracker == null)
+            this.dragTracker = new anra.gef.DragTracker();
+        return this.dragTracker;
     },
     getEditPolicy:function (key) {
     },
@@ -314,21 +327,101 @@ anra.gef.EditPart = Base.extend({
         this.model = model;
     },
     setParent:function (parent) {
+        this.editor = parent.editor;
         this.parent = parent;
     },
     setSelected:function (value) {
         this.selected = value;
+        if (this.figure != null)
+            this.figure.setSelected(value);
     },
     understandsRequest:function (req) {
-        var iter = getEditPolicyIterator();
-        while (iter.hasNext()) {
-            if (iter.next().understandsRequest(req))
-                return true;
-        }
+//        var iter = getEditPolicyIterator();
+//        while (iter.hasNext()) {
+//            if (iter.next().understandsRequest(req))
+//                return true;
+//        }
         return false;
     }
-})
-;
+});
+
+//TODO
+anra.gef.SelectionTool = Base.extend({
+    currentEditor:null,
+    startLocation:null,
+    dragTrack:null,
+    targetEditPart:null,
+    mouseDown:function (me, editPart) {
+        this.currentEditor = editPart.editor;
+        this.startLocation = {x:me.x, y:me.y};
+        this.targetEditPart = editPart;
+        this.handleButtonDown(me, editPart);
+
+        if (this.dragTrack != null)
+            this.dragTrack.mouseDown(me, editPart);
+    },
+    handleButtonDown:function (me, editPart) {
+        if (editPart instanceof  anra.gef.EditPart) {
+            this.setDragTracker(editPart.getDragTracker());
+        }
+    },
+    mouseDrag:function (me, editPart) {
+        if (this.dragTrack != null)
+            this.dragTrack.mouseDrag(me, editPart);
+    },
+    mouseUp:function (me, editPart) {
+        if (this.dragTrack != null)
+            this.dragTrack.mouseUp(me, editPart);
+        this.currentEditor = editPart.editor;
+        this.targetEditPart = editPart;
+    },
+    setDragTracker:function (dt) {
+        if (this.dragTrack == dt)
+            return;
+        if (this.dragTrack != null)
+            this.dragTrack.deactivate();
+        this.dragTrack = dt;
+        if (this.dragTrack != null) {
+            this.dragTrack.currentEditor = this.currentEditor;
+            this.dragTrack.targetEditPart = this.targetEditPart;
+            this.dragTrack.active();
+        }
+    },
+    active:function () {
+
+    },
+    deactivate:function () {
+        this.currentEditor = null;
+        this.startLocation = null;
+        this.dragTrack = null;
+        this.targetEditPart = null;
+    }
+});
+
+anra.gef.DragTracker = anra.gef.SelectionTool.extend({
+    status:null,
+    mouseDown:function (me, editPart) {
+        this.status = me.type;
+        if (this.currentEditor != null)
+            this.currentEditor.setSelection(editPart);
+    },
+    mouseDrag:function(me,editPart){
+        this.status = me.type;
+    },
+    mouseUp:function (me, editPart) {
+        console.log('up');
+        //TODO
+        if (this.status == anra.EVENT.MouseDrag) {
+            editPart.figure.bounds.x=me.x;
+            editPart.figure.bounds.y=me.y;
+            editPart.figure.applyBounds();
+            // editPart.editor.cmdStack.execute();
+        }
+        this.status = me.type;
+
+    }
+});
+
 
 anra.gef.Policy = Base.extend({
     activate:function () {
@@ -339,7 +432,6 @@ anra.gef.Policy = Base.extend({
 
 anra.gef.Palette = anra.gef.Figure.extend({});
 
-anra.gef.Policy.prototype.class = "anra.gef.Policy";
 anra.gef.Request = Base.extend({});
 anra.gef.Editor = Base.extend({
     canvas:null,
@@ -347,6 +439,8 @@ anra.gef.Editor = Base.extend({
     palette:null,
     element:null,
     rootEditPart:null,
+    cmdStack:null,
+    tool:null,
     _Editor:function () {
     },
     setInput:function (input) {
@@ -364,6 +458,7 @@ anra.gef.Editor = Base.extend({
         this.rootEditPart = this.createRootEditPart();
         this.rootEditPart.editor = this;
         this.initRootEditPart(this.rootEditPart);
+        this.cmdStack = new anra.CommandStack();
     },
     createRootEditPart:function () {
         var root = new anra.gef.EditPart();
@@ -378,6 +473,42 @@ anra.gef.Editor = Base.extend({
     },
     initRootEditPart:function (editPart) {
         editPart.refresh();
+    },
+    _save:function () {
+        this.doSave();
+        this.cmdStack.markSaveLocation();
+    },
+    doSave:function () {
+        //执行保存
+    },
+    isDirty:function () {
+        return this.cmdStack.isDirty();
+    },
+    getDefaultTool:function () {
+        if (this.tool == null)
+            this.tool = new anra.gef.SelectionTool();
+        return this.tool;
+    },
+    setSelection:function (o) {
+        this.clearSelection();
+        this.selection = o;
+        if (o instanceof Array) {
+            for (var e in o)
+                o.setSelected(SELECTED_PRIMARY);
+        } else if (o instanceof anra.gef.EditPart) {
+            o.setSelected(SELECTED_PRIMARY);
+        }
+    },
+    clearSelection:function () {
+        if (this.selection != null) {
+            var o = this.selection;
+            if (o instanceof Array) {
+                for (var e in o)
+                    o.setSelected(SELECTED_NONE);
+            } else if (o instanceof anra.gef.EditPart) {
+                o.setSelected(SELECTED_NONE);
+            }
+        }
     },
     createPalette:function (id) {
         var i = id + 'Plt';
