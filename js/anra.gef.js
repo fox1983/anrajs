@@ -27,11 +27,11 @@ anra.gef.Figure = anra.svg.Composite.extend({
         });
     },
     mouseIn:function () {
-        if (!this.isSelected)
+        if (this.isSelected == SELECTED_NONE)
             this.setAttribute('stroke', this.strokeIn);
     },
     mouseOut:function () {
-        if (!this.isSelected)
+        if (this.isSelected == SELECTED_NONE)
             this.setAttribute('stroke', this.stroke);
     },
     setSelected:function (s) {
@@ -225,18 +225,27 @@ anra.gef.EditPart = Base.extend({
     _initFigureListeners:function () {
         if (this.figure != null) {
             var _ep = this;
+            var dt = this.getDragTracker();
             this.figure.addListener(anra.EVENT.MouseDown, function (e) {
                 //TODO
-                if (_ep.editor != null && _ep.editor.getDefaultTool() != null)
-                    _ep.editor.getDefaultTool().mouseDown(e, _ep);
+                if (dt != null)
+                    dt.mouseDown(e, _ep);
+            });
+            this.figure.addListener(anra.EVENT.DragStart, function (e) {
+                if (dt != null)
+                    dt.dragStart(e, _ep);
+            });
+            this.figure.addListener(anra.EVENT.DragEnd, function (e) {
+                if (dt != null)
+                    dt.dragEnd(e, _ep);
             });
             this.figure.addListener(anra.EVENT.MouseDrag, function (e) {
-                if (_ep.editor != null && _ep.editor.getDefaultTool() != null)
-                    _ep.editor.getDefaultTool().mouseDrag(e, _ep);
+                if (dt != null)
+                    dt.mouseDrag(e, _ep);
             });
             this.figure.addListener(anra.EVENT.MouseUp, function (e) {
-                if (_ep.editor != null && _ep.editor.getDefaultTool() != null)
-                    _ep.editor.getDefaultTool().mouseUp(e, _ep);
+                if (dt != null)
+                    dt.mouseUp(e, _ep);
             });
         }
     },
@@ -345,80 +354,54 @@ anra.gef.EditPart = Base.extend({
     }
 });
 
-//TODO
-anra.gef.SelectionTool = Base.extend({
-    currentEditor:null,
+anra.gef.DragTracker = Base.extend({
+    status:null,
+    xoffset:0,
+    yoffset:0,
     startLocation:null,
-    dragTrack:null,
-    targetEditPart:null,
     mouseDown:function (me, editPart) {
-        this.currentEditor = editPart.editor;
-        this.startLocation = {x:me.x, y:me.y};
-        this.targetEditPart = editPart;
-        this.handleButtonDown(me, editPart);
-
-        if (this.dragTrack != null)
-            this.dragTrack.mouseDown(me, editPart);
+        this.status = me.type;
+        editPart.editor.setSelection(editPart);
     },
-    handleButtonDown:function (me, editPart) {
-        if (editPart instanceof  anra.gef.EditPart) {
-            this.setDragTracker(editPart.getDragTracker());
-        }
+    dragStart:function (me, editPart) {
+        this.status = me.type;
+        this.startLocation = {x:editPart.figure.bounds.x, y:editPart.figure.bounds.y};
+        this.xoffset = me.x - editPart.figure.bounds.x;
+        this.yoffset = me.y - editPart.figure.bounds.y;
     },
     mouseDrag:function (me, editPart) {
-        if (this.dragTrack != null)
-            this.dragTrack.mouseDrag(me, editPart);
+        this.status = me.type;
+        editPart.figure.bounds.x = me.x - this.xoffset;
+        editPart.figure.bounds.y = me.y - this.yoffset;
+        editPart.figure.applyBounds();
+    },
+    dragEnd:function (me, editPart) {
+        this.status = me.type;
+        editPart.editor.execute(new anra.gef.RelocalCommand(editPart, this.startLocation, {x:editPart.figure.bounds.x, y:editPart.figure.bounds.y}));
     },
     mouseUp:function (me, editPart) {
-        if (this.dragTrack != null)
-            this.dragTrack.mouseUp(me, editPart);
-        this.currentEditor = editPart.editor;
-        this.targetEditPart = editPart;
-    },
-    setDragTracker:function (dt) {
-        if (this.dragTrack == dt)
-            return;
-        if (this.dragTrack != null)
-            this.dragTrack.deactivate();
-        this.dragTrack = dt;
-        if (this.dragTrack != null) {
-            this.dragTrack.currentEditor = this.currentEditor;
-            this.dragTrack.targetEditPart = this.targetEditPart;
-            this.dragTrack.active();
-        }
-    },
-    active:function () {
-
-    },
-    deactivate:function () {
-        this.currentEditor = null;
-        this.startLocation = null;
-        this.dragTrack = null;
-        this.targetEditPart = null;
+        this.status = me.type;
     }
 });
 
-anra.gef.DragTracker = anra.gef.SelectionTool.extend({
-    status:null,
-    mouseDown:function (me, editPart) {
-        this.status = me.type;
-        if (this.currentEditor != null)
-            this.currentEditor.setSelection(editPart);
+anra.gef.RelocalCommand = anra.Command.extend({
+    constructor:function (editPart, sp, ep) {
+        this.sp = sp;
+        this.ep = ep;
+        this.editPart = editPart;
     },
-    mouseDrag:function(me,editPart){
-        this.status = me.type;
+    canExecute:function () {
+        return this.editPart != null && this.sp != null && this.ep != null;
     },
-    mouseUp:function (me, editPart) {
-        console.log('up');
-        //TODO
-        if (this.status == anra.EVENT.MouseDrag) {
-            editPart.figure.bounds.x=me.x;
-            editPart.figure.bounds.y=me.y;
-            editPart.figure.applyBounds();
-            // editPart.editor.cmdStack.execute();
-        }
-        this.status = me.type;
-
+    execute:function () {
+        this.editPart.figure.bounds.x = this.ep.x;
+        this.editPart.figure.bounds.y = this.ep.y;
+        this.editPart.figure.applyBounds();
+    },
+    undo:function () {
+        this.editPart.figure.bounds.x = this.sp.x;
+        this.editPart.figure.bounds.y = this.sp.y;
+        this.editPart.figure.applyBounds();
     }
 });
 
@@ -440,7 +423,6 @@ anra.gef.Editor = Base.extend({
     element:null,
     rootEditPart:null,
     cmdStack:null,
-    tool:null,
     _Editor:function () {
     },
     setInput:function (input) {
@@ -449,16 +431,24 @@ anra.gef.Editor = Base.extend({
     createContent:function (parentId) {
         this.element = document.getElementById(parentId);
         if (this.element == null) {
-            console.log('GEF的父级元素不能为空');
+            anra.Platform.error('GEF的父级元素不能为空');
             return;
         }
         this.palette = this.createPalette(parentId);
         this.canvas = this.createCanvas(parentId);
 
+        this._initCanvasListeners(this.canvas);
+
         this.rootEditPart = this.createRootEditPart();
         this.rootEditPart.editor = this;
         this.initRootEditPart(this.rootEditPart);
         this.cmdStack = new anra.CommandStack();
+    },
+    _initCanvasListeners:function (cav) {
+    },
+    execute:function (c) {
+        if (this.cmdStack != null)
+            this.cmdStack.execute(c);
     },
     createRootEditPart:function () {
         var root = new anra.gef.EditPart();
@@ -484,11 +474,11 @@ anra.gef.Editor = Base.extend({
     isDirty:function () {
         return this.cmdStack.isDirty();
     },
-    getDefaultTool:function () {
-        if (this.tool == null)
-            this.tool = new anra.gef.SelectionTool();
-        return this.tool;
-    },
+//    getDefaultTool:function () {
+//        if (this.tool == null)
+//            this.tool = new anra.gef.SelectionTool();
+//        return this.tool;
+//    },
     setSelection:function (o) {
         this.clearSelection();
         this.selection = o;
@@ -515,10 +505,10 @@ anra.gef.Editor = Base.extend({
         var div = document.createElement('div');
         div.setAttribute('id', i);
         div.style.position = 'relative';
-        div.style.width = '20%';
+        div.style.width = '10%';
         div.style.height = '100%';
         div.style.float = 'left';
-        div.style.backgroundColor = '#CC78A7';
+        div.style.backgroundColor = '#CCCCCC';
         this.element.appendChild(div);
         return new anra.gef.Palette(i);
     },
@@ -527,10 +517,11 @@ anra.gef.Editor = Base.extend({
         var div = document.createElement('div');
         div.setAttribute('id', i);
         div.style.position = 'relative';
-        div.style.width = '80%';
+        div.style.width = '90%';
         div.style.height = '100%';
         div.style.float = 'right';
-        div.style.backgroundColor = '#AAFFBB';
+        div.style.overflow = 'auto';
+        div.style.backgroundColor = '#EEFFEE';
         this.element.appendChild(div);
         this.element.appendChild(div);
         return  new anra.SVG(i);

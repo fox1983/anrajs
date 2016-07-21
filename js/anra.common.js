@@ -158,8 +158,28 @@ anra.ImageRegistry = new anra.ImageRegistry();
  */
 anra.Platform = {
     pool:new Map(),
+    ready:false,
+    focus:null,
     regist:function (key, object) {
         this.pool.set(key, object);
+        if (!this.ready)
+            this.init();
+    },
+    init:function () {
+        //全局事件
+        var p = this;
+        document.onkeydown = function (event) {
+            var d = p.focus;
+            if (d != null && d.dispatcher!=null)
+                d.dispatcher.dispatchKeyDown(event);
+        };
+
+        document.onkeyup = function (event) {
+            var d = p.focus;
+            if (d != null && d.dispatcher != null)
+                d.dispatcher.dispatchKeyUp(event);
+        };
+        this.ready = true;
     },
     get:function (key) {
         return this.pool.get(key);
@@ -369,7 +389,9 @@ anra.EVENT = {
     KeyUp:10,
     TouchStart:11,
     TouchMove:12,
-    TouchEnd:13
+    TouchEnd:13,
+    DragStart:14,
+    DragEnd:15
 };
 var E = anra.EVENT;
 /**
@@ -385,18 +407,14 @@ anra.event.Event = Base.extend({
     type:0,
     x:undefined,
     y:undefined,
-    constructor:function (obj, location) {
+    prop:null,
+    constructor:function (obj, location, prop) {
         this.type = obj || anra.EVENT.NONE;
         if (location != null && location.length == 2) {
             this.x = location[0 ];
             this.y = location[1];
         }
-    },
-    getType:function () {
-        return this.type;
-    },
-    getWidget:function () {
-        return this.widget;
+        this.prop = prop;
     }
 });
 
@@ -456,7 +474,7 @@ anra.event.EventTable = Base.extend({
     unhook:function (eventType, listener) {
         for (var i = 0; i < this.types.length; i++) {
             if (this.types[i] == eventType && this.listeners[i] == listener) {
-                remove(i);
+                this.remove(i);
                 return;
             }
         }

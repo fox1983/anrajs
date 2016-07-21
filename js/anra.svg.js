@@ -125,6 +125,9 @@ Control.prototype.init = function () {
             dispatcher.setFocusOwner(o);
             dispatcher.dispatchMouseDown(event);
         };
+        e.ondragstart = function (event) {
+            return false;
+        };
         e.onmousemove = function (event) {
             dispatcher.setFocusOwner(o);
             dispatcher.dispatchMouseMove(event);
@@ -149,6 +152,7 @@ Control.prototype.init = function () {
             dispatcher.setFocusOwner(o);
             dispatcher.dispatchDoubleClick(event);
         };
+
         this.ready = true;
         this.initProp();
     }
@@ -255,8 +259,8 @@ anra.SVG = Composite.extend({
         this.owner.style.position = 'absolute';
         this.owner.style.top = 0;
         this.owner.style.left = 0;
-        this.owner.style.width = '100%';
-        this.owner.style.height = '100%';
+        this.owner.style.width = '200%';
+        this.owner.style.height = '200%';
         this.svg = this;
         this.dispatcher = new anra.svg.EventDispatcher(this);
         var d = this.dispatcher;
@@ -273,11 +277,12 @@ anra.SVG = Composite.extend({
                 d.dispatchMouseOutScreen(event);
         };
         this.element.onmouseup = function (event) {
+            anra.Platform.focusDisplay=this;
             if (d.focusOwner != null)
                 d.dispatchMouseUp(event);
         };
-
         anra.Platform.regist(anra.Platform.DISPLAY, this);
+        anra.Platform.focus=this;
     },
     p2x:function (p) {
         if (this.element == null)
@@ -296,19 +301,19 @@ anra.SVG = Composite.extend({
         return [x, y];
     }
 });
-function getX(obj){
-    var parObj=obj;
-    var left=obj.offsetLeft;
-    while(parObj=parObj.offsetParent){
-        left+=parObj.offsetLeft;
+function getX(obj) {
+    var parObj = obj;
+    var left = obj.offsetLeft;
+    while (parObj = parObj.offsetParent) {
+        left += parObj.offsetLeft;
     }
     return left;
 }
-function getY(obj){
-    var parObj=obj;
-    var top=obj.offsetTop;
-    while(parObj = parObj.offsetParent){
-        top+=parObj.offsetTop;
+function getY(obj) {
+    var parObj = obj;
+    var top = obj.offsetTop;
+    while (parObj = parObj.offsetParent) {
+        top += parObj.offsetTop;
     }
     return top;
 }
@@ -393,8 +398,11 @@ anra.svg.EventDispatcher = Base.extend({
         var location = this.getRelativeLocation(event);
         if ((this.mouseState == anra.EVENT.MouseDown) || (this.mouseState == anra.EVENT.MouseDrag)) {
             this.mouseState = anra.EVENT.MouseDrag;
-            if (this.dragTarget == null)
+            if (this.dragTarget == null) {
                 this.dragTarget = this.focusOwner;
+                e = new anra.event.Event(anra.EVENT.DragStart, location);
+                this.dragTarget.notifyListeners(anra.EVENT.DragStart, e);
+            }
         } else {
             this.mouseState = anra.EVENT.MouseMove;
             e = new anra.event.Event(anra.EVENT.MouseMove);
@@ -412,9 +420,15 @@ anra.svg.EventDispatcher = Base.extend({
     dispatchMouseUp:function (event) {
         var location = this.getRelativeLocation(event);
         this.mouseState = anra.EVENT.MouseUp;
-        this.dragTarget = null;
-        var e = new anra.event.Event(anra.EVENT.MouseUp, location);
+        var e = new anra.event.Event(anra.EVENT.DragEnd, location);
+        if (this.mouseState == anra.EVENT.MouseDrag) {
+            e.prop = {drag:this.dragTarget, target:this.focusOwner};
+            this.dragTarget.notifyListeners(anra.EVENT.DragEnd, e);
+            this.focusOwner.notifyListeners(anra.EVENT.DragEnd, e);
+        }
+        e = new anra.event.Event(anra.EVENT.MouseUp, location);
         this.focusOwner.notifyListeners(anra.EVENT.MouseUp, e);
+        this.dragTarget = null;
     },
     dispatchMouseIn:function (event) {
         var location = this.getRelativeLocation(event);
@@ -429,8 +443,8 @@ anra.svg.EventDispatcher = Base.extend({
         this.focusOwner.notifyListeners(anra.EVENT.MouseOut, e);
     },
     dispatchMouseOutScreen:function (event) {
-        this.mouseState = anra.EVENT.MouseOut;
-        this.dragTarget = null;
+//        this.mouseState = anra.EVENT.MouseOut;
+//        this.dragTarget = null;
     },
     dispatchDoubleClick:function (event) {
         var location = this.getRelativeLocation(event);
