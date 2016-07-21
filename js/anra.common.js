@@ -170,7 +170,7 @@ anra.Platform = {
         var p = this;
         document.onkeydown = function (event) {
             var d = p.focus;
-            if (d != null && d.dispatcher!=null)
+            if (d != null && d.dispatcher != null)
                 d.dispatcher.dispatchKeyDown(event);
         };
 
@@ -195,7 +195,7 @@ anra.Platform = {
         return this.get(this.DISPLAY);
     },
     error:function (e) {
-        this.getDisplay.error(e);
+        this.getDisplay().error(e);
     }
 };
 
@@ -422,13 +422,16 @@ anra.event.KeyEvent = anra.event.Event.extend({
     key:undefined,
     keyCode:undefined,
     constructor:function (obj, location, event) {
+        if (event != null) {
+            //            this.keyCode = event.keyCode;
+            for (var k in event) {
+                this[k] = event[k];
+            }
+        }
         this.type = obj || anra.EVENT.NONE;
         if (location != null && location.length == 2) {
             this.x = location[0 ];
             this.y = location[1];
-        }
-        if (event != null) {
-            this.keyCode = event.keyCode;
         }
     }
 });
@@ -539,6 +542,22 @@ anra.CommandEvent = Base.extend({
 PRE_EXECUTE = 1;
 PRE_REDO = 2;
 PRE_UNDO = 4;
+
+/**
+ * 动作注册器
+ * @type {*}
+ */
+anra.ActionRegistry = Base.extend({
+    handlers:null,
+    keyHandle:function(e){
+
+    },
+    registKeyHandler:function(key,action){
+
+    }
+
+});
+
 /**
  * 命令栈
  * @type {*}
@@ -564,7 +583,6 @@ anra.CommandStack = Base.extend({
         return this.undoable.length == 0 ? false : this.undoable.last.canUndo();
     },
     notifyListeners:function (command, state) {
-        var event = new anra.CommandEvent(this, command, state);
         for (var i = 0; i < this.listeners.length; i++)
             this.listeners[i].handleEvent(event);
     },

@@ -51,11 +51,15 @@ anra.svg.Control = anra.Control.extend({
         this.bounds = {'x':0, 'y':0, 'width':100, 'height':100};
     },
     applyBounds:function () {
+        if (this.bounds == null)
+            return;
         var l = this.locArea();
         this.setAttribute('x', this.bounds.x + l[0]);
         this.setAttribute('y', this.bounds.y + l[1]);
         this.setAttribute('width', this.bounds.width);
         this.setAttribute('height', this.bounds.height);
+    },
+    createContent:function () {
     },
     /**
      * 绝对位置
@@ -109,6 +113,7 @@ anra.svg.Control = anra.Control.extend({
         this.setStyle({});
     },
     paint:function () {
+        this.applyBounds();
         //this.repaint();
     }
 })
@@ -168,6 +173,7 @@ Control.prototype.setParent = function (s) {
         this.svg = this.parent.svg;
         this.svg.owner.appendChild(this.owner);
         this.applyBounds();
+        this.createContent(this);
         this.paint();
     }
 };
@@ -177,8 +183,9 @@ Control.prototype.setBounds = function (b) {
             this.bounds[k] = b[k];
         }
     }
-    if (this.ready)
+    if (this.ready) {
         this.applyBounds();
+    }
 };
 Control.prototype.locArea = function () {
     var xo = 0, yo = 0;
@@ -209,7 +216,7 @@ anra.svg.Composite = Control.extend({
             this.children.removeObject(c);
             this.svg.owner.remove(c.owner);
         } else {
-            console.log('can not remove ' + c.toString() + ' from Composite');
+            anra.Platform.error('can not remove ' + c.toString() + ' from Composite');
         }
     },
     addChild:function (c) {
@@ -224,10 +231,11 @@ anra.svg.Composite = Control.extend({
                 this.paint();
             }
         } else {
-            console.log('can not add [' + c + '] to Composite');
+            anra.Platform.error('can not add [' + c + '] to ' + this.tagName);
         }
     },
     paint:function () {
+        this.applyBounds();
         if (this.layoutManager != null)
             this.layout();
 
@@ -244,6 +252,9 @@ var Composite = anra.svg.Composite;
 
 anra.SVG = Composite.extend({
     dispatcher:null,
+    error:function (msg) {
+        console.log(msg);
+    },
     constructor:function (id) {
         this.element = document.getElementById(id);
         if (this.element != null) {
@@ -277,12 +288,12 @@ anra.SVG = Composite.extend({
                 d.dispatchMouseOutScreen(event);
         };
         this.element.onmouseup = function (event) {
-            anra.Platform.focusDisplay=this;
+            anra.Platform.focusDisplay = this;
             if (d.focusOwner != null)
                 d.dispatchMouseUp(event);
         };
         anra.Platform.regist(anra.Platform.DISPLAY, this);
-        anra.Platform.focus=this;
+        anra.Platform.focus = this;
     },
     p2x:function (p) {
         if (this.element == null)
@@ -296,27 +307,33 @@ anra.SVG = Composite.extend({
     },
     getRelativeLocation:function (event) {
         var ev = event || window.event;
-        var x = ev.clientX - getX(this.element) + Math.floor(window.pageXOffset);
-        var y = ev.clientY - getY(this.element) + Math.floor(window.pageYOffset);
+        var x = ev.clientX - this.getX(this.element) + Math.floor(window.pageXOffset);
+        var y = ev.clientY - this.getY(this.element) + Math.floor(window.pageYOffset);
         return [x, y];
+    },
+    getX:function (obj) {
+        if (this.left != null)
+            return this.left;
+        var parObj = obj;
+        var left = obj.offsetLeft;
+        while (parObj = parObj.offsetParent) {
+            left += parObj.offsetLeft;
+        }
+        this.left = left;
+        return this.left;
+    },
+    getY:function (obj) {
+        if (this.top != null)
+            return this.top;
+        var parObj = obj;
+        var top = obj.offsetTop;
+        while (parObj = parObj.offsetParent) {
+            top += parObj.offsetTop;
+        }
+        this.top = top;
+        return this.top;
     }
 });
-function getX(obj) {
-    var parObj = obj;
-    var left = obj.offsetLeft;
-    while (parObj = parObj.offsetParent) {
-        left += parObj.offsetLeft;
-    }
-    return left;
-}
-function getY(obj) {
-    var parObj = obj;
-    var top = obj.offsetTop;
-    while (parObj = parObj.offsetParent) {
-        top += parObj.offsetTop;
-    }
-    return top;
-}
 
 anra.svg.Rect = Composite.extend({
 });
@@ -371,6 +388,7 @@ anra.svg.GridLayout = anra.svg.Layout.extend({
 
 anra.svg.GridData = Base.extend({
 });
+count = 0;
 /**
  * 事件分发器
  * @type {*}
@@ -393,6 +411,12 @@ anra.svg.EventDispatcher = Base.extend({
 //        widget.setFocus();
     },
     dispatchMouseMove:function (event) {
+        //提高效率
+        if ((++count ) % 5 != 0) {
+            if (count > 101)
+                count = 0;
+            return;
+        }
         //模拟拖拽
         var e;
         var location = this.getRelativeLocation(event);
@@ -453,11 +477,13 @@ anra.svg.EventDispatcher = Base.extend({
     },
     dispatchKeyDown:function (event) {
         var e = new anra.event.KeyEvent(anra.EVENT.KeyDown, this.getRelativeLocation(event), event);
-        this.focusOwner.notifyListeners(e.type, e);
+        var f = this.focusOwner == null ? this.display : this.focusOwner;
+        f.notifyListeners(e.type, e);
     },
     dispatchKeyUp:function (event) {
         var e = new anra.event.KeyEvent(anra.EVENT.KeyUp, this.getRelativeLocation(event), event);
-        this.focusOwner.notifyListeners(e.type, e);
+        var f = this.focusOwner == null ? this.display : this.focusOwner;
+        f.notifyListeners(e.type, event);
     },
     dispatchTouchStart:function (event) {
         var location = this.getRelativeLocation(event.touches[0]);

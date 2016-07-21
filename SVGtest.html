@@ -12,15 +12,6 @@
 
             var rect = new anra.gef.Figure();
             rect.setBounds({
-                x:0,
-                y:120,
-                width:30,
-                height:410
-            });
-            display.addChild(rect);
-
-            rect = new anra.gef.Figure();
-            rect.setBounds({
                 x:200,
                 y:20,
                 width:300,
@@ -28,7 +19,19 @@
             });
             display.addChild(rect);
 
-            var circle = new anra.svg.Circle();
+            var CustomCircle = anra.svg.Circle.extend({
+                createContent:function () {
+                    var r = new anra.svg.Rect();
+                    r.setBounds({
+                        x:0,
+                        y:0,
+                        width:150,
+                        height:30
+                    });
+                    this.addChild(r);
+                }
+            });
+            var circle = new CustomCircle();
             circle.setBounds({
                 x:20,
                 y:0,
@@ -41,7 +44,7 @@
 
             rect.addChild(circle);
 
-            var r=new anra.svg.Rect();
+            var r = new anra.svg.Rect();
             r.setBounds({
                 x:20,
                 y:0,

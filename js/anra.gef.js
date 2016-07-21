@@ -84,52 +84,53 @@ anra.gef.EditPart = Base.extend({
     },
     refreshChildren:function () {
         var i;
-        if (this.children == null)
-            return;
-        var map = new Map();
-        //增量修改当前children
-        for (var e in this.children) {
-            map.set(e.model, e);
-        }
-        var model, editPart;
-        for (i = 0; i < this.modelChildren.length; i++) {
-            model = this.modelChildren[i];
-            if (i < this.children.length
-                && this.children.get(i).model == model)
-                continue;
+        if (this.children != null) {
+            var map = new Map();
+            //增量修改当前children
+            for (var e in this.children) {
+                map.set(e.model, e);
+            }
+            var model, editPart;
+            for (i = 0; i < this.modelChildren.length; i++) {
+                model = this.modelChildren[i];
+                if (i < this.children.length
+                    && this.children.get(i).model == model)
+                    continue;
 
-            editPart = map.get(model);
-            if (editPart != null)
-                this.reorderChild(editPart, i);
-            else {
-                editPart = this.createChild(model);
-                this.addChild(editPart, i);
+                editPart = map.get(model);
+                if (editPart != null)
+                    this.reorderChild(editPart, i);
+                else {
+                    editPart = this.createChild(model);
+                    this.addChild(editPart, i);
+                }
+            }
+
+            var size = this.children.length;
+            if (i < size) {
+                var trash = [];
+                for (; i < size; i++)
+                    trash.push(this.children[i]);
+                for (i = 0; i < trash.size(); i++) {
+                    var ep = trash[i];
+                    this.removeChild(ep);
+                }
             }
         }
-
-        var size = this.children.length
-        if (i < size) {
-            var trash = [];
-            for (; i < size; i++)
-                trash.push(this.children[i]);
-            for (i = 0; i < trash.size(); i++) {
-                var ep = trash[i];
-                this.removeChild(ep);
-            }
-        }
+        this.figure.paint();
     },
     createChild:function (model) {
         if (this.editor == null) {
-            console.log("EditPart的editor不能为空");
+            anra.Platform.error("EditPart的editor不能为空");
             return null;
         }
         return  this.editor.createEditPart(this, model);
     },
     addChild:function (child, index) {
-        if (index == null)
-            index = getChildren().size();
         if (this.children == null)
             this.children = [];
+        if (index == null)
+            index = this.children.length;
 
         this.children[index] = child;
         child.setParent(this);
@@ -143,11 +144,11 @@ anra.gef.EditPart = Base.extend({
         this.children[index] = editpart;
         this.addChildVisual(editpart, index);
     },
-    removeChildVisual:function (editPart) {
-        this.getFigure().removeChild(editPart.getFigure());
+    removeChildVisual:function (child) {
+        this.getFigure().removeChild(child.getFigure());
     },
-    addChildVisual:function (editPart, index) {
-        this.getFigure().addChild(editPart.getFigure());
+    addChildVisual:function (child, index) {
+        this.getFigure().addChild(child.getFigure());
     },
     deactivate:function () {
         var i;
@@ -373,7 +374,7 @@ anra.gef.DragTracker = Base.extend({
         this.status = me.type;
         editPart.figure.bounds.x = me.x - this.xoffset;
         editPart.figure.bounds.y = me.y - this.yoffset;
-        editPart.figure.applyBounds();
+        editPart.figure.paint();
     },
     dragEnd:function (me, editPart) {
         this.status = me.type;
@@ -396,12 +397,12 @@ anra.gef.RelocalCommand = anra.Command.extend({
     execute:function () {
         this.editPart.figure.bounds.x = this.ep.x;
         this.editPart.figure.bounds.y = this.ep.y;
-        this.editPart.figure.applyBounds();
+        this.editPart.figure.paint();
     },
     undo:function () {
         this.editPart.figure.bounds.x = this.sp.x;
         this.editPart.figure.bounds.y = this.sp.y;
-        this.editPart.figure.applyBounds();
+        this.editPart.figure.paint();
     }
 });
 
@@ -430,6 +431,8 @@ anra.gef.Editor = Base.extend({
     },
     createContent:function (parentId) {
         this.element = document.getElementById(parentId);
+        this.actionRegistry = new anra.ActionRegistry();
+        this.registActions();
         if (this.element == null) {
             anra.Platform.error('GEF的父级元素不能为空');
             return;
@@ -445,6 +448,15 @@ anra.gef.Editor = Base.extend({
         this.cmdStack = new anra.CommandStack();
     },
     _initCanvasListeners:function (cav) {
+        var editor = this;
+        this.canvas.addKeyListener({
+            handleEvent:function (e) {
+                editor.actionRegistry.keyHandle(e);
+            }
+        });
+    },
+    registActions:function () {
+
     },
     execute:function (c) {
         if (this.cmdStack != null)
@@ -522,7 +534,6 @@ anra.gef.Editor = Base.extend({
         div.style.float = 'right';
         div.style.overflow = 'auto';
         div.style.backgroundColor = '#EEFFEE';
-        this.element.appendChild(div);
         this.element.appendChild(div);
         return  new anra.SVG(i);
     }
