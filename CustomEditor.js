@@ -3,10 +3,12 @@ NodeEditPart = anra.gef.EditPart.extend({
         if (this.model != null && this.figure != null) {
             var b = this.model['bounds'];
             if (b != null)
+
                 this.figure.setBounds({x:b[0], y:b[1], width:b[2], height:b[3] });
         }
     },
     createFigure:function () {
+
         return new MyFigure();
     }
 
@@ -14,14 +16,29 @@ NodeEditPart = anra.gef.EditPart.extend({
 
 MyFigure = anra.gef.Figure.extend({
     createContent:function () {
-        var e = new anra.svg.Ellipse();
+        this.layoutManager = new anra.svg.GridLayout(2,false);
+
+        var e = new anra.svg.Rect();   //Ellipse
         e.setBounds({
-            x:10,
-            y:20,
-            width:20,
+
+            width:15,
             height:18
         });
+
+        e.layoutData=new anra.svg.GridData(this,e);
+
         this.addChild(e);
+
+
+        var e1 = new anra.svg.Ellipse();
+        e1.setBounds({
+
+            width:11,
+            height:30
+        });
+
+        this.addChild(e1);
+
     }
 });
 

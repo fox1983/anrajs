@@ -20,12 +20,12 @@ anra.svg.GridLayout = anra.svg.Layout.extend({
         "makeColumnsEqualWidth":false,      //列宽度是否相等，当为false，列宽度与部件的宽度一样
         "marginWidth":5,
         "marginHeight":5,
-        "marginLeft":5,
-        "marginTop":5,
-        "marginRight":5,
-        "marginBottom":5,
-        "horizontalSpacing":5,
-        "verticalSpacing":5,
+        "marginLeft":10,
+        "marginTop":0,
+        "marginRight":0,
+        "marginBottom":0,
+        "horizontalSpacing":1,
+        "verticalSpacing":1,
 
         "marginTopUsed":0,
         "marginLeftUsed":0,
@@ -234,6 +234,13 @@ anra.svg.GridLayout = anra.svg.Layout.extend({
             this.compute(c,p);
             c.applyBounds();
         }
+
+        //for(var c in p.children){
+        //    c.getBounds().x = 0;
+        //    c.getBounds().y = 0;
+        //    this.compute(c,p);
+        //    c.applyBounds();
+        //}
 
 
     },
