@@ -7,8 +7,17 @@ Array.prototype.indexOf = function (val) {
 Array.prototype.remove = function (val) {
     if (typeof val == 'number') {
         this.splice(val, 1);
+    } else {
+        this.removeObject(val);
     }
 };
+Array.prototype.insert = function (item, index) {
+    this.splice(index, 0, item);
+};
+/**
+ * 移除数组中的指定对象
+ * @param val
+ */
 Array.prototype.removeObject = function (val) {
     var index = this.indexOf(val);
     if (index > -1) {
@@ -47,65 +56,8 @@ Array.prototype.contains = function (obj) {
     return false;
 };
 
-function Map() {
-
-    var mapObj = new Object();
-    var size = 0;
-    this.size = function () {
-        return size;
-    };
-
-    this.set = function (key, value) {
-        if (!mapObj.hasOwnProperty(key))
-            size++;
-        mapObj[key] = value;
-    };
-    this.putAll = function (json) {
-        if (typeof(json) == 'object') {
-            for (var k in json) {
-                set(k, json[k]);
-            }
-        }
-    };
-    this.remove = function (key) {
-        if (mapObj.hasOwnProperty(key)) {
-            delete mapObj[key];
-            size--;
-        }
-    };
-
-    this.get = function (key) {
-        return mapObj.hasOwnProperty(key) ? mapObj[key] : null;
-    };
-
-    this.keys = function () {
-        var keys = [];
-        for (var k in mapObj) {
-            keys.push(k);
-        }
-        return keys;
-    };
-
-    // 遍历map
-    this.forEach = function (fn) {
-        for (var k in mapObj) {
-            if (fn(mapObj[k], k)) {
-                break;
-            }
-        }
-    };
-
-    this.toString = function () {
-        var str = "{";
-        for (var k in mapObj) {
-            str += "\"" + k + "\" : \"" + mapObj[k] + "\",";
-        }
-        str = str.substring(0, str.length - 1);
-        str += "}";
-        return str;
-    }
-
-}
+Map = HashMap;
+Map.prototype.put=Map.prototype.set;
 
 
 /*
@@ -205,6 +157,8 @@ anra.Platform = {
  */
 anra.Rectangle = {
     contains:function (rect, x, y) {
+        if (rect == null)
+            return false;
         return (x >= rect.x) && (y >= rect.y) && x < (rect.x + rect.width) && y < (rect.y + rect.height);
     },
     distance:function (r1, r2) {
@@ -549,10 +503,10 @@ PRE_UNDO = 4;
  */
 anra.ActionRegistry = Base.extend({
     handlers:null,
-    keyHandle:function(e){
+    keyHandle:function (e) {
 
     },
-    registKeyHandler:function(key,action){
+    registKeyHandler:function (key, action) {
 
     }
 

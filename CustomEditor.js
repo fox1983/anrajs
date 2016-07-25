@@ -7,6 +7,9 @@ NodeEditPart = anra.gef.EditPart.extend({
                 this.figure.setBounds({x:b[0], y:b[1], width:b[2], height:b[3] });
         }
     },
+    setModel:function (model) {
+        this.model = model;
+    },
     createFigure:function () {
 
         return new MyFigure();

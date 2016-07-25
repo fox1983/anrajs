@@ -108,6 +108,9 @@ anra.svg.Control = anra.Control.extend({
         }
         Util.apply(this.owner.style, a, v);
     },
+    /**
+     * 初始化属性，在构建完成后调用。
+     */
     initProp:function () {
         this.setAttribute({'fill':'white', 'stroke':'black'});
         this.setStyle({});
@@ -365,13 +368,6 @@ anra.svg.Ellipse = Composite.extend({
     }
 });
 
-/**
- * 连线
- * @type {*}
- */
-anra.svg.Line = Control.extend({
-
-});
 /**
  * 布局
  * @type {*}
