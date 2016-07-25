@@ -17,15 +17,16 @@ anra.svg.GridLayout = anra.svg.Layout.extend({
     arg:{
 
         "numColumns":1,             //列数目
+        "numRows":1,
         "makeColumnsEqualWidth":false,      //列宽度是否相等，当为false，列宽度与部件的宽度一样
         "marginWidth":5,
         "marginHeight":5,
-        "marginLeft":10,
-        "marginTop":0,
-        "marginRight":0,
-        "marginBottom":0,
-        "horizontalSpacing":1,
-        "verticalSpacing":1,
+        "marginLeft":2,
+        "marginTop":2,
+        "marginRight":2,
+        "marginBottom":2,
+        "horizontalSpacing":15,
+        "verticalSpacing":15,
 
         "marginTopUsed":0,
         "marginLeftUsed":0,
@@ -36,70 +37,88 @@ anra.svg.GridLayout = anra.svg.Layout.extend({
 
     },
 
-    getMaxColumnWH:function(chBounds,parArg){
-        if(parArg.maxColumnWidth < chBounds.width){
-            parArg.maxColumnWidth = chBounds.width;
-        }
-        if(parArg.maxColumnHeight < chBounds.height){
+    layout:function(p){
 
-            parArg.maxColumnHeight = chBounds.height;
-        }
-    },
+        var parArg = p.layoutManager.arg;
 
-    getMaxColumnW:function(chBounds,parArg){
-        if(parArg.maxColumnWidth < chBounds.width){
-            parArg.maxColumnWidth = chBounds.width;
-        }
-    },
+        parArg.currentColumnNum=0;
+        parArg.marginLeftUsed = parArg.marginLeft;
+        parArg.marginTopUsed = parArg.marginTop;
 
-    getMaxColumnH:function(chBounds,parArg){
-        if(parArg.maxColumnHeight < chBounds.height){
 
-            parArg.maxColumnHeight = chBounds.height;
+        for(var i = 0; i < p.children.length; i ++){
+            var c = p.children[i];
+            c.layoutData.x = 0;
+            c.layoutData.y = 0;
+            c.layoutData.compute(c,p);
+            c.applyBounds();
+
         }
     },
 
-    getAvailableWidth:function(p){
-        return p.getBounds().width - p.layoutManager.arg.marginRight
-            - p.layoutManager.arg.marginLeftUsed;   //求得本行可用宽度
-    },
-
-    getAvailableHeight:function(p){
-        return p.getBounds().height - p.layoutManager.arg.marginBottom
-            - p.layoutManager.arg.marginTopUsed;
-    },
-
-    getXY:function(parArg, chBounds){
-
-            if(parArg.marginLeftUsed == parArg.marginLeft &&
-                parArg.marginTopUsed == parArg.marginTop){    //这是第一行第一个
-
-                chBounds.x = parArg.marginLeftUsed;
-                chBounds.y = parArg.marginTopUsed;
-
-            }else if(parArg.marginLeftUsed == parArg.marginLeft){           //这是第一列的
-
-                chBounds.x = parArg.marginLeftUsed;
-                chBounds.y = parArg.marginTopUsed + parArg.verticalSpacing;
-
-            }else if(parArg.marginTopUsed == parArg.marginTop){             //这是第一行的
-
-                chBounds.x = parArg.marginLeftUsed + parArg.horizontalSpacing;
-                chBounds.y = parArg.marginTopUsed;
-
-            }else{
-
-                chBounds.x = parArg.marginLeftUsed + parArg.horizontalSpacing;
-                chBounds.y = parArg.marginTopUsed + parArg.verticalSpacing;
-
+    constructor:function(numColumns, makeColumnsEqualWidth, p) {
+        var arg = this.arg;
+        if (numColumns) {
+            arg.numColumns = numColumns;
+            if(makeColumnsEqualWidth){
+                arg.maxColumnWidth = (p.getBounds().width - arg.marginLeft - arg.marginRight)/(1.0*numColumns);
             }
 
+            
+            arg.makeColumnsEqualWidth = makeColumnsEqualWidth;
+
+        }
+        arg.marginTopUsed = arg.marginTop;
+        arg.marginLeftUsed = arg.marginLeft;
+    }
+
+
+});
+
+/**
+ *提供给Control
+ * @type {*}
+ */
+anra.svg.GridData = Base.extend({
+    widthReal:0,
+    heightReal:0,
+
+    width:0,
+    height:0,
+
+    //定义一个属性，设置该方格占用多少个横格子，只有当makeColumnsEqualWidth为true的时候才有用
+    //并且设置的widthReal将不起作用
+    usedColumn:0,
+    usedRow:0,
+
+    x:0,
+    y:0,
+    /**
+     *
+     * @param p     父容器
+     * @param c     this的所属对象
+     * @param widthReal 实际宽度（但显示在html不一定是实际的宽度）
+     * @param heightReal  实际高度（但显示在html不一定是实际的高度）
+     * @param usedColumn 占用列数
+     * @param usedHeight 占用行数
+     */
+    constructor:function(p,c, widthReal, heightReal, usedColumn, usedHeight){
+        this.widthReal = widthReal;
+        this.heightReal = heightReal;
+        this.usedColumn = usedColumn;
+        this.usedHeight = usedHeight;
+
+
+        this.compute(c,p);    //计算c的x,y，并且在必要时重新计算width、height
     },
 
 
 
     compute:function(c,p){
-        var chBounds = c.getBounds();
+        //alert(this.usedColumn);
+        this.width = this.widthReal;
+        this.height = this.heightReal;
+
         var parArg = p.layoutManager.arg;
 
         var changeLine = false;
@@ -108,19 +127,22 @@ anra.svg.GridLayout = anra.svg.Layout.extend({
         var availableHeight = this.getAvailableHeight(p);
 
         if(availableHeight<=0){
-            c.getBounds().width = 0;
-            c.getBounds().height = 0;
+            this.width = 0;
+            this.height = 0;
             return;
         }
 
         if(parArg.makeColumnsEqualWidth){    //列等宽
-
             //计算最大宽度和最大高度
-            this.getMaxColumnWH(chBounds,parArg);
-
+            if(this.usedColumn == 0 || typeof(this.usedColumn) == 'undefined'){
+                this.getMaxColumnW(parArg);
+            }
+            this.getMaxColumnH(parArg);
 
             if(parArg.currentColumnNum == parArg.numColumns ||
-                        (availableWidth >= 0 && availableWidth <= parArg.horizontalSpacing)){   //如果一行达到想要的数目则换行
+                (availableWidth >= 0 && availableWidth <= parArg.horizontalSpacing) ||
+                        availableWidth<0){   //如果一行达到想要的数目则换行
+
                 changeLine = true;
 
                 parArg.marginLeftUsed = parArg.marginLeft;
@@ -129,30 +151,47 @@ anra.svg.GridLayout = anra.svg.Layout.extend({
                     parArg.marginTopUsed += parArg.maxColumnHeight;
                 }else{
                     parArg.marginTopUsed = parArg.marginTopUsed + parArg.verticalSpacing
-                                    + parArg.maxColumnHeight;
+                    + parArg.maxColumnHeight;
                 }
 
             }
+
             availableWidth = this.getAvailableWidth(p);
             availableHeight = this.getAvailableHeight(p);
 
-            this.getXY(parArg,chBounds);
+            this.setXY(parArg);
+
+
+            if(this.usedColumn > 0){
+                this.width = this.usedColumn * parArg.maxColumnWidth;
+            }
 
             //限定单位方格宽度不能超过parent
-            if(chBounds.width > availableWidth){
-                chBounds.width = availableWidth - parArg.horizontalSpacing;
-                //temp = chBounds.width;
+            if(this.width > availableWidth){
+                if(this.usedColumn > 0){
+                    this.width = p.getBounds().width - parArg.marginLeft - parArg.marginRight;
+                }else{
+                    this.width = availableWidth - parArg.horizontalSpacing;
+                }
             }
 
             //限定单位方格高度不能超过parent
-            if(chBounds.height > availableHeight){
-                chBounds.height = availableHeight - parArg.verticalSpacing;
+            if(this.height > availableHeight){
+                this.height = availableHeight - parArg.verticalSpacing;
             }
 
             if(parArg.marginLeftUsed == parArg.marginLeft){
-                parArg.marginLeftUsed += parArg.maxColumnWidth;
+                if(this.usedColumn > 0){
+                    parArg.marginLeftUsed += this.width;
+                }else{
+                    parArg.marginLeftUsed += parArg.maxColumnWidth;
+                }
             }else{
-                parArg.marginLeftUsed = parArg.marginLeftUsed + parArg.horizontalSpacing + parArg.maxColumnWidth;
+                if(this.usedColumn > 0){
+                    parArg.marginLeftUsed = parArg.marginLeftUsed + parArg.horizontalSpacing + this.width;
+                }else{
+                    parArg.marginLeftUsed = parArg.marginLeftUsed + parArg.horizontalSpacing + parArg.maxColumnWidth;
+                }
             }
 
 
@@ -164,14 +203,15 @@ anra.svg.GridLayout = anra.svg.Layout.extend({
 
         }else{
             //计算最大高度
-            this.getMaxColumnH(chBounds,parArg);
+            this.getMaxColumnH(parArg);
 
             /**
              * 换行，换行的条件有：(1)当前行的数目等于预设的数目
              * (2)可用宽度大于等于0，小于等于行间距
              */
             if(parArg.currentColumnNum == parArg.numColumns ||
-                                    (availableWidth >= 0 && availableWidth <= parArg.horizontalSpacing)){  //本次换行
+                (availableWidth >= 0 && availableWidth <= parArg.horizontalSpacing
+                        || availableWidth<0)){  //本次换行
                 //设定换行标识
                 changeLine = true;
 
@@ -190,23 +230,23 @@ anra.svg.GridLayout = anra.svg.Layout.extend({
             availableWidth = this.getAvailableWidth(p);
             availableHeight = this.getAvailableHeight(p);
             //计算坐标
-            this.getXY(parArg,chBounds);
+            this.setXY(parArg);
 
             //限定单位方格宽度不能超过parent
-            if(chBounds.width > availableWidth){
-                chBounds.width = availableWidth - parArg.horizontalSpacing;
+            if(this.width > availableWidth){
+                this.width = availableWidth - parArg.horizontalSpacing;
             }
 
             //限定单位方格高度不能超过parent
-            if(chBounds.height > availableHeight){
-                chBounds.height = availableHeight - parArg.verticalSpacing;
+            if(this.height > availableHeight){
+                this.height = availableHeight - parArg.verticalSpacing;
             }
 
 
             if(parArg.marginLeftUsed == parArg.marginLeft){
-                parArg.marginLeftUsed = parArg.marginLeftUsed+ chBounds.width;
+                parArg.marginLeftUsed = parArg.marginLeftUsed+ this.width;
             }else{
-                parArg.marginLeftUsed = parArg.marginLeftUsed + parArg.horizontalSpacing + chBounds.width;
+                parArg.marginLeftUsed = parArg.marginLeftUsed + parArg.horizontalSpacing + this.width;
             }
 
             if(changeLine){    //换行
@@ -216,55 +256,80 @@ anra.svg.GridLayout = anra.svg.Layout.extend({
             }
 
         }
+        //c.getBounds().x = this.x;
+        //c.getBounds().y = this.y;
+        //c.getBounds().width = this.width;
+        //c.getBounds().height = this.height;
+        debugger
+        c.setBounds({
+            x:this.x,
+            y:this.y,
+            width:this.width,
+            height:this.height
+        });
     },
 
-    layout:function(p){
-
-        var parArg = p.layoutManager.arg;
-
-        parArg.currentColumnNum=0;
-        parArg.marginLeftUsed = parArg.marginLeft;
-        parArg.marginTopUsed = parArg.marginTop;
-
-
-        for(var i = 0; i < p.children.length; i ++){
-            var c = p.children[i];
-            c.getBounds().x = 0;
-            c.getBounds().y = 0;
-            this.compute(c,p);
-            c.applyBounds();
+    //==============
+    getMaxColumnWH:function(parArg){
+        if(parArg.maxColumnWidth < this.width){
+            parArg.maxColumnWidth = this.width;
         }
+        if(parArg.maxColumnHeight < this.height){
 
-        //for(var c in p.children){
-        //    c.getBounds().x = 0;
-        //    c.getBounds().y = 0;
-        //    this.compute(c,p);
-        //    c.applyBounds();
-        //}
-
-
+            parArg.maxColumnHeight = this.height;
+        }
     },
 
-    constructor:function(numColumns, makeColumnsEqualWidth) {
-        if (numColumns /*&& makeColumnsEqualWidth || numColumns && !makeColumnsEqualWidth*/) {
-            this.arg.numColumns = numColumns;
-            this.arg.makeColumnsEqualWidth = makeColumnsEqualWidth;
+    getMaxColumnW:function(parArg){
+        if(parArg.maxColumnWidth < this.width){
+            parArg.maxColumnWidth = this.width;
+        }
+    },
+
+    getMaxColumnH:function(parArg){
+        if(parArg.maxColumnHeight < this.height){
+
+            parArg.maxColumnHeight = this.height;
+        }
+    },
+
+    getAvailableWidth:function(p){
+        return p.getBounds().width - p.layoutManager.arg.marginRight
+            - p.layoutManager.arg.marginLeftUsed;   //求得本行可用宽度
+    },
+
+    getAvailableHeight:function(p){
+        return p.getBounds().height - p.layoutManager.arg.marginBottom
+            - p.layoutManager.arg.marginTopUsed;
+    },
+
+    setXY:function(parArg){
+
+        if(parArg.marginLeftUsed == parArg.marginLeft &&
+            parArg.marginTopUsed == parArg.marginTop){    //这是第一行第一个
+
+            this.x = parArg.marginLeftUsed;
+            this.y = parArg.marginTopUsed;
+
+        }else if(parArg.marginLeftUsed == parArg.marginLeft){           //这是第一列的
+
+            this.x = parArg.marginLeftUsed;
+            this.y = parArg.marginTopUsed + parArg.verticalSpacing;
+
+        }else if(parArg.marginTopUsed == parArg.marginTop){             //这是第一行的
+
+            this.x = parArg.marginLeftUsed + parArg.horizontalSpacing;
+            this.y = parArg.marginTopUsed;
+
+        }else{
+
+            this.x = parArg.marginLeftUsed + parArg.horizontalSpacing;
+            this.y = parArg.marginTopUsed + parArg.verticalSpacing;
 
         }
-        this.arg.marginTopUsed = this.arg.marginTop;
-        this.arg.marginLeftUsed = this.arg.marginLeft;
-    }
-});
 
-/**
- *提供给Control
- * @type {*}
- */
-anra.svg.GridData = Base.extend({
-
-    constructor:function(p,c){
-        p.layoutManager.compute(c,p);
-        c.applyBounds();
     }
+
+    //==============
 
 });
