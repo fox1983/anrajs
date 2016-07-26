@@ -12,7 +12,7 @@ anra.gef.Figure = anra.svg.Composite.extend({
     strokeIn:'blue',
     stroke:'black',
     strokeSelected:'green',
-    isSelected:false,
+    isSelected:SELECTED_NONE,
     constructor:function () {
         this._Figure();
     },
@@ -218,7 +218,7 @@ anra.gef.EditPart = Base.extend({
     },
     getFigure:function () {
         if (this.figure == null) {
-            this.figure = this.createFigure();
+            this.figure = this.createFigure(this.model);
             this._initFigureListeners();
         }
         return this.figure;
@@ -250,7 +250,7 @@ anra.gef.EditPart = Base.extend({
             });
         }
     },
-    createFigure:function () {
+    createFigure:function (model) {
         return new anra.gef.Figure();
     },
     isActive:function () {
@@ -303,9 +303,7 @@ anra.gef.EditPart = Base.extend({
     getCommand:function (request) {
     },
     getDragTracker:function (request) {
-        if (this.dragTracker == null)
-            this.dragTracker = new anra.gef.DragTracker();
-        return this.dragTracker;
+        return null;
     },
     getEditPolicy:function (key) {
     },
@@ -376,11 +374,16 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
     sConns:null,
     tConns:null,
     lineCache:null,
-    getSourceAnchor:function () {
-        return {x:0, y:0};
+    getSourceAnchor:function (line) {
+        return this.figure.getSourceAnchor(line);
     },
-    getTargetAnchor:function () {
-        return {x:100, y:100};
+    getDragTracker:function () {
+        if (this.dragTracker == null)
+            this.dragTracker = new anra.gef.DragTracker();
+        return this.dragTracker;
+    },
+    getTargetAnchor:function (line) {
+        return this.figure.getTargetAnchor(line);
     },
     constructor:function () {
         this._NodeEditPart();
@@ -484,7 +487,7 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
         if (modelObjects != null)
             for (i = 0; i < modelObjects.length; i++) {
                 model = modelObjects[i];
-                if (i < this.tConns.length && this.tConns[i].model == model){
+                if (i < this.tConns.length && this.tConns[i].model == model) {
                     this.tConns[i].refresh();
                     continue;
                 }
@@ -555,14 +558,14 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
 });
 
 anra.gef.RootEditPart = anra.gef.EditPart.extend({
-    constructor:function(){
-      this._RootEditPart();
+    constructor:function () {
+        this._RootEditPart();
     },
-    _RootEditPart:function(){
+    _RootEditPart:function () {
         this._EditPart();
-        this.editPartMap=new Map();
+        this.editPartMap = new Map();
     },
-    setSelection:function(o){
+    setSelection:function (o) {
         this.clearSelection();
         this.selection = o;
         if (o instanceof Array) {
@@ -586,12 +589,10 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
     getRoot:function () {
         return this;
     },
-    regist:function(editPart){
-        //TODO
-        console.log(editPart.model);
-        this.editPartMap.set(editPart.model,editPart);
+    regist:function (editPart) {
+        this.editPartMap.set(editPart.model, editPart);
     },
-    unregist:function(editPart){
+    unregist:function (editPart) {
         this.editPartMap.remove(editPart.model);
     },
     getEditPart:function (model) {
@@ -710,7 +711,7 @@ anra.gef.DragTracker = Base.extend({
     },
     dragEnd:function (me, editPart) {
         this.status = me.type;
-        editPart.editor.execute(new anra.gef.RelocalCommand(editPart, this.startLocation, {x:editPart.figure.bounds.x, y:editPart.figure.bounds.y}));
+        editPart.editor.execute(new anra.gef.RelocalCommand(editPart, this.startLocation, {x:editPart.model.getBounds()[0], y:editPart.model.getBounds()[0]}));
     },
     mouseUp:function (me, editPart) {
         this.status = me.type;
@@ -756,6 +757,7 @@ anra.gef.Editor = Base.extend({
     element:null,
     rootEditPart:null,
     cmdStack:null,
+    background: '#EEFFEE',
     _Editor:function () {
     },
     setInput:function (input) {
@@ -847,7 +849,7 @@ anra.gef.Editor = Base.extend({
         div.style.height = '100%';
         div.style.float = 'right';
         div.style.overflow = 'auto';
-        div.style.backgroundColor = '#EEFFEE';
+        div.style.background =this.background;
         this.element.appendChild(div);
         return  new anra.SVG(i);
     }
@@ -865,10 +867,27 @@ anra.gef.Line = anra.gef.Figure.extend({
     endPoint:null,
     sourceAnchor:null,
     targetAnchor:null,
+    endMarker:null,
+    startMarker:null,
+    setStartMarker:function (marker) {
+        this.startMarker = marker;
+        if (marker != null) {
+            marker.init(this);
+            this.setAttribute('marker-start', 'url(#' + marker.id + ')');
+        } else
+            this.removeAttribute('marker-start');
+    },
+    setEndMarker:function (marker) {
+        if (marker != null) {
+            this.setAttribute('marker-end', 'url(#' + marker.id + ')');
+        } else
+            this.removeAttribute('marker-end');
+    },
     constructor:function () {
         this._Line();
     },
     _Line:function () {
+        this._Figure();
         this.points = [];
         this.startPoint = {};
         this.endPoint = {};
@@ -882,7 +901,7 @@ anra.gef.Line = anra.gef.Figure.extend({
     initProp:function () {
         this.setAttribute({
             stroke:'black',
-            'stroke-width':'1'
+            'stroke-width':'1.5'
         });
     },
     paint:function () {
@@ -903,8 +922,9 @@ anra.gef.Line = anra.gef.Figure.extend({
     },
     layout:function () {
     }
-})
-;
+});
+
+
 var setPoint = function (o, t) {
     if (s != null)
         for (var k in t) {
@@ -919,6 +939,20 @@ anra.gef.Polyline = anra.gef.Line.extend({
     points:null,
     tagName:'polyline'
 });
+
+/**
+ * 路径线
+ * @type {*|void}
+ */
+anra.gef.PathLine = anra.gef.Line.extend({
+    points:null,
+    tagName:'path'
+
+});
+
+anra.gef.Marker = anra.svg.Control.extend({
+});
+
 
 anra.gef.BaseModel = Base.extend({
     constructor:function () {
@@ -936,12 +970,11 @@ anra.gef.BaseModel = Base.extend({
         var o, n;
         for (var key in p) {
             o = this.properties.get(key);
-            this.properties.put(key, p[key]);
+            this.properties.set(key, p[key]);
             if (fire) {
                 this.firePropertyChanged(key, o, p[key]);
             }
         }
-
     },
     getBounds:function () {
         return this.properties.get('bounds');
@@ -956,7 +989,7 @@ anra.gef.BaseModel = Base.extend({
         //TODO
         var o, n;
         o = this.properties.get(key);
-        this.properties.put(value);
+        this.properties.set(key,value);
         if (fire) {
             this.firePropertyChanged(key, o, value);
         }

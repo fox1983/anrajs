@@ -14,10 +14,10 @@ NodeEditPart = anra.gef.NodeEditPart.extend({
         return new MyFigure();
     },
     getSourceAnchor:function (line) {
-        return {x:this.figure.fattr('x'), y:this.figure.fattr('y')};
+        return {x:this.figure.fattr('cx'), y:this.figure.fattr('cy')};
     },
     getTargetAnchor:function (line) {
-        return {x:this.figure.fattr('x') + 10, y:this.figure.fattr('y')+10};
+        return {x:this.figure.fattr('cx') + 10, y:this.figure.fattr('cy') + 10};
     }
 
 });
@@ -32,17 +32,49 @@ MyLineEditPart = anra.gef.LineEditPart.extend({
 });
 
 MyFigure = anra.gef.Figure.extend({
+    tagName:'circle',
     createContent:function () {
         var e = new anra.svg.Ellipse();
-        e.setBounds({
-            x:10,
-            y:20,
-            width:20,
-            height:18
-        });
+//        var b = this.bounds;
+//        var r = b.width / 2;
+//        e.setBounds({
+//            x:b.x + r,
+//            y:b.y + r,
+//            width:r/2,
+//            height:r/2
+//        });
         this.addChild(e);
+
+        this.layoutManager = new CircleLayout();
+    },
+    getClientArea:function () {
+        return [this.fattr('cx') - this.fattr('r'), this.fattr('cy') - this.fattr('r'), this.fattr['r'] * 2];
+    },
+    applyBounds:function () {
+        var l = this.locArea();
+        var r = this.bounds.width / 2;
+
+        this.setAttribute('r', r);
+        this.setAttribute('cx', this.bounds.x + r + l[0]);
+        this.setAttribute('cy', this.bounds.y + r + l[1]);
     }
 });
+
+CircleLayout = anra.svg.Layout.extend({
+    layout:function (comp) {
+        var c = comp.children[0];
+        var b = comp.bounds;
+        var width=b.width/2;
+        var r = width/2;
+        c.setBounds({
+            x:r,
+            y:r,
+            width:width,
+            height:width
+        });
+    }
+})
+;
 
 MyEditor = anra.gef.Editor.extend({
     models:null,
@@ -66,7 +98,7 @@ MyEditor = anra.gef.Editor.extend({
             lines = nodes[i]['lines'];
             if (lines != null)
                 for (var inx = 0; inx < lines.length; inx++) {
-                    line=lines[inx];
+                    line = lines[inx];
                     nm.addSourceLine(line);
                     //记录连线目标id
                     list = targetCache.get(line.target);
@@ -82,7 +114,7 @@ MyEditor = anra.gef.Editor.extend({
                 }
             list = targetCache.get(nodes[i].id);
             if (list != null) {
-                for ( inx = 0; inx < list.length; inx++) {
+                for (inx = 0; inx < list.length; inx++) {
                     nm.addTargetLine(list[inx]);
                 }
                 targetCache.remove(nodes[i].id);

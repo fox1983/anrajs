@@ -82,6 +82,9 @@ anra.svg.Control = anra.Control.extend({
     getBounds:function () {
         return this.bounds;
     },
+    removeAttribute:function (k) {
+        this.owner.removeAttribute(k);
+    },
     setAttribute:function (a, v) {
         if (this.owner == null) {
             if (this._attr == null)
@@ -113,7 +116,6 @@ anra.svg.Control = anra.Control.extend({
      */
     initProp:function () {
         this.setAttribute({'fill':'white', 'stroke':'black'});
-        this.setStyle({});
     },
     paint:function () {
         this.applyBounds();
@@ -162,6 +164,10 @@ Control.prototype.init = function () {
         };
 
         this.ready = true;
+
+        //应用预设
+        this.setAttribute({});
+        this.setStyle({});
         this.initProp();
     }
     this.paint();
@@ -348,9 +354,32 @@ anra.svg.Circle = Composite.extend({
     applyBounds:function () {
         var l = this.locArea();
         var r = this.bounds.width / 2;
-        this.setAttribute('r', r);
-        this.setAttribute('cx', this.bounds.x + r + l[0]);
-        this.setAttribute('cy', this.bounds.y + r + l[1]);
+        this.setAttribute({
+            r:r,
+            cx:this.bounds.x + r + l[0],
+            'cy':this.bounds.y + r + l[1]
+        });
+    }
+});
+
+/**
+ * 文本
+ * @type {*|void}
+ */
+anra.svg.Text = Control.extend({
+    tagName:'text',
+    text:null,
+    setText:function (text) {
+        this.text = text;
+        if (this.owner != null) {
+            this.owner.innerHTML = text;
+        }
+    },
+    initProp:function(){
+        this.owner.innerHTML = this.text;
+    },
+    paint:function(){
+
     }
 });
 

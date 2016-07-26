@@ -2,19 +2,18 @@ NodeEditPart = anra.gef.EditPart.extend({
     refreshVisual:function () {
         if (this.model != null && this.figure != null) {
             var b = this.model['bounds'];
-            if (b != null)
-
+            if (b != null){
                 this.figure.setBounds({x:b[0], y:b[1], width:b[2], height:b[3] });
+                this.figure.paint();
+            }
         }
     },
     setModel:function (model) {
         this.model = model;
     },
     createFigure:function () {
-
         return new MyFigure();
     }
-
 });
 
 MyFigure = anra.gef.Figure.extend({
