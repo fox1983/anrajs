@@ -2,15 +2,17 @@ NodeEditPart = anra.gef.EditPart.extend({
     refreshVisual:function () {
         if (this.model != null && this.figure != null) {
             var b = this.model['bounds'];
-            if (b != null)
+            if (b != null){
                 this.figure.setBounds({x:b[0], y:b[1], width:b[2], height:b[3] });
+                this.figure.paint();
+            }
+
         }
     },
     setModel:function (model) {
         this.model = model;
     },
     createFigure:function () {
-        //alert(this.model.id);
         switch (this.model.type){
             case 0:
                 return new Figure0();
@@ -28,25 +30,41 @@ NodeEditPart = anra.gef.EditPart.extend({
 MyFigure = anra.gef.Figure.extend({
 
     createContent:function () {
+        debugger
         this.layoutManager = new anra.svg.GridLayout(2,true, this);
-        this.layoutManager.arg.marginLeft = 0;
-        this.layoutManager.arg.marginRight = 0;
-        this.layoutManager.arg.marginTop = 0;
-        this.layoutManager.arg.marginBottom = 0;
+        this.layoutManager.setNumRows(2);
 
-        //获得
+        this.layoutManager.arg.marginLeft = 8;
+        this.layoutManager.arg.marginRight = 8;
+        this.layoutManager.arg.marginTop = 5;
+        this.layoutManager.arg.marginBottom = 5;
+        this.layoutManager.arg.verticalSpacing = 0;
+        this.layoutManager.arg.horizontalSpacing = 0;
+
+        //debugger
+        var text = new anra.svg.Text();
+        var t = "1221";
+        text.setText(t);
 
 
         var idPart = new anra.svg.Rect();
+        idPart.layoutData=new anra.svg.GridData(0, 12);
+        idPart.layoutData.setColumns(2);
+        idPart.layoutData.setRows(1);
 
-        idPart.layoutData=new anra.svg.GridData(this,idPart, 0, 12, 2);
         this.addChild(idPart);
 
-
-        var namePart = new anra.svg.Rect();
-        namePart.layoutData=new anra.svg.GridData(this,namePart, 0, 12,1);
+        var namePart = new anra.svg.Ellipse();
+        namePart.layoutData = new anra.svg.GridData(0,0);
+        namePart.layoutData.setColumns(1);
+        namePart.layoutData.setRows(1);
         this.addChild(namePart);
 
+        var displayPart = new anra.svg.Ellipse();
+        displayPart.layoutData = new anra.svg.GridData(0,0);
+        displayPart.layoutData.setColumns(1);
+        displayPart.layoutData.setRows(1);
+        this.addChild(displayPart);
 
         this.customContent();
 
