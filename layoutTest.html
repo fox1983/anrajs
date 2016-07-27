@@ -19,119 +19,27 @@
             });
             display.addChild(parent);
 
-            parent.layoutManager=new anra.svg.GridLayout(4,true);    //能初始化数据
-
+            parent.layoutManager=new anra.svg.GridLayout(4,true,parent);    //能初始化数据
+            parent.layoutManager.arg.marginLeft = 5;
+            parent.layoutManager.arg.numRows=5;
             //这是创建一个控件
             var c4=new anra.svg.Rect();
-            c4.setBounds({
-                width:145,
-                height:165
-            });
-            c4.layoutData=new anra.svg.GridData(parent,c4);   //在这里做计算
+            c4.layoutData=new anra.svg.GridData(45,45);   //在这里做计算
+            c4.layoutData.spanCol=3;
+            c4.layoutData.spanRow=2;
             parent.addChild(c4);
 
-            var c1=new anra.svg.Rect();
-            c1.setBounds({
-                width:145,
-                height:165
-            });
-            c1.layoutData=new anra.svg.GridData(parent,c1);
-            parent.addChild(c1);
 
-//
-            var c2=new anra.svg.Rect();
-            c2.setBounds({
-                width:145,
-                height:165
-            });
-            c2.layoutData=new anra.svg.GridData(parent,c2);
-            parent.addChild(c2);
-
-
-            var c3=new anra.svg.Rect();
-            c3.setBounds({
-                width:145,
-                height:165
-            });
-            c3.layoutData=new anra.svg.GridData(parent,c3);
-            parent.addChild(c3);
-            debugger
-
-            var c3=new anra.svg.Rect();
-            c3.setBounds({
-                width:145,
-                height:165
-            });
-            c3.layoutData=new anra.svg.GridData(parent,c3);
+            var c3 = new anra.svg.Rect();
+            c3.layoutData=new anra.svg.GridData(56,78);
+            c3.layoutData.spanRow = 4;
             parent.addChild(c3);
 
-            var c3=new anra.svg.Rect();
-            c3.setBounds({
-                width:145,
-                height:165
-            });
-            c3.layoutData=new anra.svg.GridData(parent,c3);
+            var c3 = new anra.svg.Rect();
+            c3.layoutData=new anra.svg.GridData(56,78);
             parent.addChild(c3);
 
-            var c3=new anra.svg.Rect();
-            c3.setBounds({
-                width:145,
-                height:165
-            });
-            c3.layoutData=new anra.svg.GridData(parent,c3);
-            parent.addChild(c3);
 
-            var c3=new anra.svg.Rect();
-            c3.setBounds({
-                width:145,
-                height:165
-            });
-            c3.layoutData=new anra.svg.GridData(parent,c3);
-            parent.addChild(c3);
-
-            var c3=new anra.svg.Rect();
-            c3.setBounds({
-                width:145,
-                height:165
-            });
-            c3.layoutData=new anra.svg.GridData(parent,c3);
-            parent.addChild(c3);
-
-            var c3=new anra.svg.Rect();
-            c3.setBounds({
-                width:145,
-                height:165
-            });
-            c3.layoutData=new anra.svg.GridData(parent,c3);
-            parent.addChild(c3);
-
-            var c3=new anra.svg.Rect();
-            c3.setBounds({
-                width:145,
-                height:165
-            });
-            c3.layoutData=new anra.svg.GridData(parent,c3);
-            parent.addChild(c3);
-
-            var c3=new anra.svg.Rect();
-            c3.setBounds({
-                width:145,
-                height:165
-            });
-            c3.layoutData=new anra.svg.GridData(parent,c3);
-            parent.addChild(c3);
-            //alert(c3.getBounds().x+","+c3.getBounds().y);
-//
-//
-//
-//
-            var c4=new anra.svg.Rect();
-            c4.setBounds({
-                width:145,
-                height:165
-            });
-            c4.layoutData=new anra.svg.GridData(parent,c4);
-            parent.addChild(c4);
 
         }
 
