@@ -115,6 +115,7 @@ NodeFigure = anra.gef.Figure.extend({
                 'fill':'#1E78A0'
             });
         };
+        this.circle1=e;
         var w = this.bounds.width;
         var w1 = w * 0.75;
         var r1 = (w - w1) / 2;
@@ -169,8 +170,10 @@ NodeFigure = anra.gef.Figure.extend({
         });
     },
     mouseIn:function () {
+        this.circle1.setAttribute('fill','red');
     },
     mouseOut:function () {
+        this.circle1.setAttribute('fill','green');
     },
     setSelected:function (s) {
 
