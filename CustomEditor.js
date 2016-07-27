@@ -42,7 +42,7 @@ MyFigure = anra.gef.Figure.extend({
         this.layoutManager.arg.horizontalSpacing = 0;
 
         //debugger
-        var text = new anra.svg.Text();
+        //var text = new anra.svg.Text();
         var t = "1221";
         text.setText(t);
 
