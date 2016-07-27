@@ -20,8 +20,15 @@ MyFigure = anra.gef.Figure.extend({
     createContent:function () {
         this.layoutManager = new anra.svg.GridLayout(2,false);
 
+<<<<<<< HEAD
         var e = new anra.svg.Rect();   //Ellipse
         e.setBounds({
+=======
+        //debugger
+        //var text = new anra.svg.Text();
+        var t = "1221";
+        text.setText(t);
+>>>>>>> origin/master
 
             width:15,
             height:18
