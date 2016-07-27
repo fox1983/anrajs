@@ -206,6 +206,7 @@ Control.prototype.locArea = function () {
     return [xo, yo];
 };
 
+
 /**
  *容器类
  * @type {*}
@@ -258,6 +259,28 @@ anra.svg.Composite = Control.extend({
     }
 });
 var Composite = anra.svg.Composite;
+
+/**
+ * 组
+ * @type {*|void}
+ */
+anra.svg.Group = Composite.extend({
+    animations:null,
+    tagName:'g',
+    applyBounds:function () {
+    }
+});
+
+/**
+ * 动画
+ * @type {*|void}
+ */
+anra.svg.Animation = Control.extend({
+    start:function () {
+    },
+    stop:function () {
+    }
+});
 
 anra.SVG = Composite.extend({
     dispatcher:null,
@@ -372,13 +395,13 @@ anra.svg.Text = Control.extend({
     setText:function (text) {
         this.text = text;
         if (this.owner != null) {
-            this.owner.innerHTML = text;
+            this.owner.textContent = text;
         }
     },
-    initProp:function(){
-        this.owner.innerHTML = this.text;
+    initProp:function () {
+        this.owner.textContent = this.text;
     },
-    paint:function(){
+    paint:function () {
 
     }
 });
