@@ -940,15 +940,6 @@ anra.gef.Polyline = anra.gef.Line.extend({
     tagName:'polyline'
 });
 
-/**
- * 路径线
- * @type {*|void}
- */
-anra.gef.PathLine = anra.gef.Line.extend({
-    points:null,
-    tagName:'path'
-
-});
 
 anra.gef.Marker = anra.svg.Control.extend({
 });

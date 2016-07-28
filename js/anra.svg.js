@@ -115,7 +115,7 @@ anra.svg.Control = anra.Control.extend({
      * 初始化属性，在构建完成后调用。
      */
     initProp:function () {
-        this.setAttribute({'fill':'white', 'stroke':'black'});
+//        this.setAttribute({'fill':'white', 'stroke':'black'});
     },
     paint:function () {
         this.applyBounds();
@@ -180,7 +180,6 @@ Control.prototype.setParent = function (s) {
         }
         this.parent = s;
         this.svg = this.parent.svg;
-        this.svg.owner.appendChild(this.owner);
         this.applyBounds();
         this.createContent(this);
         this.paint();
@@ -237,6 +236,7 @@ anra.svg.Composite = Control.extend({
             if (!this.children.contains(c)) {
                 this.children.push(c);
                 c.init();
+                this.svg.owner.appendChild(c.owner);
                 c.setParent(this);
                 this.paint();
             }
@@ -267,7 +267,68 @@ var Composite = anra.svg.Composite;
 anra.svg.Group = Composite.extend({
     animations:null,
     tagName:'g',
+    addChild:function (c) {
+        if (this.children == null) {
+            this.children = [];
+        }
+        if (c instanceof  anra.svg.Control) {
+            if (!this.children.contains(c)) {
+                this.children.push(c);
+                c.init();
+                this.owner.appendChild(c.owner);
+                c.setParent(this);
+                this.paint();
+            }
+        } else {
+            anra.Platform.error('can not add [' + c + '] to ' + this.tagName);
+        }
+    },
     applyBounds:function () {
+    }
+});
+
+anra.svg.Path = Composite.extend({
+    startPoint:null,
+    frags:null,
+    close:false,
+    tagName:'path',
+    constructor:function () {
+        this._Path();
+    },
+    _Path:function () {
+        this._Control();
+        this.startPoint = {x:0, y:0};
+    },
+    applyBounds:function () {
+        this.setAttribute('d', this.compute());
+    },
+    initProp:function () {
+        this.setAttribute({
+            stroke:'white',
+            fill:'none',
+            'stroke-width':2
+        });
+    },
+    compute:function () {
+        var l = this.locArea();
+        var result = '';
+        if (this.startPoint != null) {
+            result += 'm' + (this.startPoint.x + l[0]) + ',' + (this.startPoint.y + l[1]) + ' ';
+        }
+        if (this.frags != null)
+            for (var i = 0; i < this.frags.length; i++) {
+                result += ' ' + this.frags[i];
+            }
+        if (this.close) {
+            result += 'z';
+        }
+        return result;
+    }
+});
+
+anra.svg.MarkerLine = anra.svg.Group.extend({
+    createContent:function () {
+//        this.addChild();
     }
 });
 
@@ -372,15 +433,15 @@ anra.svg.Rect = Composite.extend({
 anra.svg.Circle = Composite.extend({
     tagName:'circle',
     getClientArea:function () {
-        return [this.fattr('cx') - this.fattr('r'), this.fattr('cy') - this.fattr('r'), this.fattr['r'] * 2];
+        return [this.fattr('cx'), this.fattr('cy'), this.fattr['r'] * 2];
     },
     applyBounds:function () {
         var l = this.locArea();
         var r = this.bounds.width / 2;
         this.setAttribute({
             r:r,
-            cx:this.bounds.x + r + l[0],
-            'cy':this.bounds.y + r + l[1]
+            cx:this.bounds.x + l[0],
+            'cy':this.bounds.y + l[1]
         });
     }
 });

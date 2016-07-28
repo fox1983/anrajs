@@ -115,13 +115,12 @@ NodeFigure = anra.gef.Figure.extend({
                 'fill':'#1E78A0'
             });
         };
-        this.circle1=e;
+        this.circle1 = e;
         var w = this.bounds.width;
         var w1 = w * 0.75;
-        var r1 = (w - w1) / 2;
         e.setBounds({
-            x:r1,
-            y:r1,
+            x:this.bounds.x,
+            y:this.bounds.y,
             width:w1,
             height:w1
         });
@@ -135,19 +134,22 @@ NodeFigure = anra.gef.Figure.extend({
             });
         };
         w1 = w * 0.65;
-        r1 = (w - w1) / 2;
         e.setBounds({
-            x:r1,
-            y:r1,
+            x:this.bounds.x,
+            y:this.bounds.y,
             width:w1,
             height:w1
         });
 
         this.addChild(e);
 
+        var group = new anra.svg.Group();
+        this.addChild(group);
+
+
         var text = new anra.svg.Text();
         text.setText(413);
-        this.addChild(text);
+        group.addChild(text);
         text.setAttribute({
             fill:'rgb(162,136,60)'
         });
@@ -155,11 +157,19 @@ NodeFigure = anra.gef.Figure.extend({
 
         text = new anra.svg.Text();
         text.setText(134);
-        this.addChild(text);
+        group.addChild(text);
         text.setAttribute({
             fill:'rgb(29,136,90)'
         });
         this.num2 = text;
+
+        var path = new anra.svg.Path();
+
+        this.addChild(path);
+        path.setAttribute({
+            'stroke-width':5
+        });
+        this.arrow1=path;
 
         this.layoutManager = new NodeLayout();
     },
@@ -170,10 +180,10 @@ NodeFigure = anra.gef.Figure.extend({
         });
     },
     mouseIn:function () {
-        this.circle1.setAttribute('fill','red');
+        this.circle1.setAttribute('fill', 'red');
     },
     mouseOut:function () {
-        this.circle1.setAttribute('fill','green');
+        this.circle1.setAttribute('fill', 'green');
     },
     setSelected:function (s) {
 
@@ -184,16 +194,17 @@ NodeFigure = anra.gef.Figure.extend({
     getTargetAnchor:function (line) {
         return {x:this.fattr('cx'), y:this.fattr('cy')};
     },
+
     getClientArea:function () {
-        return [this.fattr('cx') - this.fattr('r'), this.fattr('cy') - this.fattr('r'), this.fattr['r'] * 2];
+        return [this.fattr('cx'), this.fattr('cy'), this.fattr['r'] * 2];
     },
     applyBounds:function () {
         var l = this.locArea();
         var r = this.bounds.width / 2;
         this.setAttribute({
             r:r,
-            cx:this.bounds.x + r + l[0],
-            cy:this.bounds.y + r + l[1]
+            cx:this.bounds.x + l[0],
+            'cy':this.bounds.y + l[1]
         });
     }
 });
@@ -202,28 +213,34 @@ var CORE_EDIT_PART;
 NodeLayout = anra.svg.Layout.extend({
     layout:function (p) {
         if (CORE_EDIT_PART != null) {
-            var x1 = p.fattr('cx');
-            var y1 = p.fattr('cy');
-            var r1 = p.fattr('r');
-            var x0 = CORE_EDIT_PART.figure.x;
-            var y0 = CORE_EDIT_PART.figure.y;
+            var x1 = p.bounds.x;
+            var y1 = p.bounds.y;
+            var r1 = p.bounds.width/2;
+            var x0 = CORE_EDIT_PART.figure.bounds.x;
+            var y0 = CORE_EDIT_PART.figure.bounds.y;
             var r0 = Math.sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
             var result = intersection(x0, y0, r0, x1, y1, r1);
+
+            p.num1.setBounds({
+                x:result[0],
+                y:result[2]
+            });
+
+
+            p.num2.setBounds({
+                x:result[1],
+                y:result[3]
+            });
+//            p.num1.owner.setAttribute('x', result[0]);
+//            p.num1.owner.setAttribute('y', result[2]);
+
+
+//            p.num2.owner.setAttribute('x', result[1]);
+//            p.num2.owner.setAttribute('y', result[3]);
 //
-            p.num1.owner.setAttribute('x',result[0]);
-            p.num1.owner.setAttribute('y',result[2]);
-
-
-            p.num2.owner.setAttribute('x',result[1]);
-            p.num2.owner.setAttribute('y',result[3]);
-
-//            p.num2.setBounds({
-//                x:result[1],
-//                y:result[3]
-//            });
-
+//            p.arrow1.startPoint = {x:result[0],y:result[2]};
+//            p.arrow1.frags = ['a40,40 0 0,1 30,-30'];
         }
-//        console.log(p.num1);
     }
 });
 
