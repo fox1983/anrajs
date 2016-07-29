@@ -276,7 +276,7 @@ anra.svg.Group = Composite.extend({
                 this.children.push(c);
                 c.init();
                 this.owner.appendChild(c.owner);
-                c.setParent(this);
+                c.setParent(this.parent);
                 this.paint();
             }
         } else {
@@ -461,9 +461,6 @@ anra.svg.Text = Control.extend({
     },
     initProp:function () {
         this.owner.textContent = this.text;
-    },
-    paint:function () {
-
     }
 });
 
@@ -502,7 +499,7 @@ count = 0;
  * 事件分发器
  * @type {*}
  */
-anra.svg.EventDispatcher = Base.extend({
+anra.svg.EventDisntpatcher = Base.extend({
     display:null,
     constructor:function (display) {
         this.display = display;

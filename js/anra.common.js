@@ -353,7 +353,7 @@ var E = anra.EVENT;
  * @type {Array}
  */
 anra.BubbleEvent = [
-    E.MouseDown, E.MouseUp, E.MouseMove, E.MouseIn, E.MouseOut,E.MouseDoubleClick, E.MouseDrag, E.DragEnd, E.DragStart
+    E.MouseDown, E.MouseUp, E.MouseMove,E.MouseDoubleClick, E.MouseDrag, E.DragEnd, E.DragStart
 ];
 
 anra.event.Event = Base.extend({

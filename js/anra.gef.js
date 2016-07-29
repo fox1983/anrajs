@@ -359,14 +359,6 @@ anra.gef.EditPart = Base.extend({
         this.selected = value;
         if (this.figure != null)
             this.figure.setSelected(value);
-    },
-    understandsRequest:function (req) {
-//        var iter = getEditPolicyIterator();
-//        while (iter.hasNext()) {
-//            if (iter.next().understandsRequest(req))
-//                return true;
-//        }
-        return false;
     }
 });
 
