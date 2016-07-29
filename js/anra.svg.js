@@ -499,7 +499,7 @@ count = 0;
  * 事件分发器
  * @type {*}
  */
-anra.svg.EventDisntpatcher = Base.extend({
+anra.svg.EventDispatcher = Base.extend({
     display:null,
     constructor:function (display) {
         this.display = display;
