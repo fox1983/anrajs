@@ -645,7 +645,7 @@ anra.gef.LineEditPart = anra.gef.EditPart.extend({
         this.activateFigure();
     },
     activateFigure:function () {
-        this.getRoot().figure.addChild(this.getFigure());
+        this.getRoot().figure.addChild(this.getFigure(),this.source.figure);
     },
     getRoot:function () {
         return this.parent.getRoot();
@@ -655,7 +655,7 @@ anra.gef.LineEditPart = anra.gef.EditPart.extend({
     },
     refresh:function () {
         if (this.figure == null) {
-            this.getRoot().figure.addChild(this.getFigure());
+            this.getRoot().figure.addChild(this.getFigure(),this.source.figure);
         }
         this.refreshSourceAnchor();
         this.refreshTargetAnchor();
@@ -739,7 +739,10 @@ anra.gef.Policy = Base.extend({
     }
 });
 
-anra.gef.Palette = anra.gef.Figure.extend({});
+anra.gef.Palette = Base.extend({
+
+
+});
 
 anra.gef.Request = Base.extend({});
 anra.gef.Editor = Base.extend({

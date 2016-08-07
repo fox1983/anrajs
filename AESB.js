@@ -194,19 +194,10 @@ NodeFigure = anra.gef.Figure.extend({
     getTargetAnchor:function (line) {
         return {x:this.fattr('cx'), y:this.fattr('cy')};
     },
-    getClientArea:function () {
-        return [this.fattr('cx'), this.fattr('cy'), this.fattr['r'] * 2];
-    },
-    applyBounds:function () {
-        var l = this.locArea();
-        var r = this.bounds.width / 2;
-        this.setAttribute({
-            r:r,
-            cx:this.bounds.x + l[0],
-            'cy':this.bounds.y + l[1]
-        });
-    }
+    getClientArea:anra.svg.Circle.prototype.getClientArea,
+    applyBounds:anra.svg.Circle.prototype.applyBounds
 });
+
 var CORE_EDIT_PART;
 
 NodeLayout = anra.svg.Layout.extend({

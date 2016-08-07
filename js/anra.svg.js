@@ -228,7 +228,12 @@ anra.svg.Composite = Control.extend({
             anra.Platform.error('can not remove ' + c.toString() + ' from Composite');
         }
     },
-    addChild:function (c) {
+    /**
+     *
+     * @param c
+     * @param beforeElement 插入到指定节点之前
+     */
+    addChild:function (c, beforeElement) {
         if (this.children == null) {
             this.children = [];
         }
@@ -236,13 +241,23 @@ anra.svg.Composite = Control.extend({
             if (!this.children.contains(c)) {
                 this.children.push(c);
                 c.init();
-                this.svg.owner.appendChild(c.owner);
+                if (beforeElement instanceof anra.svg.Control)
+                    this.domContainer().insertBefore(c.owner, beforeElement.owner);
+                else
+                    this.domContainer().appendChild(c.owner);
                 c.setParent(this);
                 this.paint();
             }
         } else {
             anra.Platform.error('can not add [' + c + '] to ' + this.tagName);
         }
+    },
+    /**
+     * DOM容器
+     * @return {*}
+     */
+    domContainer:function () {
+        return this.svg.owner;
     },
     paint:function () {
         this.applyBounds();
@@ -267,21 +282,8 @@ var Composite = anra.svg.Composite;
 anra.svg.Group = Composite.extend({
     animations:null,
     tagName:'g',
-    addChild:function (c) {
-        if (this.children == null) {
-            this.children = [];
-        }
-        if (c instanceof  anra.svg.Control) {
-            if (!this.children.contains(c)) {
-                this.children.push(c);
-                c.init();
-                this.owner.appendChild(c.owner);
-                c.setParent(this.parent);
-                this.paint();
-            }
-        } else {
-            anra.Platform.error('can not add [' + c + '] to ' + this.tagName);
-        }
+    domContainer:function () {
+        return this.owner;
     },
     applyBounds:function () {
     }
@@ -337,10 +339,7 @@ anra.svg.MarkerLine = anra.svg.Group.extend({
  * @type {*|void}
  */
 anra.svg.Animation = Control.extend({
-    start:function () {
-    },
-    stop:function () {
-    }
+    tagName:'animateTransform'
 });
 
 anra.SVG = Composite.extend({
@@ -368,7 +367,6 @@ anra.SVG = Composite.extend({
         this.svg = this;
         this.dispatcher = new anra.svg.EventDispatcher(this);
         var d = this.dispatcher;
-        var t = this;
         var div = this.element;
         this.element.onmousemove = function (event) {
             if (d.focusOwner != null)
