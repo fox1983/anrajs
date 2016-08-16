@@ -115,7 +115,7 @@ anra.svg.Control = anra.Control.extend({
      * 初始化属性，在构建完成后调用。
      */
     initProp:function () {
-//        this.setAttribute({'fill':'white', 'stroke':'black'});
+        this.setAttribute({'fill': 'white', 'stroke': 'black'});
     },
     paint:function () {
         this.applyBounds();
@@ -180,6 +180,7 @@ Control.prototype.setParent = function (s) {
         }
         this.parent = s;
         this.svg = this.parent.svg;
+        this.svg.owner.appendChild(this.owner);
         this.applyBounds();
         this.createContent(this);
         this.paint();
@@ -228,12 +229,7 @@ anra.svg.Composite = Control.extend({
             anra.Platform.error('can not remove ' + c.toString() + ' from Composite');
         }
     },
-    /**
-     *
-     * @param c
-     * @param beforeElement 插入到指定节点之前
-     */
-    addChild:function (c, beforeElement) {
+    addChild: function (c) {
         if (this.children == null) {
             this.children = [];
         }
@@ -241,10 +237,6 @@ anra.svg.Composite = Control.extend({
             if (!this.children.contains(c)) {
                 this.children.push(c);
                 c.init();
-                if (beforeElement instanceof anra.svg.Control)
-                    this.domContainer().insertBefore(c.owner, beforeElement.owner);
-                else
-                    this.domContainer().appendChild(c.owner);
                 c.setParent(this);
                 this.paint();
             }
@@ -367,6 +359,7 @@ anra.SVG = Composite.extend({
         this.svg = this;
         this.dispatcher = new anra.svg.EventDispatcher(this);
         var d = this.dispatcher;
+        var t = this;
         var div = this.element;
         this.element.onmousemove = function (event) {
             if (d.focusOwner != null)
@@ -459,6 +452,9 @@ anra.svg.Text = Control.extend({
     },
     initProp:function () {
         this.owner.textContent = this.text;
+    },
+    paint: function () {
+
     }
 });
 

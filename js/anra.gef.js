@@ -359,6 +359,14 @@ anra.gef.EditPart = Base.extend({
         this.selected = value;
         if (this.figure != null)
             this.figure.setSelected(value);
+    },
+    understandsRequest: function (req) {
+//        var iter = getEditPolicyIterator();
+//        while (iter.hasNext()) {
+//            if (iter.next().understandsRequest(req))
+//                return true;
+//        }
+        return false;
     }
 });
 
@@ -578,10 +586,40 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
             }
         }
     },
-    getRoot:function () {
+    getRoot: function () {
         return this;
     },
-    regist:function (editPart) {
+    createLayer: function () {
+        if (this.figure != null) {
+            var primaryLayer = new anra.svg.Composite();
+            primaryLayer.setBounds(
+                {
+                    x: 0,
+                    y: 0,
+                    width: 1000,
+                    height: 1000
+                });
+            var handleLayer = new anra.svg.Composite();
+            handleLayer.setBounds(
+                {
+                    x: 0,
+                    y: 0,
+                    width: 500,
+                    height: 1000
+                });
+            this.figure.addChild(primaryLayer);
+            this.figure.addChild(handleLayer);
+            this.layers.set("Primary_Layer", primaryLayer);
+            this.layers.set("Handle_Layer", handleLayer);
+        }
+    },
+    getLayer: function (key) {
+        return this.layers.get(key);
+    },
+    addChildVisual: function (child, index) {
+        this.getLayer("Primary_Layer").addChild(child.getFigure());
+    },
+    regist: function (editPart) {
         this.editPartMap.set(editPart.model, editPart);
     },
     unregist:function (editPart) {
@@ -645,7 +683,7 @@ anra.gef.LineEditPart = anra.gef.EditPart.extend({
         this.activateFigure();
     },
     activateFigure:function () {
-        this.getRoot().figure.addChild(this.getFigure(),this.source.figure);
+        this.getRoot().figure.addChild(this.getFigure());
     },
     getRoot:function () {
         return this.parent.getRoot();
@@ -655,7 +693,7 @@ anra.gef.LineEditPart = anra.gef.EditPart.extend({
     },
     refresh:function () {
         if (this.figure == null) {
-            this.getRoot().figure.addChild(this.getFigure(),this.source.figure);
+            this.getRoot().figure.addChild(this.getFigure());
         }
         this.refreshSourceAnchor();
         this.refreshTargetAnchor();
@@ -739,10 +777,7 @@ anra.gef.Policy = Base.extend({
     }
 });
 
-anra.gef.Palette = Base.extend({
-
-
-});
+anra.gef.Palette = anra.gef.Figure.extend({});
 
 anra.gef.Request = Base.extend({});
 anra.gef.Editor = Base.extend({
@@ -798,6 +833,7 @@ anra.gef.Editor = Base.extend({
         var root = new anra.gef.RootEditPart();
         root.figure = this.canvas;
         root.setModel(this.models);
+        root.createLayer();
         return root;
     },
     createEditPart:function (context, model) {
@@ -935,6 +971,15 @@ anra.gef.Polyline = anra.gef.Line.extend({
     tagName:'polyline'
 });
 
+/**
+ * 路径线
+ * @type {*|void}
+ */
+anra.gef.PathLine = anra.gef.Line.extend({
+    points: null,
+    tagName: 'path'
+
+});
 
 anra.gef.Marker = anra.svg.Control.extend({
 });
