@@ -595,22 +595,8 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
     },
     createLayer: function () {
         if (this.figure != null) {
-            var primaryLayer = new anra.svg.Composite();
-            primaryLayer.setBounds(
-                {
-                    x: 0,
-                    y: 0,
-                    width: 1000,
-                    height: 1000
-                });
-            var handleLayer = new anra.svg.Composite();
-            handleLayer.setBounds(
-                {
-                    x: 0,
-                    y: 0,
-                    width: 500,
-                    height: 1000
-                });
+            var primaryLayer = new anra.svg.Group();
+            var handleLayer = new anra.svg.Group();
             this.figure.addChild(primaryLayer);
             this.figure.addChild(handleLayer);
             this.layers.set("Primary_Layer", primaryLayer);

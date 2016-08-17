@@ -8,134 +8,136 @@ anra.Handle = Control.extend({
     defaultHeight: 4,
     offset: 2,
     //data
-    editpart: null,
-    dragTracker: null,
-    constructor: function (editpart, direction) {
+    editPart: null,
+    direction: null,
+    constructor: function (editPart, direction) {
         this._Control(); //调用父的构造函数
-        var figure = editpart.figure;
-        if (figure != null) {
-            this.setLocater(this.getLocation(figure, direction));
+        this.editPart = editPart;
+        this.direction = direction;
+        var model = editPart.model;
+        if (model != null) {
+            this.setLocator(model.getBounds());
             this.setStyle({
                 'fill': '#000000'
             });
-            var dt = this.createResizeTracker(this, editpart, direction);
+            var dt = this.getResizeTracker(this, editPart, direction);
             this.addListener(anra.EVENT.MouseDown, function (e) {
                 console.log("mouse down" + e.x + e.y);
                 if (dt != null)
-                    dt.mouseDown(e, editpart);
+                    dt.mouseDown(e, editPart);
             });
             this.addListener(anra.EVENT.DragStart, function (e) {
                 console.log("drag start" + e.x + e.y);
                 if (dt != null)
-                    dt.dragStart(e, editpart);
+                    dt.dragStart(e, editPart);
             });
             this.addListener(anra.EVENT.DragEnd, function (e) {
                 console.log("Drag End" + e.x + e.y);
                 if (dt != null)
-                    dt.dragEnd(e, editpart);
+                    dt.dragEnd(e, editPart);
             });
             this.addListener(anra.EVENT.MouseDrag, function (e) {
                 console.log("mouse Drag" + e.x + e.y);
                 if (dt != null)
-                    dt.mouseDrag(e, editpart);
+                    dt.mouseDrag(e, editPart);
             });
             this.addListener(anra.EVENT.MouseUp, function (e) {
                 console.log("mouse up" + e.x + e.y);
                 if (dt != null)
-                    dt.mouseUp(e, editpart);
+                    dt.mouseUp(e, editPart);
             });
         }
 
     },
-    createResizeTracker: function (handle, editpart, direction) {
-        console.log("direction:" + direction);
-        SouthTracker = anra.gef.ResizeTracker.extend(
-            {
-                dragStart: function (me, editpart) {
-                    this.status = me.type;
-                    //this.yOffset = me.y- editpart.model.getBounds()[1];
-                    this.heightOffset = me.y - editpart.model.getBounds()[3];
-                }
-                ,
-                mouseDrag: function (me, editPart) {
-                    this.status = me.type;
-                    //editPart.model.getBounds()[1] = me.y - this.yOffset;
-                    editPart.model.getBounds()[3] = me.y - this.heightOffset;
-                    var bounds = editPart.model.getBounds();
-                    handle.setLocater({x: bounds[0] + bounds[2] / 2 - 2, y: bounds[1] + bounds[3] - 2});
-                    editpart.refresh();
-                },
-                dragEnd: function (me, editPart) {
-                    this.status = me.type;
-                    editPart.editor.execute(new anra.gef.ConstraintCommand(editPart, null, {
-                        x: editPart.model.getBounds()[0],
-                        y: editPart.model.getBounds()[1],
-                        width: editpart.model.getBounds()[2],
-                        height: editpart.model.getBounds()[3]
-                    }));
-                }
-            });
-        return new SouthTracker();
-    },
-    getLocation: function (figure, direction) {
-        var location = {x: 0, y: 0};
-        var bounds = figure.getBounds();
-        switch (direction) {
+
+    setLocator: function (bounds) {
+        var x;
+        var y;
+        switch (this.direction) {
             case 'north':
-                location.x = bounds.x + bounds.width / 2 - this.offset;
-                location.y = bounds.y + this.offset * -1;
+                x = bounds[0] + bounds[2] / 2 - this.offset;
+                y = bounds[1] + this.offset * -1;
                 break;
             case 'south':
-                location.x = bounds.x + bounds.width / 2 - this.offset;
-                location.y = bounds.y + bounds.height - this.offset;
+                x = bounds[0] + bounds[2] / 2 - this.offset;
+                y = bounds[1] + bounds[3] - this.offset;
                 break;
             default :
                 x = 0;
                 y = 0;
         }
-        return location;
-    },
-    setLocater: function (location) {
         this.setBounds({
-            x: location.x,
-            y: location.y,
+            x: x,
+            y: y,
             width: this.defaultWidth,
             height: this.defaultHeight
         });
-        console.log("x:" + location.x + ",y:" + location.y);
+    },
+    getResizeTracker: function (handle, editpart, direction) {
+        var tracker = null;
+        switch (direction) {
+            case "south":
+                tracker = new anra.gef.SouthTracker(handle);
+                break;
+            case "north":
+                tracker = new anra.gef.NorthTracker(handle);
+                break;
+        }
+        return tracker;
     }
 });
-anra.gef.ResizeTracker = Base.extend({
+anra.gef.getResizeTracker = Base.extend({
     status: null,
-    xOffset: 0,
-    yOffset: 0,
-    widOffset: 0,
-    heightOffset: 0,
-    oldLocation: null,
-    oldSize: null,
+    xStart: 0,
+    yStart: 0,
+    oldConstraint: null,
+    handle: null,
+    constructor: function (handle) {
+        this.handle = handle;
+    },
     mouseDown: function (me, editPart) {
         this.status = me.type;
     },
     dragStart: function (me, editPart) {
         this.status = me.type;
-        this.startLocation = {x: editPart.model.getBounds()[0], y: editPart.model.getBounds()[1]};
-        this.xStart = me.x - editPart.model.getBounds()[0];
-        this.yStart = me.y - editPart.model.getBounds()[1];
-    },
-    mouseDrag: function (me, editPart) {
-        this.status = me.type;
-        editPart.model.getBounds()[0] = me.x - this.xStart;
-        editPart.model.getBounds()[1] = me.y - this.yStart;
-        editPart.refresh();
+        this.xStart = me.x;
+        this.yStart = me.y;
+        this.oldConstraint = {
+            x: editPart.model.getBounds()[0],
+            y: editPart.model.getBounds()[1],
+            width: editPart.model.getBounds()[2],
+            height: editPart.model.getBounds()[3]
+        };
+
     },
     dragEnd: function (me, editPart) {
         this.status = me.type;
-        editPart.editor.execute(new anra.gef.RelocalCommand(editPart, this.startLocation, {
+        editPart.editor.execute(new anra.gef.RelocalCommand(editPart, this.oldConstraint, {
             x: editPart.model.getBounds()[0],
-            y: editPart.model.getBounds()[1]
+            y: editPart.model.getBounds()[1],
+            width: editPart.model.getBounds()[2],
+            height: editPart.model.getBounds()[3]
         }));
     },
     mouseUp: function (me, editPart) {
         this.status = me.type;
+    }
+})
+;
+anra.gef.SouthTracker = anra.gef.getResizeTracker.extend({
+    mouseDrag: function (me, editPart) {
+        this.status = me.type;
+        editPart.model.getBounds()[3] = this.oldConstraint.height + (me.y - this.yStart);
+        editPart.refresh();
+        this.handle.setLocator(editPart.model.getBounds());
+    }
+});
+anra.gef.NorthTracker = anra.gef.getResizeTracker.extend({
+    mouseDrag: function (me, editPart) {
+        this.status = me.type;
+        editPart.model.getBounds()[1] = this.oldConstraint.y + (me.y - this.yStart);
+        editPart.model.getBounds()[3] = this.oldConstraint.height - (me.y - this.yStart);
+        this.handle.setLocator(editPart.model.getBounds());
+        editPart.refresh();
     }
 });
