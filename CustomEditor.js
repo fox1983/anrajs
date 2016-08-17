@@ -33,8 +33,8 @@ NodeEditPart = anra.gef.NodeEditPart.extend({
     addSelectionHandles: function () {
         var handleLayer = this.getRoot().getLayer("Handle_Layer");
         //handleLayer.removeAll();
-        var northHandle = new anra.Handle(this.figure, 'north');
-        var southHandle = new anra.Handle(this.figure, 'south');
+        var northHandle = new anra.Handle(this, 'north');
+        var southHandle = new anra.Handle(this, 'south');
         handleLayer.addChild(northHandle);
         handleLayer.addChild(southHandle);
     }
