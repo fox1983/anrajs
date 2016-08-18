@@ -1,5 +1,5 @@
 /**
- * Created by Administrator on 2016/8/9 0009.
+ * Created by weiyajun on 2016/8/9 0009.
  */
 var Control = anra.svg.Control;
 anra.Handle = Control.extend({
@@ -51,20 +51,42 @@ anra.Handle = Control.extend({
     },
 
     setLocator: function (bounds) {
-        var x;
-        var y;
+        var width = bounds[2];
+        var height = bounds[3];
+        var x = bounds[0] - this.offset;
+        var y = bounds[1] - this.offset;
         switch (this.direction) {
-            case 'north':
-                x = bounds[0] + bounds[2] / 2 - this.offset;
-                y = bounds[1] + this.offset * -1;
+            //上三个
+            case anra.Handle.NORTH_WEST:
                 break;
-            case 'south':
-                x = bounds[0] + bounds[2] / 2 - this.offset;
-                y = bounds[1] + bounds[3] - this.offset;
+            case anra.Handle.NORTH:
+                x += width / 2;
+                break;
+            case anra.Handle.NORTH_EAST:
+                x += width;
+                break;
+            //中两个
+            case anra.Handle.WEST:
+                y += height / 2;
+                break;
+            case anra.Handle.EAST:
+                x += width;
+                y += height / 2;
+                break;
+            //下三个
+            case anra.Handle.SOUTH_WEST:
+                y += height;
+                break;
+            case anra.Handle.SOUTH:
+                x += width / 2;
+                y += height;
+                break;
+            case anra.Handle.SOUTH_EAST:
+                x += width;
+                y += height;
                 break;
             default :
-                x = 0;
-                y = 0;
+
         }
         this.setBounds({
             x: x,
@@ -76,16 +98,48 @@ anra.Handle = Control.extend({
     getResizeTracker: function (handle, editpart, direction) {
         var tracker = null;
         switch (direction) {
-            case "south":
-                tracker = new anra.gef.SouthTracker(handle);
+            case anra.Handle.NORTH_WEST:
+                tracker = new anra.gef.NorthWestTracker(handle);
                 break;
-            case "north":
+            case anra.Handle.NORTH:
                 tracker = new anra.gef.NorthTracker(handle);
                 break;
+            case anra.Handle.NORTH_EAST:
+                tracker = new anra.gef.NorthEastTracker(handle);
+                break;
+
+            case anra.Handle.WEST:
+                tracker = new anra.gef.WestTracker(handle);
+                break;
+            case anra.Handle.EAST:
+                tracker = new anra.gef.EastTracker(handle);
+                break;
+
+
+            case anra.Handle.SOUTH_WEST:
+                tracker = new anra.gef.SouthWestTracker(handle);
+                break;
+            case anra.Handle.SOUTH:
+                tracker = new anra.gef.SouthTracker(handle);
+                break;
+            case anra.Handle.SOUTH_EAST:
+                tracker = new anra.gef.SouthEastTracker(handle);
+                break;
+            default :
         }
         return tracker;
     }
 });
+//定义方向常量
+anra.Handle.NORTH = "north";
+anra.Handle.SOUTH = "south";
+anra.Handle.EAST = "east";
+anra.Handle.WEST = "west";
+anra.Handle.NORTH_EAST = "northeast";
+anra.Handle.NORTH_WEST = "northwest";
+anra.Handle.SOUTH_EAST = "southeast";
+anra.Handle.SOUTH_WEST = "southwest";
+
 anra.gef.getResizeTracker = Base.extend({
     status: null,
     xStart: 0,
@@ -124,10 +178,13 @@ anra.gef.getResizeTracker = Base.extend({
     }
 })
 ;
-anra.gef.SouthTracker = anra.gef.getResizeTracker.extend({
+anra.gef.NorthWestTracker = anra.gef.getResizeTracker.extend({
     mouseDrag: function (me, editPart) {
         this.status = me.type;
-        editPart.model.getBounds()[3] = this.oldConstraint.height + (me.y - this.yStart);
+        editPart.model.getBounds()[0] = this.oldConstraint.x + (me.x - this.xStart);
+        editPart.model.getBounds()[1] = this.oldConstraint.y + (me.y - this.yStart);
+        editPart.model.getBounds()[2] = this.oldConstraint.width - (me.x - this.xStart);
+        editPart.model.getBounds()[3] = this.oldConstraint.height - (me.y - this.yStart);
         editPart.refresh();
         this.handle.setLocator(editPart.model.getBounds());
     }
@@ -139,5 +196,61 @@ anra.gef.NorthTracker = anra.gef.getResizeTracker.extend({
         editPart.model.getBounds()[3] = this.oldConstraint.height - (me.y - this.yStart);
         this.handle.setLocator(editPart.model.getBounds());
         editPart.refresh();
+    }
+});
+anra.gef.NorthEastTracker = anra.gef.getResizeTracker.extend({
+    mouseDrag: function (me, editPart) {
+        this.status = me.type;
+        editPart.model.getBounds()[1] = this.oldConstraint.y + (me.y - this.yStart);
+        editPart.model.getBounds()[2] = this.oldConstraint.width + (me.x - this.xStart);
+        editPart.model.getBounds()[3] = this.oldConstraint.height - (me.y - this.yStart);
+        editPart.refresh();
+        this.handle.setLocator(editPart.model.getBounds());
+    }
+});
+
+anra.gef.WestTracker = anra.gef.getResizeTracker.extend({
+    mouseDrag: function (me, editPart) {
+        this.status = me.type;
+        editPart.model.getBounds()[0] = this.oldConstraint.x + (me.x - this.xStart);
+        editPart.model.getBounds()[2] = this.oldConstraint.width - (me.x - this.xStart);
+        editPart.refresh();
+        this.handle.setLocator(editPart.model.getBounds());
+    }
+});
+anra.gef.EastTracker = anra.gef.getResizeTracker.extend({
+    mouseDrag: function (me, editPart) {
+        this.status = me.type;
+        editPart.model.getBounds()[2] = this.oldConstraint.width + (me.x - this.xStart);
+        editPart.refresh();
+        this.handle.setLocator(editPart.model.getBounds());
+    }
+});
+
+anra.gef.SouthWestTracker = anra.gef.getResizeTracker.extend({
+    mouseDrag: function (me, editPart) {
+        this.status = me.type;
+        editPart.model.getBounds()[0] = this.oldConstraint.x + (me.x - this.xStart);
+        editPart.model.getBounds()[2] = this.oldConstraint.width - (me.x - this.xStart);
+        editPart.model.getBounds()[3] = this.oldConstraint.height + (me.y - this.yStart);
+        editPart.refresh();
+        this.handle.setLocator(editPart.model.getBounds());
+    }
+});
+anra.gef.SouthTracker = anra.gef.getResizeTracker.extend({
+    mouseDrag: function (me, editPart) {
+        this.status = me.type;
+        editPart.model.getBounds()[3] = this.oldConstraint.height + (me.y - this.yStart);
+        editPart.refresh();
+        this.handle.setLocator(editPart.model.getBounds());
+    }
+});
+anra.gef.SouthEastTracker = anra.gef.getResizeTracker.extend({
+    mouseDrag: function (me, editPart) {
+        this.status = me.type;
+        editPart.model.getBounds()[2] = this.oldConstraint.width + (me.x - this.xStart);
+        editPart.model.getBounds()[3] = this.oldConstraint.height + (me.y - this.yStart);
+        editPart.refresh();
+        this.handle.setLocator(editPart.model.getBounds());
     }
 });

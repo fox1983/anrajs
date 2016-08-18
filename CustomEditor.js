@@ -6,7 +6,6 @@ NodeEditPart = anra.gef.NodeEditPart.extend({
                 this.figure.setBounds({x: b[0], y: b[1], width: b[2], height: b[3]});
                 this.figure.paint();
             }
-
         }
     },
     setModel: function (model) {
@@ -32,11 +31,15 @@ NodeEditPart = anra.gef.NodeEditPart.extend({
     },
     addSelectionHandles: function () {
         var handleLayer = this.getRoot().getLayer("Handle_Layer");
-        //handleLayer.removeAll();
-        var northHandle = new anra.Handle(this, 'north');
-        var southHandle = new anra.Handle(this, 'south');
-        handleLayer.addChild(northHandle);
-        handleLayer.addChild(southHandle);
+        handleLayer.removeAll();
+        handleLayer.addChild(new anra.Handle(this, anra.Handle.NORTH));
+        handleLayer.addChild(new anra.Handle(this, anra.Handle.SOUTH));
+        handleLayer.addChild(new anra.Handle(this, anra.Handle.EAST));
+        handleLayer.addChild(new anra.Handle(this, anra.Handle.WEST));
+        handleLayer.addChild(new anra.Handle(this, anra.Handle.NORTH_EAST));
+        handleLayer.addChild(new anra.Handle(this, anra.Handle.NORTH_WEST));
+        handleLayer.addChild(new anra.Handle(this, anra.Handle.SOUTH_EAST));
+        handleLayer.addChild(new anra.Handle(this, anra.Handle.SOUTH_WEST));
     }
 });
 
