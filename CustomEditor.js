@@ -24,9 +24,7 @@ NodeEditPart = anra.gef.NodeEditPart.extend({
         }
     },
     setSelected: function (value) {
-        this.selected = value;
-        if (this.figure != null)
-            this.figure.setSelected(value);
+        this.base(value);
         this.addSelectionHandles();
     },
     addSelectionHandles: function () {

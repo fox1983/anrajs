@@ -16,6 +16,10 @@ anra.Handle = Control.extend({
         this.direction = direction;
         var model = editPart.model;
         if (model != null) {
+            var handle = this;
+            editPart.figure.addListener(anra.EVENT.MouseDrag, function () {
+                handle.setLocator(editPart.model.getBounds());
+            });
             this.setLocator(model.getBounds());
             this.setStyle({
                 'fill': '#000000'
@@ -94,6 +98,9 @@ anra.Handle = Control.extend({
             width: this.defaultWidth,
             height: this.defaultHeight
         });
+    },
+    refreshLocation: function () {
+        this.setLocator(this.editPart.model.getBounds());
     },
     getResizeTracker: function (handle, editpart, direction) {
         var tracker = null;
@@ -186,7 +193,7 @@ anra.gef.NorthWestTracker = anra.gef.getResizeTracker.extend({
         editPart.model.getBounds()[2] = this.oldConstraint.width - (me.x - this.xStart);
         editPart.model.getBounds()[3] = this.oldConstraint.height - (me.y - this.yStart);
         editPart.refresh();
-        this.handle.setLocator(editPart.model.getBounds());
+        editPart.getRoot().getLayer("Handle_Layer").paint();
     }
 });
 anra.gef.NorthTracker = anra.gef.getResizeTracker.extend({
@@ -194,8 +201,8 @@ anra.gef.NorthTracker = anra.gef.getResizeTracker.extend({
         this.status = me.type;
         editPart.model.getBounds()[1] = this.oldConstraint.y + (me.y - this.yStart);
         editPart.model.getBounds()[3] = this.oldConstraint.height - (me.y - this.yStart);
-        this.handle.setLocator(editPart.model.getBounds());
         editPart.refresh();
+        editPart.getRoot().getLayer("Handle_Layer").paint();
     }
 });
 anra.gef.NorthEastTracker = anra.gef.getResizeTracker.extend({
@@ -205,7 +212,7 @@ anra.gef.NorthEastTracker = anra.gef.getResizeTracker.extend({
         editPart.model.getBounds()[2] = this.oldConstraint.width + (me.x - this.xStart);
         editPart.model.getBounds()[3] = this.oldConstraint.height - (me.y - this.yStart);
         editPart.refresh();
-        this.handle.setLocator(editPart.model.getBounds());
+        editPart.getRoot().getLayer("Handle_Layer").paint();
     }
 });
 
@@ -215,7 +222,7 @@ anra.gef.WestTracker = anra.gef.getResizeTracker.extend({
         editPart.model.getBounds()[0] = this.oldConstraint.x + (me.x - this.xStart);
         editPart.model.getBounds()[2] = this.oldConstraint.width - (me.x - this.xStart);
         editPart.refresh();
-        this.handle.setLocator(editPart.model.getBounds());
+        editPart.getRoot().getLayer("Handle_Layer").paint();
     }
 });
 anra.gef.EastTracker = anra.gef.getResizeTracker.extend({
@@ -223,7 +230,7 @@ anra.gef.EastTracker = anra.gef.getResizeTracker.extend({
         this.status = me.type;
         editPart.model.getBounds()[2] = this.oldConstraint.width + (me.x - this.xStart);
         editPart.refresh();
-        this.handle.setLocator(editPart.model.getBounds());
+        editPart.getRoot().getLayer("Handle_Layer").paint();
     }
 });
 
@@ -234,7 +241,7 @@ anra.gef.SouthWestTracker = anra.gef.getResizeTracker.extend({
         editPart.model.getBounds()[2] = this.oldConstraint.width - (me.x - this.xStart);
         editPart.model.getBounds()[3] = this.oldConstraint.height + (me.y - this.yStart);
         editPart.refresh();
-        this.handle.setLocator(editPart.model.getBounds());
+        editPart.getRoot().getLayer("Handle_Layer").paint();
     }
 });
 anra.gef.SouthTracker = anra.gef.getResizeTracker.extend({
@@ -242,7 +249,7 @@ anra.gef.SouthTracker = anra.gef.getResizeTracker.extend({
         this.status = me.type;
         editPart.model.getBounds()[3] = this.oldConstraint.height + (me.y - this.yStart);
         editPart.refresh();
-        this.handle.setLocator(editPart.model.getBounds());
+        editPart.getRoot().getLayer("Handle_Layer").paint();
     }
 });
 anra.gef.SouthEastTracker = anra.gef.getResizeTracker.extend({
@@ -251,6 +258,6 @@ anra.gef.SouthEastTracker = anra.gef.getResizeTracker.extend({
         editPart.model.getBounds()[2] = this.oldConstraint.width + (me.x - this.xStart);
         editPart.model.getBounds()[3] = this.oldConstraint.height + (me.y - this.yStart);
         editPart.refresh();
-        this.handle.setLocator(editPart.model.getBounds());
+        editPart.getRoot().getLayer("Handle_Layer").paint();
     }
 });
