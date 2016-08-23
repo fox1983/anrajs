@@ -594,9 +594,6 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
         return this;
     },
     createLayer: function () {
-<<<<<<< HEAD
- 5    getLayer: function (key) {
-=======
         if (this.figure != null) {
             var primaryLayer = new anra.svg.Group();
             var handleLayer = new anra.svg.Group();
@@ -607,7 +604,6 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
         }
     },
     getLayer: function (key) {
->>>>>>> origin/master
         return this.layers.get(key);
     },
     addChildVisual: function (child, index) {
