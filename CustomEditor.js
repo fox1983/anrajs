@@ -23,21 +23,8 @@ NodeEditPart = anra.gef.NodeEditPart.extend({
                 return new Figure3();
         }
     },
-    setSelected: function (value) {
-        this.base(value);
-        this.addSelectionHandles();
-    },
-    addSelectionHandles: function () {
-        var handleLayer = this.getRoot().getLayer("Handle_Layer");
-        handleLayer.removeAll();
-        handleLayer.addChild(new anra.Handle(this, anra.Handle.NORTH));
-        handleLayer.addChild(new anra.Handle(this, anra.Handle.SOUTH));
-        handleLayer.addChild(new anra.Handle(this, anra.Handle.EAST));
-        handleLayer.addChild(new anra.Handle(this, anra.Handle.WEST));
-        handleLayer.addChild(new anra.Handle(this, anra.Handle.NORTH_EAST));
-        handleLayer.addChild(new anra.Handle(this, anra.Handle.NORTH_WEST));
-        handleLayer.addChild(new anra.Handle(this, anra.Handle.SOUTH_EAST));
-        handleLayer.addChild(new anra.Handle(this, anra.Handle.SOUTH_WEST));
+    createEditPolicies: function () {
+        this.installPolicy(anra.gef.Policy.PRIMARY_DRAG_ROLE, new anra.gef.ResizableEditPolicy());
     }
 });
 
