@@ -27,6 +27,13 @@ anra.gef.SelectionPolicy = anra.gef.AbstractEditPolicy.extend({
         this.base();
         this.removeSelectionListener();
     },
+    validatePolicy: function () {
+        if (this.handles.length > 0) {
+            for (var i = 0; i < this.handles.length; i++) {
+                this.handles[i].refreshLocation();
+            }
+        }
+    },
     addSelectionListener: function () {
         var SelectionEditPartListener = anra.EditPartListener.extend({
             selectedStateChanged: function () {
@@ -63,7 +70,7 @@ anra.gef.SelectionPolicy = anra.gef.AbstractEditPolicy.extend({
         this.handles = this.createSelectionHandles();
         for (var i = 0; i < this.handles.length; i++) {
 
-            this.getHost().getRoot().getLayer("Handle_Layer").addChild(this.handles[i]);
+            this.getHost().getRoot().getLayer(anra.gef.RootEditPart.HandleLayer).addChild(this.handles[i]);
         }
     },
     removeSelectionHandles: function () {

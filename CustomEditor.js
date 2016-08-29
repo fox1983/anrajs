@@ -24,7 +24,7 @@ NodeEditPart = anra.gef.NodeEditPart.extend({
         }
     },
     createEditPolicies: function () {
-        this.installPolicy(anra.gef.Policy.PRIMARY_DRAG_ROLE, new anra.gef.ResizableEditPolicy());
+        this.installEditPolicy(anra.gef.Policy.PRIMARY_DRAG_ROLE, new anra.gef.ResizableEditPolicy());
     }
 });
 
@@ -93,7 +93,6 @@ Figure2 = MyFigure.extend({
 //#FFBB00
 Figure3 = MyFigure.extend({
     customContent: function () {
-
         this.setAttribute('fill', '#FFBB00');
     }
 });
@@ -106,7 +105,6 @@ MyEditor = anra.gef.Editor.extend({
         return part;
     },
     initRootEditPart: function (editPart) {
-
         editPart.modelChildren = this.models.values();
         editPart.refresh();
     },

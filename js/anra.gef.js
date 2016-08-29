@@ -176,44 +176,7 @@ anra.gef.EditPart = Base.extend({
     },
     doActive: function () {
     },
-    deactivePolicies: function () {
-        this.policies.forEach(function (editPolicy) {
-            editPolicy.deactivate();
-        });
-    },
-    activePolicies: function () {
-        this.policies.forEach(function (editPolicy) {
-            editPolicy.activate();
-        });
-    },
     fireActivated: function () {
-    },
-    installPolicy: function (key, editPolicy) {
-        if (key == null) {
-            anra.Platform.error("Edit Policies must be installed with key");
-            return;
-        }
-        if (editPolicy == null || !(editPolicy instanceof anra.gef.Policy)) {
-            anra.Platform.error("Edit Policies must be installed with key");
-            return;
-        }
-        if (this.policies == null) {
-            this.policies = new Map();
-            this.policies.set(key, editPolicy);
-        }
-        else {
-            var oldEditPolicy = this.policies.get(key);
-            if (oldEditPolicy != null && oldEditPolicy.isActive()) {
-                oldEditPolicy.deactivate();
-            }
-            this.policies.set(key, editPolicy);
-        }
-        if (editPolicy != null) {
-            editPolicy.setHost(this);
-            if (this.isActive()) {
-                editPolicy.activate();
-            }
-        }
     },
     getFigure: function () {
         if (this.figure == null) {
@@ -274,6 +237,57 @@ anra.gef.EditPart = Base.extend({
             this.children[i].addNotify();
         this.refresh();
     },
+    createEditPolicies: function () {
+    },
+    installEditPolicy: function (key, editPolicy) {
+        if (key == null) {
+            anra.Platform.error("Edit Policies must be installed with key");
+            return;
+        }
+        if (editPolicy == null || !(editPolicy instanceof anra.gef.Policy)) {
+            anra.Platform.error("Edit Policies must be installed with key");
+            return;
+        }
+        if (this.policies == null) {
+            this.policies = new Map();
+            this.policies.set(key, editPolicy);
+        }
+        else {
+            var oldEditPolicy = this.policies.get(key);
+            if (oldEditPolicy != null && oldEditPolicy.isActive()) {
+                oldEditPolicy.deactivate();
+            }
+            this.policies.set(key, editPolicy);
+        }
+        if (editPolicy != null) {
+            editPolicy.setHost(this);
+            if (this.isActive()) {
+                editPolicy.activate();
+            }
+        }
+    },
+    activePolicies: function () {
+        this.policies.forEach(function (editPolicy) {
+            editPolicy.activate();
+        });
+    },
+    deactivePolicies: function () {
+        this.policies.forEach(function (editPolicy) {
+            editPolicy.deactivate();
+        });
+    },
+    validatePolicies: function () {
+        this.policies.forEach(function (editPolicy) {
+            editPolicy.validatePolicy();
+        });
+    },
+    getEditPolicy: function (key) {
+        var policy = this.policies.get(key);
+        return policy;
+    },
+    removeEditPolicy: function (key) {
+        this.policies.remove(key);
+    },
     unregister: function () {
         this.unregisterAccessable();
         this.unregisterVisuals();
@@ -290,8 +304,6 @@ anra.gef.EditPart = Base.extend({
     },
     unregisterAccessable: function () {
     },
-    createEditPolicies: function () {
-    },
     eraseSourceFeedBack: function (request) {
     },
     eraseTargetFeedBack: function (request) {
@@ -305,8 +317,6 @@ anra.gef.EditPart = Base.extend({
     getDragTracker: function (request) {
         return null;
     },
-    getEditPolicy: function (key) {
-    },
     getSelected: function () {
         return this.selected;
     },
@@ -317,13 +327,12 @@ anra.gef.EditPart = Base.extend({
     hasFocus: function () {
         return this.getFlag(FLAG_FOCUS);
     },
-    installEditPolicy: function (key, editPolicy) {
-    },
     performRequest: function (request) {
     },
     refresh: function () {
         this.refreshVisual();
         this.refreshChildren();
+        this.validatePolicies();
     },
     /**
      * 调用之后必须应用this.figure.paint();
@@ -338,8 +347,6 @@ anra.gef.EditPart = Base.extend({
         if (this.listeners.contains(listener)) {
             this.listeners.removeObject(listener);
         }
-    },
-    removeEditPolicy: function (key) {
     },
     removeNotify: function () {
         this.unregisterAccessable();
@@ -405,9 +412,7 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
         this.tConns = [];
     },
     refresh: function () {
-        this.refreshVisual();
-        this.refreshChildren();
-
+        this.base();
         this.refreshSourceConnections();
         this.refreshTargetConnections();
     },
@@ -567,7 +572,6 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
 
     }
 });
-
 anra.gef.RootEditPart = anra.gef.EditPart.extend({
     layers: null,
     constructor: function () {
@@ -605,20 +609,11 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
     createLayer: function () {
         if (this.figure != null) {
             var primaryLayer = new anra.svg.Group();
-            anra.HandleLayer = anra.svg.Group.extend({
-                paint: function () {
-                    if (this.children) {
-                        for (var i = 0; i < this.children.length; i++) {
-                            this.children[i].refreshLocation();
-                        }
-                    }
-                }
-            });
-            var handleLayer = new anra.HandleLayer();
+            var handleLayer = new anra.svg.Group();
             this.figure.addChild(primaryLayer);
             this.figure.addChild(handleLayer);
-            this.layers.set("Primary_Layer", primaryLayer);
-            this.layers.set("Handle_Layer", handleLayer);
+            this.layers.set(anra.gef.RootEditPart.PrimaryLayer, primaryLayer);
+            this.layers.set(anra.gef.RootEditPart.HandleLayer, handleLayer);
         }
     },
     getLayer: function (key) {
@@ -637,6 +632,8 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
         return this.editPartMap.get(model);
     }
 });
+anra.gef.RootEditPart.PrimaryLayer = "Primary_Layer";
+anra.gef.RootEditPart.HandleLayer = "Handle_Layer";
 anra.gef.LineEditPart = anra.gef.EditPart.extend({
     target: null,
     source: null,
@@ -811,6 +808,8 @@ anra.gef.Policy = Base.extend({
     activate: function () {
     },
     deactivate: function () {
+    },
+    validatePolicy: function () {
     }
 });
 
