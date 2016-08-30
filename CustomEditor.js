@@ -1,17 +1,17 @@
 NodeEditPart = anra.gef.NodeEditPart.extend({
-    refreshVisual: function () {
+    refreshVisual:function () {
         if (this.model != null && this.figure != null) {
             var b = this.model.getValue('bounds');
             if (b != null) {
-                this.figure.setBounds({x: b[0], y: b[1], width: b[2], height: b[3]});
+                this.figure.setBounds({x:b[0], y:b[1], width:b[2], height:b[3]});
                 this.figure.paint();
             }
         }
     },
-    setModel: function (model) {
+    setModel:function (model) {
         this.model = model;
     },
-    createFigure: function () {
+    createFigure:function () {
         switch (this.model.getValue('type')) {
             case 0:
                 return new Figure0();
@@ -23,11 +23,14 @@ NodeEditPart = anra.gef.NodeEditPart.extend({
                 return new Figure3();
         }
     },
-    setSelected: function (value) {
+    setSelected:function (value) {
         this.base(value);
-        this.addSelectionHandles();
+        if (value == 2)
+            this.addSelectionHandles();
+        else
+            this.getRoot().getLayer("Handle_Layer").removeAll();
     },
-    addSelectionHandles: function () {
+    addSelectionHandles:function () {
         var handleLayer = this.getRoot().getLayer("Handle_Layer");
         handleLayer.removeAll();
         handleLayer.addChild(new anra.Handle(this, anra.Handle.NORTH));
@@ -44,7 +47,7 @@ NodeEditPart = anra.gef.NodeEditPart.extend({
 
 MyFigure = anra.gef.Figure.extend({
 
-    createContent: function () {
+    createContent:function () {
         this.layoutManager = new anra.svg.GridLayout(2, true, this);
         this.layoutManager.setNumRows(2);
 
@@ -78,34 +81,34 @@ MyFigure = anra.gef.Figure.extend({
         this.customContent();
 
     },
-    customContent: function () {
+    customContent:function () {
     }
 });
 
 //	#00DD00
 Figure0 = MyFigure.extend({
-    customContent: function () {
+    customContent:function () {
         this.setAttribute('fill', '#00DD00');
     }
 });
 
 //#DDDDDD
 Figure1 = MyFigure.extend({
-    customContent: function () {
+    customContent:function () {
         this.setAttribute('fill', '#DDDDDD');   //  color
     }
 });
 
 //#FF3333
 Figure2 = MyFigure.extend({
-    customContent: function () {
+    customContent:function () {
         this.setAttribute('fill', '#FF3333');
     }
 });
 
 //#FFBB00
 Figure3 = MyFigure.extend({
-    customContent: function () {
+    customContent:function () {
 
         this.setAttribute('fill', '#FFBB00');
     }
@@ -113,17 +116,17 @@ Figure3 = MyFigure.extend({
 
 
 MyEditor = anra.gef.Editor.extend({
-    createEditPart: function (context, model) {
+    createEditPart:function (context, model) {
         var part = new NodeEditPart();
         part.model = model;
         return part;
     },
-    initRootEditPart: function (editPart) {
+    initRootEditPart:function (editPart) {
 
         editPart.modelChildren = this.models.values();
         editPart.refresh();
     },
-    handleInput: function (input) {
+    handleInput:function (input) {
         this.models = new Map();
         var nodes = input['nodes'];
         for (var i = 0; i < nodes.length; i++) {

@@ -11,7 +11,7 @@ anra.Handle = Control.extend({
     editPart: null,
     direction: null,
     constructor: function (editPart, direction) {
-        this._Control(); //µ÷ÓÃ¸¸µÄ¹¹Ôìº¯Êý
+        this._Control(); //ï¿½ï¿½ï¿½Ã¸ï¿½ï¿½Ä¹ï¿½ï¿½ìº¯ï¿½ï¿½
         this.editPart = editPart;
         this.direction = direction;
         var model = editPart.model;
@@ -60,7 +60,7 @@ anra.Handle = Control.extend({
         var x = bounds[0] - this.offset;
         var y = bounds[1] - this.offset;
         switch (this.direction) {
-            //ÉÏÈý¸ö
+            //ï¿½ï¿½ï¿½ï¿½ï¿½
             case anra.Handle.NORTH_WEST:
                 break;
             case anra.Handle.NORTH:
@@ -69,7 +69,7 @@ anra.Handle = Control.extend({
             case anra.Handle.NORTH_EAST:
                 x += width;
                 break;
-            //ÖÐÁ½¸ö
+            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             case anra.Handle.WEST:
                 y += height / 2;
                 break;
@@ -77,7 +77,7 @@ anra.Handle = Control.extend({
                 x += width;
                 y += height / 2;
                 break;
-            //ÏÂÈý¸ö
+            //ï¿½ï¿½ï¿½ï¿½ï¿½
             case anra.Handle.SOUTH_WEST:
                 y += height;
                 break;
@@ -137,7 +137,7 @@ anra.Handle = Control.extend({
         return tracker;
     }
 });
-//¶¨Òå·½Ïò³£Á¿
+//ï¿½ï¿½ï¿½å·½ï¿½ï¿½ï¿½ï¿½
 anra.Handle.NORTH = "north";
 anra.Handle.SOUTH = "south";
 anra.Handle.EAST = "east";
