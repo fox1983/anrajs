@@ -180,7 +180,7 @@ Control.prototype.setParent = function (s) {
         }
         this.parent = s;
         this.svg = this.parent.svg;
-        this.svg.owner.appendChild(this.owner);
+        this.parent.domContainer().appendChild(this.owner);
         this.applyBounds();
         this.createContent(this);
         this.paint();
