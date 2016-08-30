@@ -67,6 +67,7 @@ anra.gef.EditPart = Base.extend({
     modelChildren: null,
     flags: 0,
     editor: null,
+    listeners: null,
     constructor: function () {
         this._EditPart();
     },
@@ -75,7 +76,8 @@ anra.gef.EditPart = Base.extend({
         this.tConns = [];
         this.children = [];
         this.modelChildren = [];
-        this.policies = [];
+        this.policies = new Map();
+        this.listeners = [];
     },
     getRoot: function () {
         return this;
@@ -174,47 +176,7 @@ anra.gef.EditPart = Base.extend({
     },
     doActive: function () {
     },
-    deactivePolicies: function () {
-        for (var i = 0; i < this.policies.length; i++) {
-            this.policies[i].deactivate();
-        }
-    },
-    activePolicies: function () {
-        for (var i = 0; i < this.policies.length; i++) {
-            this.policies[i].activate();
-        }
-    },
     fireActivated: function () {
-    },
-    installPolicy: function (k, p) {
-        if (k == null) {
-            anra.Platform.error("Edit Policies must be installed with key");
-            return;
-        }
-        if (p == null || !(p instanceof anra.gef.Policy)) {
-            anra.Platform.error("Edit Policies must be installed with key");
-            return;
-        }
-        if (this.policies == null) {
-            this.policies = [];
-            this.policies.push(k);
-            this.policies.push(p);
-        } else {
-            var i = 0;
-            while (i < this.policies.length && !k.equals(this.policies[i]))
-                i += 2;
-            if (i < this.policies.length) {
-                i++;
-                var old = this.policies[i];
-                if (old != null && this.isActive())
-                    old.deactivate();
-                this.policies[i] = p;
-            } else {
-                this.policies.push(k);
-                this.policies.push(p);
-            }
-        }
-
     },
     getFigure: function () {
         if (this.figure == null) {
@@ -265,7 +227,8 @@ anra.gef.EditPart = Base.extend({
         else
             this.flags &= ~f;
     },
-    addEditPartListener: function () {
+    addEditPartListener: function (listener) {
+        this.listeners.push(listener);
     },
     addNotify: function () {
         this.register();
@@ -273,6 +236,57 @@ anra.gef.EditPart = Base.extend({
         for (var i = 0; i < this.children.length; i++)
             this.children[i].addNotify();
         this.refresh();
+    },
+    createEditPolicies: function () {
+    },
+    installEditPolicy: function (key, editPolicy) {
+        if (key == null) {
+            anra.Platform.error("Edit Policies must be installed with key");
+            return;
+        }
+        if (editPolicy == null || !(editPolicy instanceof anra.gef.Policy)) {
+            anra.Platform.error("Edit Policies must be installed with key");
+            return;
+        }
+        if (this.policies == null) {
+            this.policies = new Map();
+            this.policies.set(key, editPolicy);
+        }
+        else {
+            var oldEditPolicy = this.policies.get(key);
+            if (oldEditPolicy != null && oldEditPolicy.isActive()) {
+                oldEditPolicy.deactivate();
+            }
+            this.policies.set(key, editPolicy);
+        }
+        if (editPolicy != null) {
+            editPolicy.setHost(this);
+            if (this.isActive()) {
+                editPolicy.activate();
+            }
+        }
+    },
+    activePolicies: function () {
+        this.policies.forEach(function (editPolicy) {
+            editPolicy.activate();
+        });
+    },
+    deactivePolicies: function () {
+        this.policies.forEach(function (editPolicy) {
+            editPolicy.deactivate();
+        });
+    },
+    validatePolicies: function () {
+        this.policies.forEach(function (editPolicy) {
+            editPolicy.validatePolicy();
+        });
+    },
+    getEditPolicy: function (key) {
+        var policy = this.policies.get(key);
+        return policy;
+    },
+    removeEditPolicy: function (key) {
+        this.policies.remove(key);
     },
     unregister: function () {
         this.unregisterAccessable();
@@ -290,8 +304,6 @@ anra.gef.EditPart = Base.extend({
     },
     unregisterAccessable: function () {
     },
-    createEditPolicies: function () {
-    },
     eraseSourceFeedBack: function (request) {
     },
     eraseTargetFeedBack: function (request) {
@@ -305,9 +317,8 @@ anra.gef.EditPart = Base.extend({
     getDragTracker: function (request) {
         return null;
     },
-    getEditPolicy: function (key) {
-    },
     getSelected: function () {
+        return this.selected;
     },
     getTargetEditPart: function (request) {
     },
@@ -316,13 +327,12 @@ anra.gef.EditPart = Base.extend({
     hasFocus: function () {
         return this.getFlag(FLAG_FOCUS);
     },
-    installEditPolicy: function (key, editPolicy) {
-    },
     performRequest: function (request) {
     },
     refresh: function () {
         this.refreshVisual();
         this.refreshChildren();
+        this.validatePolicies();
     },
     /**
      * 调用之后必须应用this.figure.paint();
@@ -333,9 +343,10 @@ anra.gef.EditPart = Base.extend({
         }
 
     },
-    removeEditPartListener: function () {
-    },
-    removeEditPolicy: function (key) {
+    removeEditPartListener: function (listener) {
+        if (this.listeners.contains(listener)) {
+            this.listeners.removeObject(listener);
+        }
     },
     removeNotify: function () {
         this.unregisterAccessable();
@@ -349,7 +360,11 @@ anra.gef.EditPart = Base.extend({
         this.fireSelectionChanged();
     },
     fireSelectionChanged: function () {
-
+        for (var i = 0; i < this.listeners.length; i++) {
+            {
+                this.listeners[i].selectedStateChanged(this);
+            }
+        }
     },
     setModel: function (model) {
         this.model = model;
@@ -361,6 +376,7 @@ anra.gef.EditPart = Base.extend({
         this.selected = value;
         if (this.figure != null)
             this.figure.setSelected(value);
+        this.fireSelectionChanged();
     },
     understandsRequest: function (req) {
 //        var iter = getEditPolicyIterator();
@@ -396,9 +412,7 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
         this.tConns = [];
     },
     refresh: function () {
-        this.refreshVisual();
-        this.refreshChildren();
-
+        this.base();
         this.refreshSourceConnections();
         this.refreshTargetConnections();
     },
@@ -558,7 +572,6 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
 
     }
 });
-
 anra.gef.RootEditPart = anra.gef.EditPart.extend({
     layers: null,
     constructor: function () {
@@ -596,20 +609,11 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
     createLayer: function () {
         if (this.figure != null) {
             var primaryLayer = new anra.svg.Group();
-            anra.HandleLayer = anra.svg.Group.extend({
-                paint: function () {
-                    if (this.children) {
-                        for (var i = 0; i < this.children.length; i++) {
-                            this.children[i].refreshLocation();
-                        }
-                    }
-                }
-            });
-            var handleLayer = new anra.HandleLayer();
+            var handleLayer = new anra.svg.Group();
             this.figure.addChild(primaryLayer);
             this.figure.addChild(handleLayer);
-            this.layers.set("Primary_Layer", primaryLayer);
-            this.layers.set("Handle_Layer", handleLayer);
+            this.layers.set(anra.gef.RootEditPart.PrimaryLayer, primaryLayer);
+            this.layers.set(anra.gef.RootEditPart.HandleLayer, handleLayer);
         }
     },
     getLayer: function (key) {
@@ -628,6 +632,8 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
         return this.editPartMap.get(model);
     }
 });
+anra.gef.RootEditPart.PrimaryLayer = "Primary_Layer";
+anra.gef.RootEditPart.HandleLayer = "Handle_Layer";
 anra.gef.LineEditPart = anra.gef.EditPart.extend({
     target: null,
     source: null,
@@ -802,6 +808,8 @@ anra.gef.Policy = Base.extend({
     activate: function () {
     },
     deactivate: function () {
+    },
+    validatePolicy: function () {
     }
 });
 

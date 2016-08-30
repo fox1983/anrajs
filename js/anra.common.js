@@ -57,7 +57,7 @@ Array.prototype.contains = function (obj) {
 };
 
 Map = HashMap;
-Map.prototype.put=Map.prototype.set;
+Map.prototype.put = Map.prototype.set;
 
 
 /*
@@ -66,18 +66,18 @@ Map.prototype.put=Map.prototype.set;
  *
  */
 var anra = anra || {
-    common:function () {
-    },
-    util:{}
-};
+        common: function () {
+        },
+        util: {}
+    };
 
 SELECTED = 0;
 SELECTED_NONE = 1;
 SELECTED_PRIMARY = 2;
 /*图片加载器，用于内存管理*/
 anra.ImageRegistry = Base.extend({
-    images:new Map(),
-    regist:function (imageURL) {
+    images: new Map(),
+    regist: function (imageURL) {
         var img = this.images.get(imageURL);
         if (img == null) {
             img = new Image();
@@ -86,7 +86,7 @@ anra.ImageRegistry = Base.extend({
         }
         return img;
     },
-    isLoaded:function (imageURL) {
+    isLoaded: function (imageURL) {
         var img = this.images.get(imageURL);
         if (img == null)
             img = this.regist(imageURL);
@@ -94,10 +94,10 @@ anra.ImageRegistry = Base.extend({
             return true;
         return false;
     },
-    get:function (imageURL) {
+    get: function (imageURL) {
         return this.images.get(imageURL);
     },
-    clear:function () {
+    clear: function () {
         this.images.clear();
     }
 });
@@ -109,15 +109,15 @@ anra.ImageRegistry = new anra.ImageRegistry();
  *全局使用
  */
 anra.Platform = {
-    pool:new Map(),
-    ready:false,
-    focus:null,
-    regist:function (key, object) {
+    pool: new Map(),
+    ready: false,
+    focus: null,
+    regist: function (key, object) {
         this.pool.set(key, object);
         if (!this.ready)
             this.init();
     },
-    init:function () {
+    init: function () {
         //全局事件
         var p = this;
         document.onkeydown = function (event) {
@@ -133,20 +133,20 @@ anra.Platform = {
         };
         this.ready = true;
     },
-    get:function (key) {
+    get: function (key) {
         return this.pool.get(key);
     },
-    unregist:function (key) {
+    unregist: function (key) {
         this.pool.delete(key);
     },
-    getCurrentScene:function () {
+    getCurrentScene: function () {
         var canvas = this.get(this.DISPLAY);
         return canvas.scenes[canvas.currentScene];
     },
-    getDisplay:function () {
+    getDisplay: function () {
         return this.get(this.DISPLAY);
     },
-    error:function (e) {
+    error: function (e) {
         this.getDisplay().error(e);
     }
 };
@@ -156,12 +156,12 @@ anra.Platform = {
  * @type {Object}
  */
 anra.Rectangle = {
-    contains:function (rect, x, y) {
+    contains: function (rect, x, y) {
         if (rect == null)
             return false;
         return (x >= rect.x) && (y >= rect.y) && x < (rect.x + rect.width) && y < (rect.y + rect.height);
     },
-    distance:function (r1, r2) {
+    distance: function (r1, r2) {
         return Math.sqrt((r1[0] - r2[0]) * (r1[0] - r2[0]) + (r1[1] - r2[1]) * (r1[1] - r2[1]));
     }
 };
@@ -174,24 +174,24 @@ anra.Platform.PAINTER = 1;
  * @type {*}
  */
 anra.Display = Base.extend({
-    id:"default canvas",
-    element:null,
-    postEvent:function (e) {
+    id: "default canvas",
+    element: null,
+    postEvent: function (e) {
     },
-    error:function (msg) {
+    error: function (msg) {
         alert(msg);
     },
-    p2x:function (p) {
+    p2x: function (p) {
         if (this.element == null)
             return -1;
         return this.element.width * p / 100;
     },
-    p2y:function (p) {
+    p2y: function (p) {
         if (this.element == null)
             return -1;
         return this.element.height * p / 100;
     },
-    getRelativeLocation:function (event) {
+    getRelativeLocation: function (event) {
         var ev = event || window.event;
         var x = ev.clientX - this.element.offsetLeft + Math.floor(window.pageXOffset);
         var y = ev.clientY - this.element.offsetTop + Math.floor(window.pageYOffset);
@@ -204,31 +204,31 @@ anra.Display = Base.extend({
  * @type {*}
  */
 anra.Widget = Base.extend({
-    id:"",
-    image:null,
-    x:0,
-    y:0,
-    width:20,
-    height:20,
-    eventTable:null,
-    paint:function () {
+    id: "",
+    image: null,
+    x: 0,
+    y: 0,
+    width: 20,
+    height: 20,
+    eventTable: null,
+    paint: function () {
     },
-    dispose:function () {
+    dispose: function () {
     },
-    error:function (msg) {
+    error: function (msg) {
         this.display.error(this.id + ":" + msg);
     },
-    addListener:function (eventType, listener) {
+    addListener: function (eventType, listener) {
         if (listener == null)anra.Platform.getDisplay().error("listener can not be null");
         if (this.eventTable == null)this.eventTable = new anra.event.EventTable();
         this.eventTable.hook(eventType, listener);
     },
-    removeListener:function (eventType, listener) {
+    removeListener: function (eventType, listener) {
         if (listener == null)anra.Platform.getDisplay().error("listener can not be null");
         if (this.eventTable == null)return;
         this.eventTable.unhook(eventType, listener);
     },
-    notifyListeners:function (eventType, event, isGlobalEvent) {
+    notifyListeners: function (eventType, event, isGlobalEvent) {
         if (this.parent != null && !isGlobalEvent && anra.BubbleEvent.contains(eventType)) {
             var ls = this.eventTable == null ? null : this.eventTable.getListeners(eventType);
             if (ls == null || ls.length == 0) {
@@ -255,33 +255,33 @@ anra.Widget = Base.extend({
 })
 ;
 anra.Control = anra.Widget.extend({
-    parent:null,
-    addMouseListener:function (listener) {
+    parent: null,
+    addMouseListener: function (listener) {
         if (listener == null) this.error("NullPointException anra.Control#addMouseListener");
         this.addListener(anra.EVENT.MouseDown, listener);
         this.addListener(anra.EVENT.MouseUp, listener);
         this.addListener(anra.EVENT.MouseDoubleClick, listener);
     },
-    addKeyListener:function (listener) {
+    addKeyListener: function (listener) {
         if (listener == null) this.error("NullPointException anra.Control#addKeyListener");
         this.addListener(anra.EVENT.KeyDown, listener);
         this.addListener(anra.EVENT.KeyUp, listener);
     },
-    addTouchListener:function (listener) {
+    addTouchListener: function (listener) {
         if (listener == null) this.error("NullPointException anra.Control#addTouchListener");
         this.addListener(anra.EVENT.TouchStart, listener);
         this.addListener(anra.EVENT.TouchMove, listener);
         this.addListener(anra.EVENT.TouchEnd, listener);
     },
-    selected:function (s) {
+    selected: function (s) {
     }
 });
 anra.Composite = anra.Control.extend({
-    selection:null,
+    selection: null,
     /*找到指定位置的控件*/
-    findWidgetOnXY:function (x, y) {
+    findWidgetOnXY: function (x, y) {
     },
-    setSelection:function (o) {
+    setSelection: function (o) {
         if (this.selection != null)
             this.selection.setSelected(false);
         this.selection = o;
@@ -295,26 +295,36 @@ anra.Composite = anra.Control.extend({
  * @type {*|void}
  */
 anra.Listener = Base.extend({
-    func:null,
-    constructor:function (func) {
+    func: null,
+    constructor: function (func) {
         this.func = func;
     },
-    handleEvent:function (event) {
+    handleEvent: function (event) {
         if (this.func != null)
             this.func(event);
     }
 });
+anra.EditPartListener = anra.Listener.extend({
+    editPart: null,
+    policy: null,
+    constructor: function (editPart, policy) {
+        this.editPart = editPart;
+        this.policy = policy;
+    },
+    selectedStateChanged: function () {
 
+    }
+});
 anra.KeyListener = anra.Listener.extend({
-    handleEvent:function (event) {
+    handleEvent: function (event) {
         if (event.type == anra.EVENT.KeyDown) {
             this.handleKeyDownEvent(event);
         } else if (event.type == anra.EVENT.KeyUp) {
             this.handleKeyDownUp(event);
         }
     },
-    handleKeyDownEvent:function (event) {
-    }, handleKeyDownUp:function (event) {
+    handleKeyDownEvent: function (event) {
+    }, handleKeyDownUp: function (event) {
     }
 });
 
@@ -322,30 +332,32 @@ anra.KeyListener = anra.Listener.extend({
  * 动作
  * @type {*|Object}
  */
-anra.Action = Base.extend({id:"", run:function () {
-}});
+anra.Action = Base.extend({
+    id: "", run: function () {
+    }
+});
 
 /**
  *事件定义
  */
 anra.event = anra.event || {};
 anra.EVENT = {
-    NONE:0,
-    MouseDown:1,
-    MouseUp:2,
-    MouseOver:3,
-    MouseIn:4,
-    MouseOut:5,
-    MouseDoubleClick:6,
-    MouseDrag:7,
-    MouseMove:8,
-    KeyDown:9,
-    KeyUp:10,
-    TouchStart:11,
-    TouchMove:12,
-    TouchEnd:13,
-    DragStart:14,
-    DragEnd:15
+    NONE: 0,
+    MouseDown: 1,
+    MouseUp: 2,
+    MouseOver: 3,
+    MouseIn: 4,
+    MouseOut: 5,
+    MouseDoubleClick: 6,
+    MouseDrag: 7,
+    MouseMove: 8,
+    KeyDown: 9,
+    KeyUp: 10,
+    TouchStart: 11,
+    TouchMove: 12,
+    TouchEnd: 13,
+    DragStart: 14,
+    DragEnd: 15
 };
 var E = anra.EVENT;
 /**
@@ -353,19 +365,19 @@ var E = anra.EVENT;
  * @type {Array}
  */
 anra.BubbleEvent = [
-    E.MouseDown, E.MouseUp, E.MouseMove,E.MouseDoubleClick, E.MouseDrag, E.DragEnd, E.DragStart
+    E.MouseDown, E.MouseUp, E.MouseMove, E.MouseDoubleClick, E.MouseDrag, E.DragEnd, E.DragStart
 ];
 
 anra.event.Event = Base.extend({
-    widget:null,
-    type:0,
-    x:undefined,
-    y:undefined,
-    prop:null,
-    constructor:function (obj, location, prop) {
+    widget: null,
+    type: 0,
+    x: undefined,
+    y: undefined,
+    prop: null,
+    constructor: function (obj, location, prop) {
         this.type = obj || anra.EVENT.NONE;
         if (location != null && location.length == 2) {
-            this.x = location[0 ];
+            this.x = location[0];
             this.y = location[1];
         }
         this.prop = prop;
@@ -373,9 +385,9 @@ anra.event.Event = Base.extend({
 });
 
 anra.event.KeyEvent = anra.event.Event.extend({
-    key:undefined,
-    keyCode:undefined,
-    constructor:function (obj, location, event) {
+    key: undefined,
+    keyCode: undefined,
+    constructor: function (obj, location, event) {
         if (event != null) {
             //            this.keyCode = event.keyCode;
             for (var k in event) {
@@ -384,14 +396,14 @@ anra.event.KeyEvent = anra.event.Event.extend({
         }
         this.type = obj || anra.EVENT.NONE;
         if (location != null && location.length == 2) {
-            this.x = location[0 ];
+            this.x = location[0];
             this.y = location[1];
         }
     }
 });
 anra.event.TouchEvent = anra.event.Event.extend({
-    touches:[],
-    constructor:function (obj, location, event) {
+    touches: [],
+    constructor: function (obj, location, event) {
         this.type = obj || anra.EVENT.NONE;
         if (location != null && location.length == 2) {
             this.x = location[0];
@@ -403,17 +415,17 @@ anra.event.TouchEvent = anra.event.Event.extend({
     }
 });
 anra.event.EventTable = Base.extend({
-    types:null,
-    listeners:null,
-    level:0,
-    constructor:function () {
+    types: null,
+    listeners: null,
+    level: 0,
+    constructor: function () {
         this.types = [];
         this.listeners = [];
     },
-    containsEvent:function (eventType) {
+    containsEvent: function (eventType) {
 
     },
-    getListeners:function (eventType) {
+    getListeners: function (eventType) {
         var result = [];
         for (var i = 0; i < this.types.length; i++) {
             if (this.types [i] == eventType) {
@@ -422,13 +434,13 @@ anra.event.EventTable = Base.extend({
         }
         return result;
     },
-    hook:function (eventType, listener) {
+    hook: function (eventType, listener) {
         if (isNaN(eventType))
             anra.Platform.getDisplay.error("anra.event.EventTable#hook eventType should be number");
         this.types.push(eventType);
         this.listeners.push(listener);
     },
-    unhook:function (eventType, listener) {
+    unhook: function (eventType, listener) {
         for (var i = 0; i < this.types.length; i++) {
             if (this.types[i] == eventType && this.listeners[i] == listener) {
                 this.remove(i);
@@ -436,11 +448,11 @@ anra.event.EventTable = Base.extend({
             }
         }
     },
-    remove:function (i) {
+    remove: function (i) {
         this.types.remove(i);
         this.listeners.remove(i);
     },
-    sendEvent:function (event) {
+    sendEvent: function (event) {
         if (event.type == anra.EVENT.NONE)return;
         for (var i = 0; i < this.types.length; i++) {
             if (this.types[i] == event.type) {
@@ -453,7 +465,7 @@ anra.event.EventTable = Base.extend({
             }
         }
     },
-    size:function () {
+    size: function () {
         return this.types.length;
     }
 });
@@ -463,20 +475,20 @@ anra.event.EventTable = Base.extend({
  */
 anra.Command = Base.extend({
 
-    execute:function () {
+    execute: function () {
     },
-    canExecute:function () {
+    canExecute: function () {
         return true;
     },
-    redo:function () {
+    redo: function () {
         this.execute();
     },
-    undo:function () {
+    undo: function () {
     },
-    canUndo:function () {
+    canUndo: function () {
         return true;
     },
-    dispose:function () {
+    dispose: function () {
     }
 });
 /**
@@ -484,10 +496,10 @@ anra.Command = Base.extend({
  * @type {*}
  */
 anra.CommandEvent = Base.extend({
-    statck:null,
-    command:null,
-    state:null,
-    constructor:function (stack, cmd, state) {
+    statck: null,
+    command: null,
+    state: null,
+    constructor: function (stack, cmd, state) {
         this.stack = stack;
         this.command = cmd;
         this.state = state;
@@ -502,11 +514,11 @@ PRE_UNDO = 4;
  * @type {*}
  */
 anra.ActionRegistry = Base.extend({
-    handlers:null,
-    keyHandle:function (e) {
+    handlers: null,
+    keyHandle: function (e) {
 
     },
-    registKeyHandler:function (key, action) {
+    registKeyHandler: function (key, action) {
 
     }
 
@@ -517,44 +529,44 @@ anra.ActionRegistry = Base.extend({
  * @type {*}
  */
 anra.CommandStack = Base.extend({
-    redoable:null,
-    undoable:null,
-    listeners:null,
-    saveLocation:0,
-    constructor:function () {
+    redoable: null,
+    undoable: null,
+    listeners: null,
+    saveLocation: 0,
+    constructor: function () {
         this.redoable = [];
         this.undoable = [];
         this.listeners = [];
     },
-    addCommandStackEventListener:function (e) {
+    addCommandStackEventListener: function (e) {
         if (e instanceof  anra.Listener)
             this.listeners.push(e);
     },
-    canRedo:function () {
+    canRedo: function () {
         return this.redoable.length > 0;
     },
-    canUndo:function () {
+    canUndo: function () {
         return this.undoable.length == 0 ? false : this.undoable.last.canUndo();
     },
-    notifyListeners:function (command, state) {
+    notifyListeners: function (command, state) {
         for (var i = 0; i < this.listeners.length; i++)
             this.listeners[i].handleEvent(event);
     },
-    flush:function () {
+    flush: function () {
         this.flushRedo();
         this.flushUndo();
         this.saveLocation = 0;
         this.notifyListeners();
     },
-    flushRedo:function () {
+    flushRedo: function () {
         while (!this.redoable.isEmpty())
             this.redoable.pop().dispose();
     },
-    flushUndo:function () {
+    flushUndo: function () {
         while (!this.undoable.isEmpty())
             this.undoable.pop().dispose();
     },
-    execute:function (c) {
+    execute: function (c) {
         if (c == null || !c.canExecute())
             return;
         this.flushRedo();
@@ -573,10 +585,10 @@ anra.CommandStack = Base.extend({
             this.notifyListeners(c, POST_EXECUTE);
         }
     },
-    markSaveLocation:function () {
+    markSaveLocation: function () {
         this.saveLocation = this.undoable.length;
     },
-    isDirty:function () {
+    isDirty: function () {
         return this.undoable.length != this.saveLocation;
     }
 })
