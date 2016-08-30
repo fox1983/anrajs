@@ -224,7 +224,7 @@ anra.svg.Composite = Control.extend({
     removeChild: function (c) {
         if (c instanceof anra.svg.Control) {
             this.children.removeObject(c);
-            this.svg.owner.removeChild(c.owner);
+            this.domContainer().removeChild(c.owner);
         } else {
             anra.Platform.error('can not remove ' + c.toString() + ' from Composite');
         }
@@ -232,7 +232,7 @@ anra.svg.Composite = Control.extend({
     removeAll: function () {
         if (this.children != null && !this.children.isEmpty()) {
             for (var i = 0; i < this.children.length; i++) {
-                this.svg.owner.removeChild(this.children[i].owner);
+                this.domContainer().removeChild(this.children[i].owner);
             }
             this.children = null;
         }

@@ -25,23 +25,7 @@ NodeEditPart = anra.gef.NodeEditPart.extend({
     },
     setSelected:function (value) {
         this.base(value);
-        if (value == 2)
-            this.addSelectionHandles();
-        else
-            this.getRoot().getLayer("Handle_Layer").removeAll();
     },
-    addSelectionHandles:function () {
-        var handleLayer = this.getRoot().getLayer("Handle_Layer");
-        handleLayer.removeAll();
-        handleLayer.addChild(new anra.Handle(this, anra.Handle.NORTH));
-        handleLayer.addChild(new anra.Handle(this, anra.Handle.SOUTH));
-        handleLayer.addChild(new anra.Handle(this, anra.Handle.EAST));
-        handleLayer.addChild(new anra.Handle(this, anra.Handle.WEST));
-        handleLayer.addChild(new anra.Handle(this, anra.Handle.NORTH_EAST));
-        handleLayer.addChild(new anra.Handle(this, anra.Handle.NORTH_WEST));
-        handleLayer.addChild(new anra.Handle(this, anra.Handle.SOUTH_EAST));
-        handleLayer.addChild(new anra.Handle(this, anra.Handle.SOUTH_WEST));
-
     createEditPolicies: function () {
         this.installEditPolicy(anra.gef.Policy.PRIMARY_DRAG_ROLE, new anra.gef.ResizableEditPolicy());
     }
@@ -111,12 +95,7 @@ Figure2 = MyFigure.extend({
 
 //#FFBB00
 Figure3 = MyFigure.extend({
-<<<<<<< HEAD
     customContent:function () {
-
-=======
-    customContent: function () {
->>>>>>> origin/master
         this.setAttribute('fill', '#FFBB00');
     }
 });
@@ -128,12 +107,7 @@ MyEditor = anra.gef.Editor.extend({
         part.model = model;
         return part;
     },
-<<<<<<< HEAD
     initRootEditPart:function (editPart) {
-
-=======
-    initRootEditPart: function (editPart) {
->>>>>>> origin/master
         editPart.modelChildren = this.models.values();
         editPart.refresh();
     },
