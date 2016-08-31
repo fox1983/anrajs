@@ -7,20 +7,14 @@ anra.Handle = Control.extend({
     defaultWidth: 4,
     defaultHeight: 4,
     offset: 2,
-    //data
     editPart: null,
     direction: null,
     constructor: function (editPart, direction) {
-        this._Control(); //ï¿½ï¿½ï¿½Ã¸ï¿½ï¿½Ä¹ï¿½ï¿½ìº¯ï¿½ï¿½
+        this._Control();
         this.editPart = editPart;
         this.direction = direction;
         var model = editPart.model;
         if (model != null) {
-            var handle = this;
-            // µ±figure±»ÍÏ¶¯µÄÊ±ºò,Ë¢ÐÂhandles
-            editPart.figure.addListener(anra.EVENT.MouseDrag, function () {
-                handle.setLocator(editPart.model.getBounds());
-            });
             this.setLocator(model.getBounds());
             this.setStyle({
                 'fill': '#000000'
@@ -62,7 +56,7 @@ anra.Handle = Control.extend({
         var y = bounds[1] - this.offset;
         var cursorStyle = 'default';
         switch (this.direction) {
-            //ï¿½ï¿½ï¿½ï¿½ï¿½
+            //ï¿½ï¿½ï¿½ï¿½ï¿?
             case anra.Handle.NORTH_WEST:
                 cursorStyle = 'nw-resize';
                 break;
@@ -84,7 +78,7 @@ anra.Handle = Control.extend({
                 y += height / 2;
                 cursorStyle = 'e-resize';
                 break;
-            //ï¿½ï¿½ï¿½ï¿½ï¿½
+            //ï¿½ï¿½ï¿½ï¿½ï¿?
             case anra.Handle.SOUTH_WEST:
                 y += height;
                 cursorStyle = 'sw-resize';
