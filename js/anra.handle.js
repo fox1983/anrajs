@@ -10,17 +10,12 @@ anra.Handle = Control.extend({
     //data
     editPart:null,
     direction:null,
-    constructor:function (editPart, direction) {
-        this._Control(); //���ø��Ĺ��캯��
+    constructor: function (editPart, direction) {
+        this._Control();
         this.editPart = editPart;
         this.direction = direction;
         var model = editPart.model;
         if (model != null) {
-            var handle = this;
-            // ��figure���϶���ʱ��,ˢ��handles
-            editPart.figure.addListener(anra.EVENT.MouseDrag, function () {
-                handle.setLocator(editPart.model.getBounds());
-            });
             this.setLocator(model.getBounds());
             this.setStyle({
                 'stroke':'#000000'

@@ -229,14 +229,6 @@ anra.svg.Composite = Control.extend({
             anra.Platform.error('can not remove ' + c.toString() + ' from Composite');
         }
     },
-    removeAll: function () {
-        if (this.children != null && !this.children.isEmpty()) {
-            for (var i = 0; i < this.children.length; i++) {
-                this.domContainer().removeChild(this.children[i].owner);
-            }
-            this.children = null;
-        }
-    },
     addChild: function (c) {
         if (this.children == null) {
             this.children = [];
