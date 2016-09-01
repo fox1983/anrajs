@@ -66,7 +66,6 @@ anra.Handle = Control.extend({
         if (this.direction.search('e') != -1) {
             x += width;
         }
-        console.log(this.direction, this.direction.search('(we){1}'));
         if (this.direction.search('(w|e)') == -1) {
             x += width / 2;
         }
