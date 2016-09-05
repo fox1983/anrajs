@@ -22,27 +22,22 @@ anra.Handle = Control.extend({
             });
             var dt = this.getResizeTracker(direction);
             this.addListener(anra.EVENT.MouseDown, function (e) {
-                console.log("mouse down" + e.x + e.y);
                 if (dt != null)
                     dt.mouseDown(e, editPart);
             });
             this.addListener(anra.EVENT.DragStart, function (e) {
-                console.log("drag start" + e.x + e.y);
                 if (dt != null)
                     dt.dragStart(e, editPart);
             });
             this.addListener(anra.EVENT.DragEnd, function (e) {
-                console.log("Drag End" + e.x + e.y);
                 if (dt != null)
                     dt.dragEnd(e, editPart);
             });
             this.addListener(anra.EVENT.MouseDrag, function (e) {
-                console.log("mouse Drag" + e.x + e.y, direction, dt);
                 if (dt != null)
                     dt.mouseDrag(e, editPart);
             });
             this.addListener(anra.EVENT.MouseUp, function (e) {
-                console.log("mouse up" + e.x + e.y);
                 if (dt != null)
                     dt.mouseUp(e, editPart);
             });
