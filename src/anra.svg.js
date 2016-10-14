@@ -5,10 +5,10 @@
 anra.svg = anra.svg || {};
 
 anra.svg.Util = {
-    createElement: function (tagName) {
+    createElement:function (tagName) {
         return document.createElementNS("http://www.w3.org/2000/svg", tagName);
     },
-    apply: function (container, a, v) {
+    apply:function (container, a, v) {
         if (a != null && typeof(a) == 'object')
             for (var k in a) {
                 container[k] = a[k];
@@ -17,7 +17,7 @@ anra.svg.Util = {
             container[a] = v;
         }
     },
-    applyAttr: function (container, a, v) {
+    applyAttr:function (container, a, v) {
         if (a != null && typeof(a) == 'object')
             for (var k in a) {
                 container.setAttribute(k, a[k]);
@@ -35,22 +35,22 @@ var Util = anra.svg.Util;
  * @type {*}
  */
 anra.svg.Control = anra.Control.extend({
-    svg: null,
-    owner: null,
-    layoutData: null,
-    tagName: 'rect',
-    bounds: null,
-    parent: null,
-    _attr: null,
-    _style: null,
-    ready: false,
-    constructor: function () {
+    svg:null,
+    owner:null,
+    layoutData:null,
+    tagName:'rect',
+    bounds:null,
+    parent:null,
+    _attr:null,
+    _style:null,
+    ready:false,
+    constructor:function () {
         this._Control();
     },
-    _Control: function () {
-        this.bounds = {'x': 0, 'y': 0, 'width': 100, 'height': 100};
+    _Control:function () {
+        this.bounds = {'x':0, 'y':0, 'width':100, 'height':100};
     },
-    applyBounds: function () {
+    applyBounds:function () {
         if (this.bounds == null)
             return;
         var l = this.locArea();
@@ -59,33 +59,33 @@ anra.svg.Control = anra.Control.extend({
         this.setAttribute('width', this.bounds.width);
         this.setAttribute('height', this.bounds.height);
     },
-    createContent: function () {
+    createContent:function () {
     },
     /**
      * 绝对位置
      * @return {Object}
      */
-    getClientArea: function () {
+    getClientArea:function () {
         if (this.owner == null)
             return [0, 0, 0, 0];
         return [this.fattr('x'), this.fattr('y'), this.fattr('width'), this.fattr('height')];
     },
-    attr: function (k, h) {
+    attr:function (k, h) {
         if (h == null || typeof(h) != 'function')
             return this.owner.getAttribute(k);
         var a = this.owner.getAttribute(k);
         return a == null ? null : h(a);
     },
-    fattr: function (k) {
+    fattr:function (k) {
         return this.attr(k, parseFloat);
     },
-    getBounds: function () {
+    getBounds:function () {
         return this.bounds;
     },
-    removeAttribute: function (k) {
+    removeAttribute:function (k) {
         this.owner.removeAttribute(k);
     },
-    setAttribute: function (a, v) {
+    setAttribute:function (a, v) {
         if (this.owner == null) {
             if (this._attr == null)
                 this._attr = {};
@@ -98,7 +98,7 @@ anra.svg.Control = anra.Control.extend({
         }
         Util.applyAttr(this.owner, a, v);
     },
-    setStyle: function (a, v) {
+    setStyle:function (a, v) {
         if (this.owner == null) {
             if (this._style == null)
                 this._style = {};
@@ -114,10 +114,10 @@ anra.svg.Control = anra.Control.extend({
     /**
      * 初始化属性，在构建完成后调用。
      */
-    initProp: function () {
-        this.setAttribute({'fill': 'white', 'stroke': 'black'});
+    initProp:function () {
+        this.setAttribute({'fill':'white', 'stroke':'black'});
     },
-    paint: function () {
+    paint:function () {
         this.applyBounds();
         //this.repaint();
     }
@@ -212,16 +212,16 @@ Control.prototype.locArea = function () {
  * @type {*}
  */
 anra.svg.Composite = Control.extend({
-    children: null,
-    layoutManager: null,
-    selection: null,
-    setSelection: function (o) {
+    children:null,
+    layoutManager:null,
+    selection:null,
+    setSelection:function (o) {
         if (this.selection != null)
             this.selection.setSelected(false);
         this.selection = o;
         this.selection.setSelected(true);
     },
-    removeChild: function (c) {
+    removeChild:function (c) {
         if (c instanceof anra.svg.Control) {
             this.children.removeObject(c);
             this.domContainer().removeChild(c.owner);
@@ -229,7 +229,7 @@ anra.svg.Composite = Control.extend({
             anra.Platform.error('can not remove ' + c.toString() + ' from Composite');
         }
     },
-    addChild: function (c) {
+    addChild:function (c) {
         if (this.children == null) {
             this.children = [];
         }
@@ -243,17 +243,15 @@ anra.svg.Composite = Control.extend({
         } else {
             anra.Platform.error('can not add [' + c + '] to ' + this.tagName);
         }
-    }
-    ,
+    },
     /**
      * DOM容器
      * @return {*}
      */
-    domContainer: function () {
+    domContainer:function () {
         return this.svg.owner;
-    }
-    ,
-    paint: function () {
+    },
+    paint:function () {
         this.applyBounds();
         if (this.layoutManager != null)
             this.layout();
@@ -262,9 +260,8 @@ anra.svg.Composite = Control.extend({
             for (var i = 0; i < this.children.length; i++) {
                 this.children[i].paint();
             }
-    }
-    ,
-    layout: function () {
+    },
+    layout:function () {
         this.layoutManager.layout(this);
     }
 })
@@ -276,38 +273,38 @@ var Composite = anra.svg.Composite;
  * @type {*|void}
  */
 anra.svg.Group = Composite.extend({
-    animations: null,
-    tagName: 'g',
-    domContainer: function () {
+    animations:null,
+    tagName:'g',
+    domContainer:function () {
         return this.owner;
     },
-    applyBounds: function () {
+    applyBounds:function () {
     }
 });
 
 anra.svg.Path = Composite.extend({
-    startPoint: null,
-    frags: null,
-    close: false,
-    tagName: 'path',
-    constructor: function () {
+    startPoint:null,
+    frags:null,
+    close:false,
+    tagName:'path',
+    constructor:function () {
         this._Path();
     },
-    _Path: function () {
+    _Path:function () {
         this._Control();
-        this.startPoint = {x: 0, y: 0};
+        this.startPoint = {x:0, y:0};
     },
-    applyBounds: function () {
+    applyBounds:function () {
         this.setAttribute('d', this.compute());
     },
-    initProp: function () {
+    initProp:function () {
         this.setAttribute({
-            stroke: 'white',
-            fill: 'none',
-            'stroke-width': 2
+            stroke:'white',
+            fill:'none',
+            'stroke-width':2
         });
     },
-    compute: function () {
+    compute:function () {
         var l = this.locArea();
         var result = '';
         if (this.startPoint != null) {
@@ -325,7 +322,7 @@ anra.svg.Path = Composite.extend({
 });
 
 anra.svg.MarkerLine = anra.svg.Group.extend({
-    createContent: function () {
+    createContent:function () {
 //        this.addChild();
     }
 });
@@ -335,15 +332,15 @@ anra.svg.MarkerLine = anra.svg.Group.extend({
  * @type {*|void}
  */
 anra.svg.Animation = Control.extend({
-    tagName: 'animateTransform'
+    tagName:'animateTransform'
 });
 
 anra.SVG = Composite.extend({
-    dispatcher: null,
-    error: function (msg) {
+    dispatcher:null,
+    error:function (msg) {
         console.log(msg);
     },
-    constructor: function (id) {
+    constructor:function (id) {
         this.element = document.getElementById(id);
         if (this.element != null) {
             this.init();
@@ -352,7 +349,7 @@ anra.SVG = Composite.extend({
             this.error("SVG parent can not be null");
         }
     },
-    init: function () {
+    init:function () {
         this.owner = Util.createElement('svg');
         this.owner.setAttribute('version', '1.1');
         this.owner.style.position = 'absolute';
@@ -383,23 +380,23 @@ anra.SVG = Composite.extend({
         anra.Platform.regist(anra.Platform.DISPLAY, this);
         anra.Platform.focus = this;
     },
-    p2x: function (p) {
+    p2x:function (p) {
         if (this.element == null)
             return -1;
         return this.element.width * p / 100;
     },
-    p2y: function (p) {
+    p2y:function (p) {
         if (this.element == null)
             return -1;
         return this.element.height * p / 100;
     },
-    getRelativeLocation: function (event) {
+    getRelativeLocation:function (event) {
         var ev = event || window.event;
         var x = ev.clientX - this.getX(this.element) + Math.floor(window.pageXOffset);
         var y = ev.clientY - this.getY(this.element) + Math.floor(window.pageYOffset);
         return [x, y];
     },
-    getX: function (obj) {
+    getX:function (obj) {
         if (this.left != null)
             return this.left;
         var parObj = obj;
@@ -410,7 +407,7 @@ anra.SVG = Composite.extend({
         this.left = left;
         return this.left;
     },
-    getY: function (obj) {
+    getY:function (obj) {
         if (this.top != null)
             return this.top;
         var parObj = obj;
@@ -425,17 +422,17 @@ anra.SVG = Composite.extend({
 
 anra.svg.Rect = Composite.extend({});
 anra.svg.Circle = Composite.extend({
-    tagName: 'circle',
-    getClientArea: function () {
+    tagName:'circle',
+    getClientArea:function () {
         return [this.fattr('cx'), this.fattr('cy'), this.fattr['r'] * 2];
     },
-    applyBounds: function () {
+    applyBounds:function () {
         var l = this.locArea();
         var r = this.bounds.width / 2;
         this.setAttribute({
-            r: r,
-            cx: this.bounds.x + l[0],
-            'cy': this.bounds.y + l[1]
+            r:r,
+            cx:this.bounds.x + l[0],
+            'cy':this.bounds.y + l[1]
         });
     }
 });
@@ -445,28 +442,28 @@ anra.svg.Circle = Composite.extend({
  * @type {*|void}
  */
 anra.svg.Text = Control.extend({
-    tagName: 'text',
-    text: null,
-    setText: function (text) {
+    tagName:'text',
+    text:null,
+    setText:function (text) {
         this.text = text;
         if (this.owner != null) {
             this.owner.textContent = text;
         }
     },
-    initProp: function () {
+    initProp:function () {
         this.owner.textContent = this.text;
     },
-    paint: function () {
+    paint:function () {
 
     }
 });
 
 anra.svg.Ellipse = Composite.extend({
-    tagName: 'ellipse',
-    getClientArea: function () {
+    tagName:'ellipse',
+    getClientArea:function () {
         return [this.fattr('cx') - this.fattr('rx'), this.fattr('cy') - this.fattr('ry')];
     },
-    applyBounds: function () {
+    applyBounds:function () {
         var l = this.locArea();
         this.setAttribute('rx', this.bounds.width / 2);
         this.setAttribute('ry', this.bounds.height / 2);
@@ -480,7 +477,7 @@ anra.svg.Ellipse = Composite.extend({
  * @type {*}
  */
 anra.svg.Layout = Base.extend({
-    layout: function (comp) {
+    layout:function (comp) {
     }
 });
 
@@ -493,13 +490,13 @@ count = 0;
  * @type {*}
  */
 anra.svg.EventDispatcher = Base.extend({
-    display: null,
-    constructor: function (display) {
+    display:null,
+    constructor:function (display) {
         this.display = display;
     },
-    focusOwner: null,
-    mouseState: 0,
-    dispatchMouseDown: function (event) {
+    focusOwner:null,
+    mouseState:0,
+    dispatchMouseDown:function (event) {
         this.mouseState = anra.EVENT.MouseDown;
         var e = new anra.event.Event(anra.EVENT.MouseDown);
         var location = this.getRelativeLocation(event);
@@ -509,7 +506,7 @@ anra.svg.EventDispatcher = Base.extend({
         widget.notifyListeners(anra.EVENT.MouseDown, e);
 //        widget.setFocus();
     },
-    dispatchMouseMove: function (event) {
+    dispatchMouseMove:function (event) {
         //提高效率
         if ((++count ) % 5 != 0) {
             if (count > 101)
@@ -540,73 +537,74 @@ anra.svg.EventDispatcher = Base.extend({
             this.dragTarget.notifyListeners(anra.EVENT.MouseDrag, e);
         }
     },
-    dispatchMouseUp: function (event) {
+    dispatchMouseUp:function (event) {
         var location = this.getRelativeLocation(event);
-        this.mouseState = anra.EVENT.MouseUp;
-        var e = new anra.event.Event(anra.EVENT.DragEnd, location);
         if (this.mouseState == anra.EVENT.MouseDrag) {
-            e.prop = {drag: this.dragTarget, target: this.focusOwner};
+            var e = new anra.event.Event(anra.EVENT.DragEnd, location);
+            e.prop = {drag:this.dragTarget, target:this.focusOwner};
             this.dragTarget.notifyListeners(anra.EVENT.DragEnd, e);
-            this.focusOwner.notifyListeners(anra.EVENT.DragEnd, e);
+            if (this.dragTarget != this.focusOwner)
+                this.focusOwner.notifyListeners(anra.EVENT.DragEnd, e);
         }
+        this.mouseState = anra.EVENT.MouseUp;
         e = new anra.event.Event(anra.EVENT.MouseUp, location);
         this.focusOwner.notifyListeners(anra.EVENT.MouseUp, e);
         this.dragTarget = null;
     },
-    dispatchMouseIn: function (event) {
+    dispatchMouseIn:function (event) {
         var location = this.getRelativeLocation(event);
         var e = new anra.event.Event(anra.EVENT.MouseIn, location);
         this.focusOwner.notifyListeners(anra.EVENT.MouseIn, e);
     },
-    dispatchMouseOut: function (event) {
+    dispatchMouseOut:function (event) {
         var loc = this.getRelativeLocation(event);
         if (anra.Rectangle.contains(this.focusOwner.bounds, loc[0], loc[1]))
             return;
         var e = new anra.event.Event(anra.EVENT.MouseOut, loc);
         this.focusOwner.notifyListeners(anra.EVENT.MouseOut, e);
     },
-    dispatchMouseOutScreen: function (event) {
+    dispatchMouseOutScreen:function (event) {
 //        this.mouseState = anra.EVENT.MouseOut;
 //        this.dragTarget = null;
     },
-    dispatchDoubleClick: function (event) {
+    dispatchDoubleClick:function (event) {
         var location = this.getRelativeLocation(event);
         var e = new anra.event.Event(anra.EVENT.MouseDoubleClick, location);
         this.focusOwner.notifyListeners(anra.EVENT.MouseDoubleClick, e);
     },
-    dispatchKeyDown: function (event) {
+    dispatchKeyDown:function (event) {
         var e = new anra.event.KeyEvent(anra.EVENT.KeyDown, this.getRelativeLocation(event), event);
         var f = this.focusOwner == null ? this.display : this.focusOwner;
         f.notifyListeners(e.type, e);
     },
-    dispatchKeyUp: function (event) {
+    dispatchKeyUp:function (event) {
         var e = new anra.event.KeyEvent(anra.EVENT.KeyUp, this.getRelativeLocation(event), event);
         var f = this.focusOwner == null ? this.display : this.focusOwner;
         f.notifyListeners(e.type, event);
     },
-    dispatchTouchStart: function (event) {
+    dispatchTouchStart:function (event) {
         var location = this.getRelativeLocation(event.touches[0]);
         var e = new anra.event.TouchEvent(anra.EVENT.TouchStart, location, event);
         this.focusOwner.notifyListeners(anra.EVENT.TouchStart, e);
     },
-    dispatchTouchMove: function (event) {
+    dispatchTouchMove:function (event) {
         var location = this.getRelativeLocation(event.touches[0]);
         if (location[0] == null)
             return;
         var e = new anra.event.TouchEvent(anra.EVENT.TouchMove, location, event);
         this.focusOwner.notifyListeners(anra.EVENT.TouchMove, e);
     },
-    dispatchTouchEnd: function (event) {
+    dispatchTouchEnd:function (event) {
         var location = this.getRelativeLocation(event.touches[0]);
         if (location[0] == null)
             return;
         var e = new anra.event.TouchEvent(anra.EVENT.TouchEnd, location, event);
         this.focusOwner.notifyListeners(anra.EVENT.TouchEnd, e);
     },
-    setFocusOwner: function (o) {
+    setFocusOwner:function (o) {
         this.focusOwner = o;
     },
-    getRelativeLocation: function (event) {
+    getRelativeLocation:function (event) {
         return this.display.getRelativeLocation(event);
     }
 });
