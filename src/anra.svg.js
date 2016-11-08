@@ -420,8 +420,8 @@ anra.SVG = Composite.extend({
     }
 });
 
-anra.svg.Rect = Composite.extend({});
-anra.svg.Circle = Composite.extend({
+anra.svg.Rect = {};
+anra.svg.Circle = {
     tagName:'circle',
     getClientArea:function () {
         return [this.fattr('cx'), this.fattr('cy'), this.fattr['r'] * 2];
@@ -435,13 +435,31 @@ anra.svg.Circle = Composite.extend({
             'cy':this.bounds.y + l[1]
         });
     }
-});
-
+};
+anra.svg.Image ={
+    tagName:'image',
+    url:null,
+    setUrl:function (url) {
+        this.url = url;
+        if (this.owner != null) {
+            this.owner.setAttributeNS(
+                'http://www.w3.org/1999/xlink',
+                'xlink:href',
+                url);
+        }
+    },
+    initProp:function () {
+        this.owner.setAttributeNS(
+            'http://www.w3.org/1999/xlink',
+            'xlink:href',
+            this.url);
+    }
+};
 /**
  * 文本
  * @type {*|void}
  */
-anra.svg.Text = Control.extend({
+anra.svg.Text = {
     tagName:'text',
     text:null,
     setText:function (text) {
@@ -456,9 +474,9 @@ anra.svg.Text = Control.extend({
     paint:function () {
 
     }
-});
+};
 
-anra.svg.Ellipse = Composite.extend({
+anra.svg.Ellipse = {
     tagName:'ellipse',
     getClientArea:function () {
         return [this.fattr('cx') - this.fattr('rx'), this.fattr('cy') - this.fattr('ry')];
@@ -470,7 +488,7 @@ anra.svg.Ellipse = Composite.extend({
         this.setAttribute('cx', this.bounds.x + this.fattr('rx') + l[0]);
         this.setAttribute('cy', this.bounds.y + this.fattr('ry') + l[1]);
     }
-});
+};
 
 /**
  * 布局

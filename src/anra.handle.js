@@ -2,7 +2,20 @@
  * Created by weiyajun on 2016/8/9 0009.
  */
 var Control = anra.svg.Control;
+
 anra.Handle = Control.extend({
+    editPart:null,
+    constructor:function (editPart) {
+        this.editPart = editPart;
+    },
+    refreshLocation:function (e) {
+        this.owner.setAttribute('x', e.x-10);
+        this.owner.setAttribute('y', e.y+50);
+    }
+});
+
+
+anra.ResizeHandle = Control.extend({
     //const
     defaultWidth:4,
     defaultHeight:4,
@@ -10,7 +23,7 @@ anra.Handle = Control.extend({
     //data
     editPart:null,
     direction:null,
-    constructor: function (editPart, direction) {
+    constructor:function (editPart, direction) {
         this._Control();
         this.editPart = editPart;
         this.direction = direction;
@@ -83,14 +96,14 @@ anra.Handle = Control.extend({
     }
 });
 //���巽����
-anra.Handle.NORTH = "n";
-anra.Handle.SOUTH = "s";
-anra.Handle.EAST = "e";
-anra.Handle.WEST = "w";
-anra.Handle.NORTH_EAST = "ne";
-anra.Handle.NORTH_WEST = "nw";
-anra.Handle.SOUTH_EAST = "se";
-anra.Handle.SOUTH_WEST = "sw";
+anra.ResizeHandle.NORTH = "n";
+anra.ResizeHandle.SOUTH = "s";
+anra.ResizeHandle.EAST = "e";
+anra.ResizeHandle.WEST = "w";
+anra.ResizeHandle.NORTH_EAST = "ne";
+anra.ResizeHandle.NORTH_WEST = "nw";
+anra.ResizeHandle.SOUTH_EAST = "se";
+anra.ResizeHandle.SOUTH_WEST = "sw";
 
 anra.gef.ResizeTracker = Base.extend({
     status:null,
@@ -205,11 +218,11 @@ anra.gef.SouthEastTracker = anra.gef.ResizeTracker.extend({
 
 
 var trackPool = new Map();
-trackPool.put(anra.Handle.NORTH, new anra.gef.NorthTracker());
-trackPool.put(anra.Handle.SOUTH, new anra.gef.SouthTracker());
-trackPool.put(anra.Handle.SOUTH_EAST, new anra.gef.SouthEastTracker());
-trackPool.put(anra.Handle.SOUTH_WEST, new anra.gef.SouthWestTracker());
-trackPool.put(anra.Handle.NORTH_WEST, new anra.gef.NorthWestTracker());
-trackPool.put(anra.Handle.NORTH_EAST, new anra.gef.NorthEastTracker());
-trackPool.put(anra.Handle.EAST, new anra.gef.EastTracker());
-trackPool.put(anra.Handle.WEST, new anra.gef.WestTracker());
+trackPool.put(anra.ResizeHandle.NORTH, new anra.gef.NorthTracker());
+trackPool.put(anra.ResizeHandle.SOUTH, new anra.gef.SouthTracker());
+trackPool.put(anra.ResizeHandle.SOUTH_EAST, new anra.gef.SouthEastTracker());
+trackPool.put(anra.ResizeHandle.SOUTH_WEST, new anra.gef.SouthWestTracker());
+trackPool.put(anra.ResizeHandle.NORTH_WEST, new anra.gef.NorthWestTracker());
+trackPool.put(anra.ResizeHandle.NORTH_EAST, new anra.gef.NorthEastTracker());
+trackPool.put(anra.ResizeHandle.EAST, new anra.gef.EastTracker());
+trackPool.put(anra.ResizeHandle.WEST, new anra.gef.WestTracker());

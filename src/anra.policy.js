@@ -6,15 +6,6 @@
  */
 
 anra.gef.AbstractEditPolicy = anra.gef.Policy.extend({
-    editPart: null,
-
-    setHost: function (editPart) {
-        this.editPart = editPart;
-    },
-    getHost: function () {
-        return this.editPart;
-    }
-
 });
 anra.gef.SelectionPolicy = anra.gef.AbstractEditPolicy.extend({
     handles: [],

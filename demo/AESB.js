@@ -105,8 +105,7 @@ CoreFigure = anra.gef.Figure.extend({
     }
 });
 
-NodeFigure = anra.gef.Figure.extend({
-    tagName:'circle',
+NodeFigure = anra.gef.Figure.extend(anra.svg.Circle).extend({
     createContent:function () {
         var e = new anra.svg.Circle();
         e.initProp = function () {
@@ -193,9 +192,7 @@ NodeFigure = anra.gef.Figure.extend({
     },
     getTargetAnchor:function (line) {
         return {x:this.fattr('cx'), y:this.fattr('cy')};
-    },
-    getClientArea:anra.svg.Circle.prototype.getClientArea,
-    applyBounds:anra.svg.Circle.prototype.applyBounds
+    }
 });
 
 var CORE_EDIT_PART;

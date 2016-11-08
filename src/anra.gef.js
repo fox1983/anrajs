@@ -806,6 +806,16 @@ anra.gef.ConstraintCommand = anra.Command.extend({
 
 
 anra.gef.Policy = Base.extend({
+    editPart: null,
+    setHost: function (editPart) {
+        this.editPart = editPart;
+    },
+    getHostFigure:function(){
+        return this.editPart.getFigure();
+    },
+    getHost: function () {
+        return this.editPart;
+    },
     activate:function () {
     },
     deactivate:function () {
