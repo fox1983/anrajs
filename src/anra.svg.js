@@ -162,7 +162,7 @@ Control.prototype.create = function () {
 
         e.onmouseup = function (event) {
             dispatcher.setFocusOwner(o);
-            dispatcher.dispatchMouseUp(event,false);
+            dispatcher.dispatchMouseUp(event);
         };
 
         e.ondblclick = function (event) {
@@ -429,7 +429,7 @@ anra.SVG = Composite.extend({
         this.element.onmouseup = function (event) {
             anra.Platform.focusDisplay = this;
             if (d.focusOwner != null)
-                d.dispatchMouseUp(event);
+                d.dispatchMouseUp(event,true);
         };
         anra.Platform.regist(anra.Platform.DISPLAY, this);
         anra.Platform.focus = this;
