@@ -368,6 +368,10 @@ anra.svg.Polyline = {
     },
     getEndPoint:function () {
         return this.points == null || this.points.length == 0 ? null : this.points[this.points.length - 1];
+    },
+    afterAddListener:function () {
+        if (this.eventTable.size() > 0)
+            this.setStyle('pointer-events', 'stroke');
     }
 };
 
