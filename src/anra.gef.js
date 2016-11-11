@@ -13,11 +13,7 @@ anra.gef.Figure = anra.svg.Composite.extend({
     stroke:'black',
     strokeSelected:'green',
     isSelected:SELECTED_NONE,
-    constructor:function () {
-        this._Figure();
-    },
-    _Figure:function () {
-        this._Control();
+    init:function () {
         var f = this;
         this.addListener(anra.EVENT.MouseIn, function (e) {
             f.mouseIn();
@@ -961,11 +957,7 @@ anra.gef.Line = anra.gef.Figure.extend({
         } else
             this.removeAttribute('marker-end');
     },
-    constructor:function () {
-        this._Line();
-    },
-    _Line:function () {
-        this._Figure();
+    init:function () {
         this.points = [];
         this.startPoint = {};
         this.endPoint = {};

@@ -203,8 +203,8 @@ CommonLineEditPart = anra.gef.LineEditPart.extend({
 });
 
 Line = anra.gef.Line.extend({
-        constructor:function (source) {
-            this._Line();
+        init:function (source) {
+            anra.gef.Line.prototype.init(source);
             this.source = source;
         },
         mouseIn:function () {

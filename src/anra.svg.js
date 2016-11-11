@@ -44,11 +44,18 @@ anra.svg.Control = anra.Control.extend({
     _attr:null,
     _style:null,
     ready:false,
-    constructor:function () {
-        this._Control();
-    },
-    _Control:function () {
+    _init:function () {
         this.bounds = {'x':0, 'y':0, 'width':100, 'height':100};
+        this._style = {'pointer-events':'none'};
+        if (this.init != null)this.init();
+    },
+    afterRemoveListener:function () {
+        if (this.eventTable.size())
+            this.setStyle('pointer-events', 'none');
+    },
+    afterAddListener:function () {
+        if (this.eventTable.size() > 0)
+            this.setStyle('pointer-events', 'visible');
     },
     applyBounds:function () {
         if (this.bounds == null)
@@ -125,7 +132,7 @@ anra.svg.Control = anra.Control.extend({
 ;
 var Control = anra.svg.Control;
 //初始化控件
-Control.prototype.init = function () {
+Control.prototype.create = function () {
     if (this.owner == null) {
         var o = this;
         this.owner = Util.createElement(this.tagName);
@@ -236,7 +243,7 @@ anra.svg.Composite = Control.extend({
         if (c instanceof  anra.svg.Control) {
             if (!this.children.contains(c)) {
                 this.children.push(c);
-                c.init();
+                c.create();
                 c.setParent(this);
                 this.paint();
             }
@@ -279,21 +286,30 @@ anra.svg.Group = Composite.extend({
         return this.owner;
     },
     applyBounds:function () {
+    },
+    addListener:function () {
+        //TODO
+    },
+    create:function () {
+        //重写create方法，使Group不再接收任何事件
+        if (this.owner == null) {
+            var o = this;
+            this.owner = Util.createElement(this.tagName);
+            this.ready = true;
+            //应用预设
+            this.setAttribute({});
+            this.setStyle({});
+            this.initProp();
+        }
+//        this.paint();
     }
 });
 
-anra.svg.Path = Composite.extend({
+anra.svg.Path = {
     startPoint:null,
     frags:null,
     close:false,
     tagName:'path',
-    constructor:function () {
-        this._Path();
-    },
-    _Path:function () {
-        this._Control();
-        this.startPoint = {x:0, y:0};
-    },
     applyBounds:function () {
         this.setAttribute('d', this.compute());
     },
@@ -319,7 +335,7 @@ anra.svg.Path = Composite.extend({
         }
         return result;
     }
-});
+};
 
 anra.svg.MarkerLine = anra.svg.Group.extend({
     createContent:function () {
@@ -436,7 +452,7 @@ anra.svg.Circle = {
         });
     }
 };
-anra.svg.Image ={
+anra.svg.Image = {
     tagName:'image',
     url:null,
     setUrl:function (url) {
