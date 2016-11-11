@@ -161,15 +161,20 @@ TextInfoPolicy = anra.gef.AbstractEditPolicy.extend({
     activate:function () {
         this.handle = new TextHandle(this.getHost());
         this.handle.setText(this.getHost().model.getValue('name'));
-        var handle = this.handle;
-        this.getHostFigure().addListener(anra.EVENT.MouseDrag, function (e) {
-            handle.refreshLocation(e);
-        });
         this.getHost().getRoot().figure.addChild(this.handle);
+    },
+    deactive:function(){
+        this.getHost().getRoot().figure.removeChild(this.handle);
     }
 });
 
 TextHandle = anra.Handle.extend(anra.svg.Text).extend({
+    refreshLocation:function (figure) {
+        if (this.owner == null || figure == null)
+            return;
+        this.owner.setAttribute('x', figure.fattr('x') - 10);
+        this.owner.setAttribute('y', figure.fattr('y') + 50);
+    }
 
 });
 
@@ -204,7 +209,7 @@ CommonLineEditPart = anra.gef.LineEditPart.extend({
 
 
 Line = anra.gef.Line.extend({
-        router: function (line) {
+        router:function (line) {
             if (line.points == null || line.points.length < 2)
                 return null;
             var sp = line.getStartPoint(), ep = line.getEndPoint();

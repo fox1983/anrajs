@@ -14,6 +14,7 @@ anra.gef.Figure = anra.svg.Composite.extend({
     stroke:'black',
     strokeSelected:'green',
     isSelected:SELECTED_NONE,
+    repaintListeners:null,
     init:function () {
         var f = this;
         this.addListener(anra.EVENT.MouseIn, function (e) {
@@ -40,8 +41,38 @@ anra.gef.Figure = anra.svg.Composite.extend({
         } else {
             this.setAttribute('stroke', this.stroke);
         }
+    },
+    paint:function () {
+        this.applyBounds();
+        if (this.layoutManager != null)
+            this.layout();
+        this.fireRepaintListener();
+        if (this.children)
+            for (var i = 0; i < this.children.length; i++) {
+                this.children[i].paint();
+            }
+    },
+    fireRepaintListener:function () {
+        if (this.repaintListeners != null)
+            this.repaintListeners.forEach(function(_f,_k){
+                _k(this);
+            },this);
+    },
+    addRepaintListener:function (listener) {
+        if (this.repaintListeners == null)
+            this.repaintListeners = new Map();
+        this.repaintListeners.put(listener, null);
+    },
+    removeRepaintListener:function (listener) {
+        if (this.repaintListeners != null)
+            this.repaintListeners.remove(listener);
+    },
+    dispose:function () {
+        if (this.repaintListeners != null) {
+            this.repaintListeners.clear();
+            this.repaintListeners = null;
+        }
     }
-
 })
 ;
 

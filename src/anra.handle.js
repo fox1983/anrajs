@@ -1,16 +1,32 @@
 /**
  * Created by weiyajun on 2016/8/9 0009.
  */
+
+var anra = anra || {};
 var Control = anra.svg.Control;
 
 anra.Handle = Control.extend({
     editPart:null,
+    listener:null,
     constructor:function (editPart) {
         this.editPart = editPart;
     },
-    refreshLocation:function (e) {
-        this.owner.setAttribute('x', e.x-10);
-        this.owner.setAttribute('y', e.y+50);
+    createContent:function (s) {
+        var t=this;
+        this.listener=function(f){
+            t.refreshLocation(f);
+        };
+        this.editPart.getFigure().addRepaintListener(this.listener);
+    },
+    _dispose:function () {
+        this.editPart.getFigure().removeRepaintListener(this.listener);
+        this.dispose();
+    },
+    dispose:function () {
+
+    },
+    refreshLocation:function (figure) {
+
     }
 });
 
