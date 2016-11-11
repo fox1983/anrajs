@@ -162,7 +162,7 @@ Control.prototype.create = function () {
 
         e.onmouseup = function (event) {
             dispatcher.setFocusOwner(o);
-            dispatcher.dispatchMouseUp(event);
+            dispatcher.dispatchMouseUp(event,false);
         };
 
         e.ondblclick = function (event) {
@@ -359,7 +359,7 @@ anra.svg.Polyline = {
         var result = '';
 
         for (var i = 0; i < this.points.length; i++) {
-            result += (i==0?'M':'L')+(this.points[i].x + l[0]) + ',' + (this.points[i].y + l[1])+' ';
+            result += (i == 0 ? 'M' : 'L') + (this.points[i].x + l[0]) + ',' + (this.points[i].y + l[1]) + ' ';
         }
         return result;
     },
@@ -605,7 +605,7 @@ anra.svg.EventDispatcher = Base.extend({
             this.dragTarget.notifyListeners(anra.EVENT.MouseDrag, e);
         }
     },
-    dispatchMouseUp:function (event) {
+    dispatchMouseUp:function (event, global) {
         var location = this.getRelativeLocation(event);
         if (this.mouseState == anra.EVENT.MouseDrag) {
             var e = new anra.event.Event(anra.EVENT.DragEnd, location);
@@ -614,9 +614,12 @@ anra.svg.EventDispatcher = Base.extend({
             if (this.dragTarget != this.focusOwner)
                 this.focusOwner.notifyListeners(anra.EVENT.DragEnd, e);
         }
-        this.mouseState = anra.EVENT.MouseUp;
-        e = new anra.event.Event(anra.EVENT.MouseUp, location);
-        this.focusOwner.notifyListeners(anra.EVENT.MouseUp, e);
+        //global标明请求是全局还是本地的
+        if (!global) {
+            this.mouseState = anra.EVENT.MouseUp;
+            e = new anra.event.Event(anra.EVENT.MouseUp, location);
+            this.focusOwner.notifyListeners(anra.EVENT.MouseUp, e);
+        }
         this.dragTarget = null;
     },
     dispatchMouseIn:function (event) {
