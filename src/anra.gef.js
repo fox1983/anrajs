@@ -9,6 +9,7 @@ anra.gef = {};
  * @type {*}
  */
 anra.gef.Figure = anra.svg.Composite.extend({
+    class:'Figure',
     strokeIn:'blue',
     stroke:'black',
     strokeSelected:'green',
@@ -53,6 +54,7 @@ var MAX_FLAG = FLAG_FOCUS;
  * @type {*}
  */
 anra.gef.EditPart = Base.extend({
+    class:'EditPart',
     selectable:true,
     model:null,
     parent:null,
@@ -570,6 +572,7 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
 });
 anra.gef.RootEditPart = anra.gef.EditPart.extend({
     layers:null,
+    class:'RootEditPart',
     constructor:function () {
         this._RootEditPart();
     },
@@ -802,14 +805,14 @@ anra.gef.ConstraintCommand = anra.Command.extend({
 
 
 anra.gef.Policy = Base.extend({
-    editPart: null,
-    setHost: function (editPart) {
+    editPart:null,
+    setHost:function (editPart) {
         this.editPart = editPart;
     },
-    getHostFigure:function(){
+    getHostFigure:function () {
         return this.editPart.getFigure();
     },
-    getHost: function () {
+    getHost:function () {
         return this.editPart;
     },
     activate:function () {
@@ -934,15 +937,12 @@ anra.gef.Editor = Base.extend({
  * 连线
  * @type {*}
  */
-anra.gef.Line = anra.gef.Figure.extend({
-    router:null,
-    tagName:'line',
-    startPoint:null,
-    endPoint:null,
+anra.gef.Line = anra.gef.Figure.extend(anra.svg.Polyline).extend({
     sourceAnchor:null,
     targetAnchor:null,
     endMarker:null,
     startMarker:null,
+    router:null,
     setStartMarker:function (marker) {
         this.startMarker = marker;
         if (marker != null) {
@@ -957,40 +957,45 @@ anra.gef.Line = anra.gef.Figure.extend({
         } else
             this.removeAttribute('marker-end');
     },
-    init:function () {
-        this.points = [];
-        this.startPoint = {};
-        this.endPoint = {};
-    },
-    setStartPoint:function (p) {
-        setPoint(this.startPoint, p);
-    },
-    setEndPoint:function (p) {
-        setPoint(this.endPoint, p);
-    },
-    initProp:function () {
-        this.setAttribute({
-            stroke:'black',
-            'stroke-width':'1.5'
-        });
-    },
     paint:function () {
+        if (this.router != null)
+            this.points = this.router(this);
         var f = this;
         if (this.sourceAnchor != null && this.targetAnchor != null)
             this.setAttribute({
-                x1:f.sourceAnchor.x,
-                y1:f.sourceAnchor.y,
-                x2:f.targetAnchor.x,
-                y2:f.targetAnchor.y
+                d:f.compute()
             });
     },
     setSourceAnchor:function (anchor) {
         this.sourceAnchor = anchor;
+        if (this.points == null)
+            this.points = [];
+        this.points[0] = anchor;
+        if (this.points.length > 1)
+            this.points[0] = ({
+                x:anchor.x,
+                y:anchor.y
+            });
+        else
+            this.points.insert({
+                x:anchor.x,
+                y:anchor.y
+            });
     },
     setTargetAnchor:function (anchor) {
         this.targetAnchor = anchor;
-    },
-    layout:function () {
+        if (this.points == null)
+            this.points = [];
+        if (this.points.length > 1)
+            this.points[this.points.length - 1] = ({
+                x:anchor.x,
+                y:anchor.y
+            });
+        else
+            this.points.push({
+                x:anchor.x,
+                y:anchor.y
+            });
     }
 });
 
@@ -1020,8 +1025,9 @@ anra.gef.PathLine = anra.gef.Line.extend({
 
 });
 
-anra.gef.Marker = anra.svg.Control.extend({});
+anra.gef.Marker = {
 
+}
 
 anra.gef.BaseModel = Base.extend({
     constructor:function () {

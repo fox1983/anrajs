@@ -202,7 +202,25 @@ CommonLineEditPart = anra.gef.LineEditPart.extend({
     }
 });
 
+
 Line = anra.gef.Line.extend({
+        router: function (line) {
+            if (line.points == null || line.points.length < 2)
+                return null;
+            var sp = line.getStartPoint(), ep = line.getEndPoint();
+
+            var mid = (sp.x + ep.x) / 2;
+            var p1 = {
+                x:mid,
+                y:sp.y
+            };
+
+            var p2 = {
+                x:mid,
+                y:ep.y
+            };
+            return  [sp, p1, p2, ep];
+        },
         init:function (source) {
             anra.gef.Line.prototype.init(source);
             this.source = source;
@@ -214,7 +232,8 @@ Line = anra.gef.Line.extend({
         initProp:function () {
             this.setAttribute({
                 stroke:'rgb(30,146,94)',
-                'stroke-width':'1.5'
+                fill:'none',
+                'stroke-width':'2'
             });
         }
     }

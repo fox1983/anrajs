@@ -337,6 +337,40 @@ anra.svg.Path = {
     }
 };
 
+
+anra.svg.Polyline = {
+    points:null,
+    close:false,
+    tagName:'path',
+    applyBounds:function () {
+        this.setAttribute('d', this.compute());
+    },
+    initProp:function () {
+        this.setAttribute({
+            stroke:'white',
+            fill:'none',
+            'stroke-width':1
+        });
+    },
+    compute:function () {
+        if (this.points == null || this.points.length < 2)
+            return null;
+        var l = this.locArea();
+        var result = '';
+
+        for (var i = 0; i < this.points.length; i++) {
+            result += (i==0?'M':'L')+(this.points[i].x + l[0]) + ',' + (this.points[i].y + l[1])+' ';
+        }
+        return result;
+    },
+    getStartPoint:function () {
+        return this.points == null || this.points.length == 0 ? null : this.points[0];
+    },
+    getEndPoint:function () {
+        return this.points == null || this.points.length == 0 ? null : this.points[this.points.length - 1];
+    }
+};
+
 anra.svg.MarkerLine = anra.svg.Group.extend({
     createContent:function () {
 //        this.addChild();
