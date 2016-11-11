@@ -123,7 +123,7 @@ anra.gef.EditPart = Base.extend({
             for (i = 0; i < this.modelChildren.length; i++) {
                 model = this.modelChildren[i];
                 if (i < this.children.length
-                    && this.children.get(i).model == model)
+                    && this.children[i].model == model)
                     continue;
 
                 editPart = map.get(model);

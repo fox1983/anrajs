@@ -78,7 +78,6 @@ FlowEditor = anra.gef.Editor.extend({
     createEditPart:function (context, model) {
         if (this.editParts == null)
             this.editParts = new Map();
-
         var part;
         /*根据type字段来确定节点类型*/
         var type = model.getValue('type');
@@ -162,8 +161,17 @@ TextInfoPolicy = anra.gef.AbstractEditPolicy.extend({
         this.handle = new TextHandle(this.getHost());
         this.handle.setText(this.getHost().model.getValue('name'));
         this.getHost().getRoot().figure.addChild(this.handle);
+
+        var root = this.getHost().getRoot();
+        this.handle.addListener(anra.EVENT.MouseUp, function (e) {
+            var json = {id:10, name:'C2APP1', type:0, bounds:[330, 230, 60, 60]};
+            var node = new anra.gef.NodeModel();
+            node.setProperties(json);
+            root.modelChildren.push(node);
+            root.refresh();
+        });
     },
-    deactive:function(){
+    deactivate:function () {
         this.getHost().getRoot().figure.removeChild(this.handle);
     }
 });
