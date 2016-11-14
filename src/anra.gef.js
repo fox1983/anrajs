@@ -54,9 +54,9 @@ anra.gef.Figure = anra.svg.Composite.extend({
     },
     fireRepaintListener:function () {
         if (this.repaintListeners != null)
-            this.repaintListeners.forEach(function(_f,_k){
+            this.repaintListeners.forEach(function (_f, _k) {
                 _k(this);
-            },this);
+            }, this);
     },
     addRepaintListener:function (listener) {
         if (this.repaintListeners == null)
@@ -93,7 +93,6 @@ anra.gef.EditPart = Base.extend({
     figure:null,
     policies:null,
     children:null,
-    modelChildren:null,
     flags:0,
     editor:null,
     listeners:null,
@@ -104,7 +103,6 @@ anra.gef.EditPart = Base.extend({
         this.sConns = [];
         this.tConns = [];
         this.children = [];
-        this.modelChildren = [];
         this.policies = new Map();
         this.listeners = [];
     },
@@ -120,12 +118,14 @@ anra.gef.EditPart = Base.extend({
                 map.set(e.model, e);
             }
             var model, editPart;
-            for (i = 0; i < this.modelChildren.length; i++) {
-                model = this.modelChildren[i];
+            var modelChildren = this.getModelChildren();
+            for (i = 0; i < modelChildren.length; i++) {
+                model = modelChildren[i];
                 if (i < this.children.length
-                    && this.children[i].model == model)
+                    && this.children[i].model.equals(model)) {
+//                    this.children[i].refresh();
                     continue;
-
+                }
                 editPart = map.get(model);
                 if (editPart != null)
                     this.reorderChild(editPart, i);
@@ -146,6 +146,22 @@ anra.gef.EditPart = Base.extend({
                 }
             }
         }
+    },
+    removeChild:function (child) {
+        if (child == null)
+            throw 'child can not be null';
+        var index = this.children.indexOf(child);
+        if (index < 0)
+            return;
+        this.fireRemovingChild(child, index);
+        if (this.isActive())
+            child.deactivate();
+        child.removeNotify();
+        this.removeChildVisual(child);
+        child.setParent(null);
+        this.children.remove(child);
+    },
+    fireRemovingChild:function () {
     },
     createChild:function (model) {
         if (this.editor == null) {
@@ -326,12 +342,14 @@ anra.gef.EditPart = Base.extend({
         this.registerVisuals();
     },
     registerAccessable:function () {
+        this.getRoot().regist(this);
+    },
+    unregisterAccessable:function () {
+        this.getRoot().unregist(this);
     },
     registerVisuals:function () {
     },
     unregisterVisuals:function () {
-    },
-    unregisterAccessable:function () {
     },
     eraseSourceFeedBack:function (request) {
     },
@@ -397,6 +415,12 @@ anra.gef.EditPart = Base.extend({
     },
     setModel:function (model) {
         this.model = model;
+    },
+    getModelChildren:function () {
+        if (this.model instanceof anra.gef.NodeModel) {
+            return this.model.getAllChildren();
+        }
+        return [];
     },
     setParent:function (parent) {
         this.parent = parent;
@@ -653,7 +677,7 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
         this.getLayer("Primary_Layer").addChild(child.getFigure());
     },
     regist:function (editPart) {
-        this.editPartMap.set(editPart.model, editPart);
+        this.editPartMap.put(editPart.model, editPart);
     },
     unregist:function (editPart) {
         this.editPartMap.remove(editPart.model);
@@ -744,11 +768,13 @@ anra.gef.LineEditPart = anra.gef.EditPart.extend({
     getSourceAnchor:function () {
         if (this.source != null)
             return this.source.getSourceAnchor(this);
+        console.log('source not found');
         return {x:0, y:0};
     },
     getTargetAnchor:function () {
         if (this.target != null)
             return this.target.getTargetAnchor(this);
+        console.log('target not found');
         return {x:100, y:100};
     }
 });
@@ -867,10 +893,29 @@ anra.gef.Editor = Base.extend({
     background:'#EEFFEE',
     _Editor:function () {
     },
-    setInput:function (input) {
-        this.input = this.handleInput(input);
+    addLine:function (line, sourceId, targetId, refresh) {
+        var target = this.rootEditPart.model.getChild(targetId);
+        var source = this.rootEditPart.model.getChild(sourceId);
+        if (target == null)
+            anra.Platform.error('can not found line target id: ' + targetId);
+        if (source == null)
+            anra.Platform.error('can not found line source id: ' + sourceId);
+        target.addTargetLine(line);
+        source.addSourceLine(line);
+//TODO
+
+        var targetPart = this.rootEditPart.getEditPart(target);
+        if (targetPart != null)
+            targetPart.refresh();
+
+        if (refresh) this.rootEditPart.refresh();
     },
-    handleInput:function (input) {
+    setInput:function (input) {
+        this.input = input;
+        this.rootModel = new anra.gef.NodeModel();
+        this.input2model(this.input, this.rootModel);
+    },
+    input2model:function (input) {
         return input;
     },
     createContent:function (parentId) {
@@ -919,6 +964,7 @@ anra.gef.Editor = Base.extend({
         return part;
     },
     initRootEditPart:function (editPart) {
+        editPart.setModel(this.rootModel);
         editPart.refresh();
     },
     _save:function () {
@@ -1111,8 +1157,10 @@ anra.gef.BaseModel = Base.extend({
 anra.gef.NodeModel = anra.gef.BaseModel.extend({
     sourceLines:null,
     targetLines:null,
+    children:null,
     constructor:function () {
         this._NodeModel();
+        this.children = new Map();
     },
     addSourceLine:function (line) {
         this.sourceLines.push(line);
@@ -1124,7 +1172,27 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
         this._BaseModel();
         this.sourceLines = [];
         this.targetLines = [];
+    },
+    addChild:function (model) {
+        this.children.put(model.id, model);
+    },
+    getChild:function (id) {
+        return this.children.get(id);
+    },
+    getAllChildren:function () {
+        return this.children.values();
+    },
+    getAllChildrenID:function () {
+        return this.children.keys();
+    },
+    equals:function (o) {
+        return this == o || this.id == o.id;
+    },
+    hashCode:function () {
+        return this.id;
     }
 });
+
+anra.gef.ContentModel = anra.gef.NodeModel.extend({});
 
 anra.gef.LineModel = anra.gef.BaseModel.extend({});

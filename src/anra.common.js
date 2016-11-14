@@ -179,7 +179,8 @@ anra.Display = Base.extend({
     postEvent:function (e) {
     },
     error:function (msg) {
-        alert(msg);
+//        alert(msg);
+        throw msg;
     },
     p2x:function (p) {
         if (this.element == null)

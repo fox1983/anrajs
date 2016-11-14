@@ -11,7 +11,6 @@ SEGMENT = 1;
 BALANCE = 2;
 
 FlowEditor = anra.gef.Editor.extend({
-    models:null,
     editParts:null,
     background:'#FFFFFF',
 
@@ -21,14 +20,14 @@ FlowEditor = anra.gef.Editor.extend({
      * @param input
      * @return {*}
      */
-    handleInput:function (input) {
-        this.models = new Map();
+    input2model:function (input, rootModel) {
         var nodes = input['nodes'];
         var lines, nm, list, line, target;
         var targetCache = new Map();
         //遍历nodes，每个node生成一个节点模型（NodeModel）
         for (var i = 0; i < nodes.length; i++) {
             nm = new anra.gef.NodeModel();
+            nm.id = nodes[i].id;
             //设置属性
             nm.setProperties(nodes[i]);
             lines = nodes[i]['lines'];
@@ -47,7 +46,7 @@ FlowEditor = anra.gef.Editor.extend({
                     }
                     list.push(line);
 
-                    target = this.models.get(line.target);
+                    target = rootModel.getChild(line.target);
                     if (target != null)
                         target.addTargetLine(line);
                 }
@@ -59,15 +58,11 @@ FlowEditor = anra.gef.Editor.extend({
                 targetCache.remove(nodes[i].id);
             }
             /*----------连线添加完毕-----------*/
-
-            //把生成好的节点记录在 FlowEditor#models
-            this.models.put(nodes[i].id, nm);
+            rootModel.addChild(nm);
         }
 
         //释放缓存
         targetCache = null;
-
-        return input;
     },
     /**
      * 第二步，根据context（前一个EditPart）和model（数据）生成EditPart（控制器）
@@ -95,17 +90,26 @@ FlowEditor = anra.gef.Editor.extend({
         this.editParts.put(model.id, part);
         return part;
     },
-    /**
-     * 第三步，初始化RootEditPart，也就是把之前步骤里生成好的模型设置为rootEditPart的孩子。
-     *如果要自定义RootEditPart，重写createRootEditPart方法即可。
-     *
-     * @param editPart
-     */
-    initRootEditPart:function (rootEditPart) {
-        rootEditPart.modelChildren = this.models.values();
-        rootEditPart.refresh();
-    }
+    addNode:function (json) {
+        var node = new anra.gef.NodeModel();
+        node.setProperties(json);
+        node.id = json.id;
+        this.rootEditPart.model.addChild(node);
 
+        lines = json['lines'];
+
+        /*--------开始添加连线---------*/
+        //添加连线，根据连线定义来确定连线的source和target
+        if (lines != null)
+            for (var inx = 0; inx < lines.length; inx++) {
+                line = lines[inx];
+                this.addLine(line, json.id, line.target);
+            }
+        this.rootEditPart.refresh();
+    },
+    compare:function (m1, m2) {
+        return m1 == m2 || (m1.id == m2.id );
+    }
 });
 
 /**
@@ -164,10 +168,11 @@ TextInfoPolicy = anra.gef.AbstractEditPolicy.extend({
 
         var root = this.getHost().getRoot();
         this.handle.addListener(anra.EVENT.MouseUp, function (e) {
-            var json = {id:10, name:'C2APP1', type:0, bounds:[330, 230, 60, 60]};
-            var node = new anra.gef.NodeModel();
-            node.setProperties(json);
-            root.modelChildren.push(node);
+            //TODO
+            var json = {id:10, name:'C2APP1', type:0, bounds:[330, 230, 60, 60], lines:[
+                {id:0, target:2, sTML:1, tTML:1 }
+            ]};
+            root.editor.addNode(json);
             root.refresh();
         });
     },

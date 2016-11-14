@@ -290,6 +290,10 @@ Base = Base.extend({
                     return '♥' + hashes.join('⁞');
 
                 default:
+
+                    if (key.hashCode != null) {
+                        return '♠' + key.hashCode();
+                    }
                     // TODO: Don't use expandos when Object.defineProperty is not available?
                     if (!key.hasOwnProperty('_hmuid_')) {
                         key._hmuid_ = ++HashMap.uid;
