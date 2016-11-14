@@ -60,7 +60,6 @@ FlowEditor = anra.gef.Editor.extend({
             /*----------连线添加完毕-----------*/
             rootModel.addChild(nm);
         }
-
         //释放缓存
         targetCache = null;
     },
@@ -106,9 +105,6 @@ FlowEditor = anra.gef.Editor.extend({
                 this.addLine(line, json.id, line.target);
             }
         this.rootEditPart.refresh();
-    },
-    compare:function (m1, m2) {
-        return m1 == m2 || (m1.id == m2.id );
     }
 });
 

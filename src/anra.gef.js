@@ -893,7 +893,7 @@ anra.gef.Editor = Base.extend({
     background:'#EEFFEE',
     _Editor:function () {
     },
-    addLine:function (line, sourceId, targetId, refresh) {
+    addLine:function (line, sourceId, targetId) {
         var target = this.rootEditPart.model.getChild(targetId);
         var source = this.rootEditPart.model.getChild(sourceId);
         if (target == null)
@@ -902,13 +902,14 @@ anra.gef.Editor = Base.extend({
             anra.Platform.error('can not found line source id: ' + sourceId);
         target.addTargetLine(line);
         source.addSourceLine(line);
-//TODO
+//TODO 未来可能用缓存优化
+        var sourcePart = this.rootEditPart.getEditPart(source);
+        if (sourcePart != null)
+            sourcePart.refresh();
 
         var targetPart = this.rootEditPart.getEditPart(target);
         if (targetPart != null)
             targetPart.refresh();
-
-        if (refresh) this.rootEditPart.refresh();
     },
     setInput:function (input) {
         this.input = input;

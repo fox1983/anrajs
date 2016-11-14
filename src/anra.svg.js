@@ -530,6 +530,13 @@ anra.svg.Text = {
         if (this.owner == null) {
             var o = this;
             this.owner = Util.createElement(this.tagName);
+
+            var e = this.owner;
+            var dispatcher = anra.Platform.getDisplay().dispatcher;
+            e.onmouseup = function (event) {
+                dispatcher.setFocusOwner(o);
+                dispatcher.dispatchMouseUp(event);
+            };
             this.setAttribute({});
             this.setStyle({});
             this.initProp();
