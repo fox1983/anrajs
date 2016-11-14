@@ -36,7 +36,7 @@ FlowEditor = anra.gef.Editor.extend({
             //添加连线，根据连线定义来确定连线的source和target
             if (lines != null)
                 for (var inx = 0; inx < lines.length; inx++) {
-                    line = this.createLine(nm, lines[inx]);
+                    line = this.createLine(lines[inx]);
                     nm.addSourceLine(line);
                     //记录连线目标节点的id
                     list = targetCache.get(line.getValue('target'));
@@ -101,12 +101,12 @@ FlowEditor = anra.gef.Editor.extend({
         //添加连线，根据连线定义来确定连线的source和target
         if (lines != null)
             for (var inx = 0; inx < lines.length; inx++) {
-                var line = this.createLine(node, lines[inx]);
+                var line = this.createLine(lines[inx]);
                 this.addLine(line, json.id, line.getValue('target'));
             }
         this.rootEditPart.refresh();
     },
-    createLine:function (sourceModel, json) {
+    createLine:function (json) {
         var lineModel = new anra.gef.LineModel();
         lineModel.setProperties(json);
         lineModel.id = json.id;
