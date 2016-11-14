@@ -525,10 +525,15 @@ anra.svg.Text = {
     initProp:function () {
         this.owner.textContent = this.text;
     },
-    paint:function () {
-
+    create:function(){
+            this.setAttribute({});
+            this.setStyle({});
+            this.initProp();
+        }
     }
 };
+
+
 
 anra.svg.Ellipse = {
     tagName:'ellipse',
