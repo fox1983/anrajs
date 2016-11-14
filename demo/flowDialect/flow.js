@@ -36,17 +36,17 @@ FlowEditor = anra.gef.Editor.extend({
             //添加连线，根据连线定义来确定连线的source和target
             if (lines != null)
                 for (var inx = 0; inx < lines.length; inx++) {
-                    line = lines[inx];
+                    line = this.createLine(nm, lines[inx]);
                     nm.addSourceLine(line);
                     //记录连线目标节点的id
-                    list = targetCache.get(line.target);
+                    list = targetCache.get(line.getValue('target'));
                     if (list == null) {
                         list = [];
-                        targetCache.set(line.target, list);
+                        targetCache.set(line.getValue('target'), list);
                     }
                     list.push(line);
 
-                    target = rootModel.getChild(line.target);
+                    target = rootModel.getChild(line.getValue('target'));
                     if (target != null)
                         target.addTargetLine(line);
                 }
@@ -95,19 +95,22 @@ FlowEditor = anra.gef.Editor.extend({
         node.id = json.id;
         this.rootEditPart.model.addChild(node);
 
-        lines = json['lines'];
+        var lines = json['lines'];
 
         /*--------开始添加连线---------*/
         //添加连线，根据连线定义来确定连线的source和target
         if (lines != null)
             for (var inx = 0; inx < lines.length; inx++) {
-                line = lines[inx];
-                line.hashCode = function () {
-                    return this.id;
-                };
-                this.addLine(line, json.id, line.target);
+                var line = this.createLine(node, lines[inx]);
+                this.addLine(line, json.id, line.getValue('target'));
             }
         this.rootEditPart.refresh();
+    },
+    createLine:function (sourceModel, json) {
+        var lineModel = new anra.gef.LineModel();
+        lineModel.setProperties(json);
+        lineModel.id = json.id;
+        return lineModel;
     }
 });
 

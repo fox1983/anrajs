@@ -900,9 +900,9 @@ anra.gef.Editor = Base.extend({
             anra.Platform.error('can not found line target id: ' + targetId);
         if (source == null)
             anra.Platform.error('can not found line source id: ' + sourceId);
-        target.addTargetLine(line);
         source.addSourceLine(line);
-//TODO 未来可能用缓存优化
+        target.addTargetLine(line);
+        //TODO 未来可能用缓存优化
         var sourcePart = this.rootEditPart.getEditPart(source);
         if (sourcePart != null)
             sourcePart.refresh();
@@ -1164,10 +1164,14 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
         this.children = new Map();
     },
     addSourceLine:function (line) {
-        this.sourceLines.put(line.id, line);
+        line.sourceNode = this;
+        this.sourceLines.put(line.hashCode(), line);
     },
     addTargetLine:function (line) {
-        this.targetLines.put(line.id, line);
+        if (line.sourceNode == null)
+            throw 'addTargetLine: sourceNode of line is  null';
+        line.targetNode = this;
+        this.targetLines.put(line.hashCode(), line);
     },
     _NodeModel:function () {
         this._BaseModel();
@@ -1197,10 +1201,12 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
 anra.gef.ContentModel = anra.gef.NodeModel.extend({});
 
 anra.gef.LineModel = anra.gef.BaseModel.extend({
+    sourceNode:null,
+    targetNode:null,
     equals:function (o) {
         return this == o || this.id == o.id;
     },
     hashCode:function () {
-        return this.id;
+        return this.sourceNode.id + "-" + this.id;
     }
 });

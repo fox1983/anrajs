@@ -525,7 +525,7 @@ anra.svg.Text = {
     initProp:function () {
         this.owner.textContent = this.text;
     },
-    create:function(){
+    create:function () {
         //此处没有注册事件分发，因为文本的事件会和anra的事件冲突
         if (this.owner == null) {
             var o = this;
@@ -543,7 +543,6 @@ anra.svg.Text = {
         }
     }
 };
-
 
 
 anra.svg.Ellipse = {
@@ -630,7 +629,8 @@ anra.svg.EventDispatcher = Base.extend({
         if (this.mouseState == anra.EVENT.MouseDrag) {
             var e = new anra.event.Event(anra.EVENT.DragEnd, location);
             e.prop = {drag:this.dragTarget, target:this.focusOwner};
-            this.dragTarget.notifyListeners(anra.EVENT.DragEnd, e);
+            if (this.dragTarget != null)
+                this.dragTarget.notifyListeners(anra.EVENT.DragEnd, e);
             if (this.dragTarget != this.focusOwner)
                 this.focusOwner.notifyListeners(anra.EVENT.DragEnd, e);
         }
