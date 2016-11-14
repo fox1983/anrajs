@@ -102,6 +102,9 @@ FlowEditor = anra.gef.Editor.extend({
         if (lines != null)
             for (var inx = 0; inx < lines.length; inx++) {
                 line = lines[inx];
+                line.hashCode = function () {
+                    return this.id;
+                };
                 this.addLine(line, json.id, line.target);
             }
         this.rootEditPart.refresh();

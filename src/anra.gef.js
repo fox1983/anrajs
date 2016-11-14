@@ -470,10 +470,10 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
         this.refreshTargetConnections();
     },
     getModelSourceLines:function () {
-        return this.model.sourceLines == null ? [] : this.model.sourceLines;
+        return this.model.sourceLines == null ? [] : this.model.sourceLines.values();
     },
     getModelTargetLines:function () {
-        return this.model.targetLines == null ? [] : this.model.targetLines;
+        return this.model.targetLines == null ? [] : this.model.targetLines.values();
     },
     getRoot:function () {
         return this.parent.getRoot();
@@ -573,7 +573,7 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
         if (i < size) {
             var trash = [];
             for (; i < size; i++)
-                trash.add(this.tConns[i]);
+                trash.push(this.tConns[i]);
             for (i = 0; i < trash.length; i++)
                 this.removeTargetConnection(trash[i]);
         }
@@ -1164,15 +1164,15 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
         this.children = new Map();
     },
     addSourceLine:function (line) {
-        this.sourceLines.push(line);
+        this.sourceLines.put(line.id, line);
     },
     addTargetLine:function (line) {
-        this.targetLines.push(line);
+        this.targetLines.put(line.id, line);
     },
     _NodeModel:function () {
         this._BaseModel();
-        this.sourceLines = [];
-        this.targetLines = [];
+        this.sourceLines = new Map();
+        this.targetLines = new Map();
     },
     addChild:function (model) {
         this.children.put(model.id, model);
@@ -1196,4 +1196,11 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
 
 anra.gef.ContentModel = anra.gef.NodeModel.extend({});
 
-anra.gef.LineModel = anra.gef.BaseModel.extend({});
+anra.gef.LineModel = anra.gef.BaseModel.extend({
+    equals:function (o) {
+        return this == o || this.id == o.id;
+    },
+    hashCode:function () {
+        return this.id;
+    }
+});
