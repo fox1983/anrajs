@@ -526,6 +526,10 @@ anra.svg.Text = {
         this.owner.textContent = this.text;
     },
     create:function(){
+        //此处没有注册事件分发，因为文本的事件会和anra的事件冲突
+        if (this.owner == null) {
+            var o = this;
+            this.owner = Util.createElement(this.tagName);
             this.setAttribute({});
             this.setStyle({});
             this.initProp();
