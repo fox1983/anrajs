@@ -6,9 +6,12 @@ Array.prototype.indexOf = function (val) {
 };
 Array.prototype.remove = function (val) {
     if (typeof val == 'number') {
+        var o = this[val];
         this.splice(val, 1);
+        return o;
     } else {
         this.removeObject(val);
+        return val;
     }
 };
 Array.prototype.insert = function (item, index) {
@@ -313,17 +316,6 @@ anra.Listener = Base.extend({
             this.func(event);
     }
 });
-anra.EditPartListener = anra.Listener.extend({
-    editPart:null,
-    policy:null,
-    constructor:function (editPart, policy) {
-        this.editPart = editPart;
-        this.policy = policy;
-    },
-    selectedStateChanged:function () {
-
-    }
-});
 anra.KeyListener = anra.Listener.extend({
     handleEvent:function (event) {
         if (event.type == anra.EVENT.KeyDown) {
@@ -444,8 +436,6 @@ anra.event.EventTable = Base.extend({
         return result;
     },
     hook:function (eventType, listener) {
-        if (isNaN(eventType))
-            anra.Platform.getDisplay.error("anra.event.EventTable#hook eventType should be number");
         this.types.push(eventType);
         this.listeners.push(listener);
     },
@@ -498,6 +488,71 @@ anra.Command = Base.extend({
         return true;
     },
     dispose:function () {
+    },
+    chain:function (command) {
+        if (command == null)
+            return this;
+
+        var result = new anra.ChainedCompoundCommand();
+        result.add(this);
+        result.add(command);
+        return result;
+    }
+});
+anra.ChainedCompoundCommand = anra.Command.extend({
+    commandList:null,
+    constructor:function () {
+        this.commandList = [];
+    },
+    add:function (c) {
+        if (c != null)this.commandList.push(c);
+    },
+    canExecute:function () {
+        if (this.commandList.length == 0)
+            return false;
+        for (var i = 0, len = this.commandList.length; i < len; i++) {
+            var cmd = this.commandList[i];
+            if (cmd == null)
+                return false;
+            if (!cmd.canExecute())
+                return false;
+        }
+        return true;
+    },
+    canUndo:function () {
+        if (this.commandList.length == 0)
+            return false;
+        for (var i = 0, len = this.commandList.length; i < len; i++) {
+            var cmd = this.commandList[i];
+            if (cmd == null)
+                return false;
+            if (!cmd.canUndo())
+                return false;
+        }
+        return true;
+    },
+    dispose:function () {
+        for (var i = 0, len = this.commandList.length; i < len; i++) {
+            this.commandList[i].dispose();
+        }
+    },
+    execute:function () {
+        for (var i = 0, len = this.commandList.length; i < len; i++) {
+            this.commandList[i].execute();
+        }
+    },
+    getCommands:function () {
+        return this.commandList;
+    },
+    isEmpty:function () {
+        return this.commandList == null || this.commandList.length == 0;
+    },
+    size:function () {
+        return this.commandList.length;
+    },
+    chain:function (c) {
+        this.add(c);
+        return this;
     }
 });
 /**
@@ -517,6 +572,7 @@ anra.CommandEvent = Base.extend({
 PRE_EXECUTE = 1;
 PRE_REDO = 2;
 PRE_UNDO = 4;
+POST_EXECUTE = 3;
 
 /**
  * 动作注册器
@@ -582,13 +638,13 @@ anra.CommandStack = Base.extend({
         this.notifyListeners(c, PRE_EXECUTE);
         try {
             c.execute();
-            while (this.undoable.size() >= 0) {
+            while (this.undoable.length > 0) {
                 this.undoable.remove(0).dispose();
-                if (saveLocation > -1)
-                    saveLocation--;
+                if (this.saveLocation > -1)
+                    this.saveLocation--;
             }
-            if (saveLocation > this.undoable.size())
-                saveLocation = -1;
+            if (this.saveLocation > this.undoable.length)
+                this.saveLocation = -1;
             this.undoable.push(c);
         } finally {
             this.notifyListeners(c, POST_EXECUTE);

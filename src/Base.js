@@ -7,7 +7,6 @@
 var Base = function () {
     // dummy
 };
-
 Base.extend = function (_instance, _static) { // subclass
     var extend = Base.prototype.extend;
 

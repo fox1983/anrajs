@@ -93,24 +93,127 @@ FlowEditor = anra.gef.Editor.extend({
         var node = new anra.gef.NodeModel();
         node.setProperties(json);
         node.id = json.id;
-        this.rootEditPart.model.addChild(node);
+
+        var cmd = new anra.gef.CreateNodeCommand(this.rootEditPart, node);
 
         var lines = json['lines'];
-
         /*--------开始添加连线---------*/
         //添加连线，根据连线定义来确定连线的source和target
         if (lines != null)
             for (var inx = 0; inx < lines.length; inx++) {
                 var line = this.createLine(lines[inx]);
-                this.addLine(line, json.id, line.getValue('target'));
+                cmd = cmd.chain(new anra.gef.CreateLineCommand(this.rootEditPart, line, json.id, line.getValue('target')));
             }
-        this.rootEditPart.refresh();
+
+        this.cmdStack.execute(cmd);
+    },
+    initRootEditPart:function (editPart) {
+        editPart.dragTracker = new anra.gef.ShadowDragTracker();
+        var content = editPart.getFigure();
+        var dt = editPart.dragTracker;
+        content.addListener(anra.EVENT.MouseDown, function (e) {
+            //TODO
+            if (dt != null)
+                dt.mouseDown(e, editPart);
+        });
+        content.addListener(anra.EVENT.DragStart, function (e) {
+            if (dt != null)
+                dt.dragStart(e, editPart);
+        });
+        content.addListener(anra.EVENT.DragEnd, function (e) {
+            if (dt != null)
+                dt.dragEnd(e, editPart);
+        });
+        content.addListener(anra.EVENT.MouseDrag, function (e) {
+            if (dt != null)
+                dt.mouseDrag(e, editPart);
+        });
+        content.addListener(anra.EVENT.MouseUp, function (e) {
+            if (dt != null)
+                dt.mouseUp(e, editPart);
+        });
     },
     createLine:function (json) {
         var lineModel = new anra.gef.LineModel();
         lineModel.setProperties(json);
         lineModel.id = json.id;
         return lineModel;
+    },
+    getCustomPolicies:function () {
+        this.put('layoutPolicy', new FlowLayoutPolicy());
+    }
+});
+
+
+FlowLayoutPolicy = anra.gef.LayoutPolicy.extend({
+    getTargetEditPart:function (request) {
+
+        var editPart = request.editPart;
+        var me = request.event;
+        console.log(me.widget);
+
+//        this.startLocation = {x:editPart.model.getBounds()[0], y:editPart.model.getBounds()[1]};
+//
+//        this.shadow = editPart.createFigure();
+//        editPart.getFigure().parent.addChild(this.shadow);
+//        this.shadow.setOpacity(0.5);
+//        this.shadow.setBounds(editPart.getFigure().getBounds());
+    },
+    showLayoutTargetFeedback:function (request) {
+
+    },
+    eraseLayoutTargetFeedback:function (request) {
+
+    },
+    createChildEditPolicy:function (child) {
+        return new ShadowPolicy();
+    }
+});
+
+ShadowPolicy = anra.gef.AbstractEditPolicy.extend({
+    showTargetFeedback:function (request) {
+        if (REQ_DRAG_MOVE == request.type) {
+            this.dragMove(request);
+        } else if (REQ_DRAG_START == request.type) {
+            this.dragStart(request);
+        }
+    },
+    eraseTargetFeedback:function (request) {
+        if (REQ_DRAG_END == request.type) {
+            var editPart = request.editPart;
+            if (this.startLocation != null && editPart.getRoot().editor != null) {
+                editPart.getFigure().parent.removeChild(this.shadow);
+                editPart.getRoot().editor.execute(this.getCommand(request));
+            }
+            this.startLocation = null;
+        }
+    },
+    getCommand:function (request) {
+        if (REQ_DRAG_END == request.type) {
+            var editPart = request.editPart;
+            var me = request.event;
+            return  new anra.gef.RelocalCommand(editPart, this.startLocation, {
+                x:me.x,
+                y:me.y
+            });
+        }
+    },
+    dragMove:function (request) {
+        var me = request.event;
+        this.shadow.getBounds().x = me.x;
+        this.shadow.getBounds().y = me.y;
+        this.shadow.paint();
+    },
+    dragStart:function (request) {
+        var editPart = request.editPart;
+        var me = request.event;
+
+        this.startLocation = {x:editPart.model.getBounds()[0], y:editPart.model.getBounds()[1]};
+
+        this.shadow = editPart.createFigure();
+        editPart.getFigure().parent.addChild(this.shadow);
+        this.shadow.setOpacity(0.5);
+        this.shadow.setBounds(editPart.getFigure().getBounds());
     }
 });
 
@@ -125,13 +228,19 @@ CommonNodeEditPart = anra.gef.NodeEditPart.extend({
     refreshVisual:function () {
         if (this.model != null && this.figure != null) {
             var b = this.model.getValue('bounds');
-            if (b != null)
-                this.figure.setBounds({x:b[0], y:b[1], width:b[2], height:b[3] });
+//            if (b != null) {
+//                this.figure.bounds.width = b[2];
+//                this.figure.bounds.height = b[3];
+//            }
+            this.figure.setBounds({x:b[0], y:b[1], width:b[2], height:b[3] });
         }
         this.figure.paint();
     },
     createLineEditPart:function () {
         return new CommonLineEditPart();
+    },
+    createDragTracker:function (request) {
+        return new anra.gef.ShadowDragTracker();
     },
     createFigure:function () {
         var f = new CommonFigure();
@@ -166,7 +275,7 @@ TextInfoPolicy = anra.gef.AbstractEditPolicy.extend({
     activate:function () {
         this.handle = new TextHandle(this.getHost());
         this.handle.setText(this.getHost().model.getValue('name'));
-        this.getHost().getRoot().figure.addChild(this.handle);
+        this.getHandleLayer().addChild(this.handle);
 
         var root = this.getHost().getRoot();
         this.handle.addListener(anra.EVENT.MouseUp, function (e) {
@@ -179,7 +288,7 @@ TextInfoPolicy = anra.gef.AbstractEditPolicy.extend({
         });
     },
     deactivate:function () {
-        this.getHost().getRoot().figure.removeChild(this.handle);
+        this.getHandleLayer().removeChild(this.handle);
     }
 });
 
@@ -201,10 +310,10 @@ TextHandle = anra.Handle.extend(anra.svg.Text).extend({
  */
 CommonFigure = anra.gef.Figure.extend(anra.svg.Image).extend({
     getTargetAnchor:function (line) {
-        return {x:this.fattr('x'), y:this.fattr('y')};
+        return {x:this.fattr('x'), y:this.fattr('y') + this.fattr('height') / 2};
     },
     getSourceAnchor:function (line) {
-        return {x:this.fattr('x') + 10, y:this.fattr('y') + 5};
+        return {x:this.fattr('x') + this.fattr('width'), y:this.fattr('y') + this.fattr('height') / 2};
     }
 });
 
@@ -242,7 +351,7 @@ Line = anra.gef.Line.extend({
             return  [sp, p1, p2, ep];
         },
         init:function (source) {
-            anra.gef.Line.prototype.init(source);
+            anra.gef.Line.prototype.init.call(this, source);
             this.source = source;
         },
         mouseIn:function () {
