@@ -14,6 +14,10 @@ anra.gef.AbstractEditPolicy = anra.gef.Policy.extend({
 anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
     sizeOnDropFeedback:null,
     listener:null,
+    feedbackMap:null,
+    constructor:function () {
+        this.feedbackMap = new Map();
+    },
     activate:function () {
         this.setListener(this.createListener());
         this.decorateChildren();
@@ -23,6 +27,12 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
     },
     eraseLayoutTargetFeedback:function (request) {
         //TODO
+        var values = this.feedbackMap.values();
+        for(var i= 0,len=values.length;i<len;i++){
+            this.removeFeedback(values[i]);
+        }
+        this.feedbackMap.clear();
+
     },
     getAddCommand:function (request) {
         return null;
@@ -31,8 +41,35 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
         return null;
     },
     showLayoutTargetFeedback:function (request) {
+        var feedback;
+        var editParts = this.getLayoutEditParts(request);
+        if (editParts instanceof Array) {
+            for (var i = 0, len = editParts.length; i < len; i++) {
+                feedback = this.getFeedback(editParts[i]);
+                this.refreshFeedback(feedback);
+            }
+        } else if (editParts instanceof anra.gef.EditPart) {
+            feedback = this.getFeedback(editParts);
+            this.refreshFeedback(feedback,request);
+        }
     },
-    showSizeOnDropFeedback:function (request) {
+    refreshFeedback:function (feedback,request) {
+
+    },
+    getLayoutEditParts:function (request) {
+        return request.editPart;
+    },
+    getFeedback:function (ep) {
+        var ghost = this.feedbackMap.get(ep.model);
+        if (ghost == null) {
+            ghost = this.createFeedback(ep);
+            this.addFeedback(ghost);
+            this.feedbackMap.put(ep.model, ghost);
+        }
+        return ghost;
+    },
+    createFeedback:function (ep) {
+        return  anra.FigureUtil.createGhostFigure(ep);
     },
     getMoveChildrenCommand:function (request) {
         //TODO
@@ -41,10 +78,6 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
         return null;
     },
     getCreateCommand:function (request) {
-    },
-    getCreationFeedbackOffset:function (request) {
-//    return new Insets();
-        return null;
     },
     getDeleteDependantCommand:function (request) {
         return null;
@@ -56,9 +89,6 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
             f.decorateChild(child);
         };
         return listener;
-    },
-    createSizeOnDropFeedback:function (createRequest) {
-        return null;
     },
     deactivate:function () {
         if (this.sizeOnDropFeedback != null) {
@@ -77,12 +107,6 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
         var children = this.getHost().children;
         for (var i = 0, len = children.length; i < len; i++)
             this.decorateChild(children[i]);
-    },
-    eraseSizeOnDropFeedback:function (request) {
-        if (this.sizeOnDropFeedback != null) {
-            this.removeFeedback(this.sizeOnDropFeedback);
-            this.sizeOnDropFeedback = null;
-        }
     },
     eraseTargetFeedback:function (request) {
         if (REQ_ADD == request.type
@@ -104,38 +128,37 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
             return this.getOrphanChildrenCommand(request);
         if (REQ_MOVE_CHILDREN == request.type)
             return this.getMoveChildrenCommand(request);
+        if (REQ_MOVE == request.type)
+            return this.getMoveCommand(request);
         if (REQ_CLONE == request.type)
             return this.getCloneCommand(request);
         if (REQ_CREATE == request.type)
             return this.getCreateCommand(request);
         return null;
     },
+    getMoveCommand:function(){},
     getLayoutContainer:function () {
         return this.getHostFigure();
+    },
+    showSizeOnDropFeedback:function (request) {
+    },
+    eraseSizeOnDropFeedback:function (request) {
+        if (this.sizeOnDropFeedback != null) {
+            this.removeFeedback(this.sizeOnDropFeedback);
+            this.sizeOnDropFeedback = null;
+        }
+    },
+    createSizeOnDropFeedback:function (createRequest) {
+//        var shadow = anra.FigureUtil.createGhostFigure(this.getHost());
+//        this.addFeedback(shadow);
+        return null;
     },
     getSizeOnDropFeedback:function (createRequest) {
         if (createRequest != null) {
             if (this.sizeOnDropFeedback == null)
                 this.sizeOnDropFeedback = this.createSizeOnDropFeedback(createRequest);
-
-            return this.getSizeOnDropFeedback();
+            return this.sizeOnDropFeedback;
         }
-
-        //TODO 创建拖拽的虚影
-//        if (this.sizeOnDropFeedback == null) {
-//            this.sizeOnDropFeedback = new RectangleFigure();
-//            FigureUtilities.makeGhostShape((Shape)
-//            this.sizeOnDropFeedback
-//        )
-//            ;
-//            ((Shape)
-//            this.sizeOnDropFeedback
-//        ).
-//            setLineStyle(Graphics.LINE_DASHDOT);
-//            this.sizeOnDropFeedback.setForegroundColor(ColorConstants.white);
-//            addFeedback(this.sizeOnDropFeedback);
-//        }
-//        return this.sizeOnDropFeedback;
     },
     getTargetEditPart:function (request) {
         if (REQ_ADD == request.type
@@ -161,9 +184,9 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
             this.showLayoutTargetFeedback(request);
 
         if (REQ_CREATE == request.type) {
-            if (request.getSize() != null) {
-                this.showSizeOnDropFeedback(request);
-            }
+//            if (request.getSize() != null) {
+            this.showSizeOnDropFeedback(request);
+//            }
         }
     },
     undecorateChild:function (child) {
@@ -173,27 +196,7 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
         var children = this.getHost().children;
         for (var i = 0; i < children.length; i++)
             this.undecorateChild(children[i]);
-    },
-    getLayoutOrigin:function () {
-        //TODO
-        return this.getLayoutContainer().getClientArea().getLocation();
-    },
-    translateFromAbsoluteToLayoutRelative:function (t) {
-        //TODO
-//    IFigure figure = getLayoutContainer();
-//    figure.translateToRelative(t);
-//    figure.translateFromParent(t);
-//    Point negatedLayoutOrigin = getLayoutOrigin().getNegated();
-//    t.performTranslate(negatedLayoutOrigin.x, negatedLayoutOrigin.y);
-    },
-    translateFromLayoutRelativeToAbsolute:function (t) {
-//    IFigure figure = getLayoutContainer();
-//    Point layoutOrigin = getLayoutOrigin();
-//    t.performTranslate(layoutOrigin.x, layoutOrigin.y);
-//    figure.translateToParent(t);
-//    figure.translateToAbsolute(t);
     }
-
 });
 
 /**

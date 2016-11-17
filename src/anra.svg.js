@@ -154,7 +154,6 @@ Control.prototype.create = function () {
         var dispatcher = anra.Platform.getDisplay().dispatcher;
         e.onmousedown = function (event) {
             //TODO
-//            console.log(event);
             dispatcher.setFocusOwner(o);
 //            dispatcher.dispatchMouseDown(event);
         };
@@ -629,8 +628,9 @@ anra.svg.EventDispatcher = Base.extend({
             if (this.dragTarget == null) {
                 this.dragTarget = this.focusOwner;
                 e = new anra.event.Event(anra.EVENT.DragStart, location);
+                e.prop = {drag:this.dragTarget, target:this.focusOwner};
                 this.dragTarget.notifyListeners(anra.EVENT.DragStart, e);
-                var widget = this.dragTarget;
+                var widget = this.focusOwner;
                 if (widget != widget.svg) {
                     widget.svg.notifyListeners(anra.EVENT.DragStart, e);
                 }
@@ -649,10 +649,11 @@ anra.svg.EventDispatcher = Base.extend({
             e = new anra.event.Event(anra.EVENT.MouseDrag);
             e.x = location[0];
             e.y = location[1];
+            e.prop = {drag:this.dragTarget, target:this.focusOwner};
             this.dragTarget.notifyListeners(anra.EVENT.MouseDrag, e);
             //TODO
-            widget = this.dragTarget;
-            if (widget != widget.svg) {
+            widget = this.focusOwner;
+            if (this.dragTarget != widget.svg) {
                 widget.svg.notifyListeners(anra.EVENT.MouseDrag, e);
             }
         }
@@ -664,15 +665,13 @@ anra.svg.EventDispatcher = Base.extend({
             var e = new anra.event.Event(anra.EVENT.DragEnd, location);
             e.prop = {drag:this.dragTarget, target:widget};
             if (this.dragTarget != null) {
-                this.dragTarget.notifyListeners(anra.EVENT.DragEnd, e);
+                this.dragTarget.notifyListeners(anra.EVENT.Dropped, e);
                 this.dragTarget.enableEvent();
             }
             if (this.dragTarget != widget)
                 widget.notifyListeners(anra.EVENT.DragEnd, e);
-            if (widget != widget.svg) {
-                widget.svg.notifyListeners(anra.EVENT.DragEnd, e);
-            }
-            this.dragTarget.enableEvent();
+//            if (widget != widget.svg)
+//                widget.svg.notifyListeners(anra.EVENT.DragEnd, e);
         }
         //global标明请求是全局还是本地的
 //        if (!global) {

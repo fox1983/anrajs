@@ -358,7 +358,8 @@ anra.EVENT = {
     TouchMove:12,
     TouchEnd:13,
     DragStart:14,
-    DragEnd:15
+    DragEnd:15,
+    Dropped:16
 };
 var E = anra.EVENT;
 /**

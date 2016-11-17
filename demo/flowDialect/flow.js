@@ -107,32 +107,6 @@ FlowEditor = anra.gef.Editor.extend({
 
         this.cmdStack.execute(cmd);
     },
-    initRootEditPart:function (editPart) {
-        editPart.dragTracker = new anra.gef.ShadowDragTracker();
-        var content = editPart.getFigure();
-        var dt = editPart.dragTracker;
-        content.addListener(anra.EVENT.MouseDown, function (e) {
-            //TODO
-            if (dt != null)
-                dt.mouseDown(e, editPart);
-        });
-        content.addListener(anra.EVENT.DragStart, function (e) {
-            if (dt != null)
-                dt.dragStart(e, editPart);
-        });
-        content.addListener(anra.EVENT.DragEnd, function (e) {
-            if (dt != null)
-                dt.dragEnd(e, editPart);
-        });
-        content.addListener(anra.EVENT.MouseDrag, function (e) {
-            if (dt != null)
-                dt.mouseDrag(e, editPart);
-        });
-        content.addListener(anra.EVENT.MouseUp, function (e) {
-            if (dt != null)
-                dt.mouseUp(e, editPart);
-        });
-    },
     createLine:function (json) {
         var lineModel = new anra.gef.LineModel();
         lineModel.setProperties(json);
@@ -146,74 +120,78 @@ FlowEditor = anra.gef.Editor.extend({
 
 
 FlowLayoutPolicy = anra.gef.LayoutPolicy.extend({
-    getTargetEditPart:function (request) {
-
-        var editPart = request.editPart;
-        var me = request.event;
-        console.log(me.widget);
-
-//        this.startLocation = {x:editPart.model.getBounds()[0], y:editPart.model.getBounds()[1]};
-//
-//        this.shadow = editPart.createFigure();
-//        editPart.getFigure().parent.addChild(this.shadow);
-//        this.shadow.setOpacity(0.5);
-//        this.shadow.setBounds(editPart.getFigure().getBounds());
+    getLayoutEditParts:function (request) {
+        if (REQ_CREATE == request.type) {
+            var creationTool = request.event.prop.drag;
+            return creationTool.create(this.getHost());
+        }
+        if (this.target != null) {
+            //解析所有与target有关的editPart
+            return this.target;
+        }
+        return null;
     },
-    showLayoutTargetFeedback:function (request) {
-
-    },
-    eraseLayoutTargetFeedback:function (request) {
-
+    refreshFeedback:function (feedback, request) {
+        if (feedback != null) {
+            feedback.setBounds({x:request.event.x, y:request.event.y});
+        }
     },
     createChildEditPolicy:function (child) {
-        return new ShadowPolicy();
+        return new ChildPolicy(this);
+    },
+    eraseLayoutTargetFeedback:function (request) {
+        anra.gef.LayoutPolicy.prototype.eraseLayoutTargetFeedback.call(this, request);
+        this.target = null;
+        this.layout();
+    },
+    layout:function () {
+        var children = this.getHost().children;
+        for (var i = 0, len = children.length; i < len; i++) {
+//            var m = children[i].model;
+
+        }
+    },
+    getMoveCommand:function (request) {
+        if (this.target != null)
+            return new anra.gef.RelocalCommand(this.target, {
+                    x:this.target.getFigure().getBounds().x,
+                    y:this.target.getFigure().getBounds().y
+                },
+                {
+                    x:request.event.x,
+                    y:request.event.y
+                });
+    },
+    getCreateCommand:function (request) {
+        var model = request.event.prop.drag.model;
+        var b = model.getValue('bounds');
+        model.setValue('bounds', [request.event.x, request.event.y, b[2], b[3]]);
+        return new anra.gef.CreateNodeCommand(this.getHost().getRoot(), model);
     }
 });
 
-ShadowPolicy = anra.gef.AbstractEditPolicy.extend({
+ChildPolicy = anra.gef.AbstractEditPolicy.extend({
+    class:'ShadowPolicy',
+    constructor:function (parent) {
+        anra.gef.AbstractEditPolicy.prototype.constructor.call(this);
+        this.parent = parent;
+    },
     showTargetFeedback:function (request) {
-        if (REQ_DRAG_MOVE == request.type) {
-            this.dragMove(request);
-        } else if (REQ_DRAG_START == request.type) {
-            this.dragStart(request);
+        if (REQ_MOVE == request.type) {
+            this.parent.target = this.getHost();
         }
     },
     eraseTargetFeedback:function (request) {
-        if (REQ_DRAG_END == request.type) {
-            var editPart = request.editPart;
-            if (this.startLocation != null && editPart.getRoot().editor != null) {
-                editPart.getFigure().parent.removeChild(this.shadow);
-                editPart.getRoot().editor.execute(this.getCommand(request));
-            }
-            this.startLocation = null;
+        if (REQ_MOVE== request.type) {
+            this.parent.eraseTargetFeedback(request);
+            this.parent.target = null;
         }
     },
     getCommand:function (request) {
-        if (REQ_DRAG_END == request.type) {
-            var editPart = request.editPart;
-            var me = request.event;
-            return  new anra.gef.RelocalCommand(editPart, this.startLocation, {
-                x:me.x,
-                y:me.y
-            });
-        }
     },
-    dragMove:function (request) {
-        var me = request.event;
-        this.shadow.getBounds().x = me.x;
-        this.shadow.getBounds().y = me.y;
-        this.shadow.paint();
-    },
-    dragStart:function (request) {
-        var editPart = request.editPart;
-        var me = request.event;
-
-        this.startLocation = {x:editPart.model.getBounds()[0], y:editPart.model.getBounds()[1]};
-
-        this.shadow = editPart.createFigure();
-        editPart.getFigure().parent.addChild(this.shadow);
-        this.shadow.setOpacity(0.5);
-        this.shadow.setBounds(editPart.getFigure().getBounds());
+    getLayoutEditParts:function (request) {
+        console.log(request.editPart);
+        return null;
     }
 });
 
@@ -228,10 +206,6 @@ CommonNodeEditPart = anra.gef.NodeEditPart.extend({
     refreshVisual:function () {
         if (this.model != null && this.figure != null) {
             var b = this.model.getValue('bounds');
-//            if (b != null) {
-//                this.figure.bounds.width = b[2];
-//                this.figure.bounds.height = b[3];
-//            }
             this.figure.setBounds({x:b[0], y:b[1], width:b[2], height:b[3] });
         }
         this.figure.paint();
@@ -272,6 +246,7 @@ BalanceEditPart = CommonNodeEditPart.extend({
 /*-------策略------*/
 TextInfoPolicy = anra.gef.AbstractEditPolicy.extend({
     handle:null,
+    class:'TextInfoPolicy',
     activate:function () {
         this.handle = new TextHandle(this.getHost());
         this.handle.setText(this.getHost().model.getValue('name'));

@@ -316,11 +316,9 @@ anra.gef.EditPart = Base.extend({
             }
             this.policies.set(key, editPolicy);
         }
-        if (editPolicy != null) {
-            editPolicy.setHost(this);
-            if (this.isActive()) {
-                editPolicy.activate();
-            }
+        editPolicy.setHost(this);
+        if (this.isActive()) {
+            editPolicy.activate();
         }
     },
     activePolicies:function () {
@@ -412,8 +410,8 @@ anra.gef.EditPart = Base.extend({
         return command;
     },
     getDragTracker:function (request) {
-        if (this.dragTracker == null)
-            this.dragTracker = createDragTracker(request);
+        if (this.dragTracker == null && this.createDragTracker != null)
+            this.dragTracker = this.createDragTracker(request);
         return this.dragTracker;
     },
     getSelected:function () {
@@ -423,7 +421,8 @@ anra.gef.EditPart = Base.extend({
         var editPart;
         var plist = this.policies.values();
         for (var i = 0, len = plist.length; i < len; i++) {
-            editPart = plist[i].getTargetEditPart(request);
+            if (plist[i].getTargetEditPart != null)
+                editPart = plist[i].getTargetEditPart(request);
             if (editPart != null)
                 return editPart;
         }
@@ -513,7 +512,7 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
         return this.figure.getSourceAnchor(line);
     },
     createDragTracker:function () {
-        return new anra.gef.DragTracker();
+        return null;
     },
     getTargetAnchor:function (line) {
         return this.figure.getTargetAnchor(line);
@@ -691,6 +690,9 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
         this.editPartMap = new Map();
         this.layers = new Map();
     },
+    createDragTracker:function () {
+        return new anra.gef.ShadowDragTracker();
+    },
     setSelection:function (o) {
         this.clearSelection();
         this.selection = o;
@@ -844,35 +846,58 @@ anra.gef.LineEditPart = anra.gef.EditPart.extend({
         return {x:100, y:100};
     }
 });
-
+anra.gef.CreationTool = Base.extend({
+    constructor:function (m) {
+        this.model = m;
+    },
+    notifyListeners:function (eventType, func) {
+        //TODO
+    },
+    create:function (editPart) {
+        if (editPart != null) {
+            return editPart.getRoot().editor.createEditPart(editPart, this.model);
+        }
+    },
+    disableEvent:function () {
+    },
+    enableEvent:function () {
+    }
+});
 anra.gef.ShadowDragTracker = Base.extend({
 
     mouseDown:function (me, editPart) {
     },
     dragStart:function (me, editPart) {
-        var target = editPart.getTargetEditPart({
-            type:REQ_DRAG_START,
-            editPart:editPart,
-            event:me
-        });
+        this.mouseDrag(me, editPart);
     },
     mouseDrag:function (me, editPart) {
-        editPart.showTargetFeedback({
-            type:REQ_MOVE,
+        var req = {
             editPart:editPart,
+            target:me.prop.drag,
             event:me
-        });
+        };
+        if (me.prop.drag != null && me.prop.drag instanceof anra.gef.CreationTool)
+            req.type = REQ_CREATE;
+        else
+            req.type = REQ_MOVE;
+
+        editPart.showTargetFeedback(req);
     },
     dragEnd:function (me, editPart) {
         var req = {
-            type:REQ_MOVE_CHILDREN,
             editPart:editPart,
+            target:me.prop.drag,
             event:me
         };
-        editPart.eraseTargetFeedback(req);
+        if (me.prop.drag != null && me.prop.drag instanceof anra.gef.CreationTool)
+            req.type = REQ_CREATE;
+        else
+            req.type = REQ_MOVE;
+
         var cmd = editPart.getCommand(req);
         if (cmd != null)
             editPart.getRoot().editor.execute(cmd);
+        editPart.eraseTargetFeedback(req);
     },
     mouseUp:function (me, editPart) {
     }
@@ -1037,6 +1062,9 @@ anra.gef.Policy = Base.extend({
     getHostFigure:function () {
         return this.editPart.getFigure();
     },
+    getTargetEditPart:function (request) {
+        return this.getHost();
+    },
     getHost:function () {
         return this.editPart;
     },
@@ -1109,6 +1137,7 @@ anra.gef.Editor = Base.extend({
         this.rootEditPart.editor = this;
         this.initRootEditPart(this.rootEditPart);
         this.rootEditPart.setModel(this.rootModel);
+        this.rootEditPart._initFigureListeners();
         this.rootEditPart.activate();
         this.cmdStack = new anra.CommandStack();
         this.rootEditPart.refresh();
@@ -1411,6 +1440,16 @@ anra.gef.EditPartListener = Base.extend({
     selectedStateChanged:function (editPart) {
     }
 });
+
+anra.FigureUtil = {
+    createGhostFigure:function (editPart) {
+        var ghost = editPart.createFigure();
+        ghost.setOpacity(0.5);
+        ghost.disableEvent();
+        ghost.setBounds(editPart.getFigure().getBounds());
+        return ghost;
+    }
+}
 
 
 REQ_CONNECTION_START = "connection start";
