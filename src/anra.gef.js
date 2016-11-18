@@ -173,7 +173,9 @@ anra.gef.EditPart = Base.extend({
             anra.Platform.error("EditPart的editor不能为空");
             return null;
         }
-        return this.editor.createEditPart(this, model);
+        var child = this.editor.createEditPart(this, model);
+        child.editor = this.editor;
+        return child;
     },
     addChild:function (child, index) {
         if (this.children == null)
@@ -722,14 +724,20 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
             var primaryLayer = new anra.svg.Group();
             var handleLayer = new anra.svg.Group();
             var feedbackLayer = new anra.svg.Group();
+//            var defineArea = new anra.svg.DefineArea();
+//            this.figure.addChild(defineArea);
             this.figure.addChild(primaryLayer);
             this.figure.addChild(handleLayer);
             this.figure.addChild(feedbackLayer);
             this.layers.set(anra.gef.RootEditPart.PrimaryLayer, primaryLayer);
             this.layers.set(anra.gef.RootEditPart.HandleLayer, handleLayer);
             this.layers.set(anra.gef.RootEditPart.FeedbackLayer, feedbackLayer);
+//            this.layers.set(anra.gef.RootEditPart.DefineLayer, defineArea);
         }
     },
+//    getDefineArea:function () {
+//        return  this.getLayer(anra.gef.RootEditPart.DefineLayer);
+//    },
     getHandleLayer:function () {
         return  this.getLayer(anra.gef.RootEditPart.HandleLayer);
     },
@@ -758,6 +766,8 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
 anra.gef.RootEditPart.PrimaryLayer = "Primary_Layer";
 anra.gef.RootEditPart.HandleLayer = "Handle_Layer";
 anra.gef.RootEditPart.FeedbackLayer = "Feedback_Layer";
+anra.gef.RootEditPart.DefineLayer = "defineLayer";
+
 anra.gef.LineEditPart = anra.gef.EditPart.extend({
     target:null,
     source:null,
@@ -1235,16 +1245,22 @@ anra.gef.Line = anra.gef.Figure.extend(anra.svg.Polyline).extend({
     setStartMarker:function (marker) {
         this.startMarker = marker;
         if (marker != null) {
-            marker.init(this);
+            this.svg.defs.addChild(marker);
             this.setAttribute('marker-start', 'url(#' + marker.id + ')');
-        } else
+        } else {
+            this.svg.defs.removeChild(marker);
             this.removeAttribute('marker-start');
+        }
     },
     setEndMarker:function (marker) {
+        this.endMarker = marker;
         if (marker != null) {
+//            this.svg.defs.addChild(marker);
             this.setAttribute('marker-end', 'url(#' + marker.id + ')');
-        } else
+        } else {
+//            this.svg.defs.removeChild(marker);
             this.removeAttribute('marker-end');
+        }
     },
     paint:function () {
         if (this.router != null)
@@ -1314,9 +1330,6 @@ anra.gef.PathLine = anra.gef.Line.extend({
 
 });
 
-anra.gef.Marker = {
-
-}
 
 anra.gef.BaseModel = Base.extend({
     constructor:function () {

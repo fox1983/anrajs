@@ -57,7 +57,11 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
 
     },
     getLayoutEditParts:function (request) {
-        return request.editPart;
+        if (REQ_CREATE == request.type) {
+            var creationTool = request.event.prop.drag;
+            return creationTool.create(this.getHost());
+        }
+        return null;
     },
     getFeedback:function (ep) {
         var ghost = this.feedbackMap.get(ep.model);

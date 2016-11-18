@@ -319,37 +319,53 @@ anra.svg.Group = Composite.extend({
     }
 });
 
-anra.svg.Path = {
-    startPoint:null,
-    frags:null,
-    close:false,
-    tagName:'path',
-    applyBounds:function () {
-        this.setAttribute('d', this.compute());
+anra.svg.DefineArea = Composite.extend({
+    tagName:'defs',
+    initProp:function () {
     },
+    setAttribute:function () {
+    },
+    setStyle:function () {
+    }
+});
+
+anra.svg.Marker = Composite.extend({
+    id:null,
+    figure:null,
+    setId:function (id) {
+        this.id = id;
+        this.setAttribute('id', id);
+    },
+    setOwner:function (owner) {
+        this.owner = owner;
+    },
+    setFigure:function (figure) {
+        if (this.figure != null)
+            this.removeChild(this.figure);
+        this.figure = figure;
+        this.addChild(this.figure);
+    }
+});
+
+anra.svg.TriangleMarker = anra.svg.Marker.extend({
     initProp:function () {
         this.setAttribute({
-            stroke:'white',
-            fill:'none',
-            'stroke-width':2
+            refX:"1",
+            refY:"5",
+            markerWidth:"6",
+            markerHeight:"6",
+            orient:"auto"});
+        var p = new anra.svg.Path();
+        p.setAttribute({
+            d:'M 0 0 L 10 5 L 0 10 z'
         });
-    },
-    compute:function () {
-        var l = this.locArea();
-        var result = '';
-        if (this.startPoint != null) {
-            result += 'm' + (this.startPoint.x + l[0]) + ',' + (this.startPoint.y + l[1]) + ' ';
-        }
-        if (this.frags != null)
-            for (var i = 0; i < this.frags.length; i++) {
-                result += ' ' + this.frags[i];
-            }
-        if (this.close) {
-            result += 'z';
-        }
-        return result;
+        this.setFigure(p);
     }
-};
+});
+
+anra.svg.path = anra.svg.Control.extend({
+    tagName:'path'
+});
 
 
 anra.svg.Polyline = {
@@ -386,11 +402,6 @@ anra.svg.Polyline = {
     }
 };
 
-anra.svg.MarkerLine = anra.svg.Group.extend({
-    createContent:function () {
-//        this.addChild();
-    }
-});
 
 /**
  * 动画
@@ -402,6 +413,7 @@ anra.svg.Animation = Control.extend({
 
 anra.SVG = Composite.extend({
     dispatcher:null,
+    defs:null,
     error:function (msg) {
         console.log(msg);
     },
@@ -451,6 +463,9 @@ anra.SVG = Composite.extend({
         };
         anra.Platform.regist(anra.Platform.DISPLAY, this);
         anra.Platform.focus = this;
+
+        this.defs = new anra.svg.DefineArea();
+        this.addChild(this.defs);
     },
     p2x:function (p) {
         if (this.element == null)
