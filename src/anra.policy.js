@@ -226,6 +226,7 @@ anra.gef.SelectionPolicy = anra.gef.AbstractEditPolicy.extend({
         }
     },
     addSelectionListener:function () {
+        var policy=this;
         var SelectionEditPartListener = anra.gef.EditPartListener.extend({
             selectedStateChanged:function () {
                 switch (this.editPart.getSelected()) {
@@ -234,13 +235,14 @@ anra.gef.SelectionPolicy = anra.gef.AbstractEditPolicy.extend({
                         break;
                     case SELECTED_NONE:
                         console.log("SELECTED_NONE");  //取消选中触发
-                        this.policy.hideSelection();
+                        policy.hideSelection();
                         break;
                     case SELECTED_PRIMARY:
                         console.log("SELECTED_PRIMARY");  //选中触发
-                        this.policy.showPrimarySelection();
+                        policy.showPrimarySelection();
                         break;
                     default :
+                        console.log(this.editPart);
                 }
             }
         });

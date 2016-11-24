@@ -721,23 +721,23 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
     },
     createLayer:function () {
         if (this.figure != null) {
+            var painterLayer = new anra.svg.Group();
             var primaryLayer = new anra.svg.Group();
             var handleLayer = new anra.svg.Group();
             var feedbackLayer = new anra.svg.Group();
-//            var defineArea = new anra.svg.DefineArea();
-//            this.figure.addChild(defineArea);
+            this.figure.addChild(painterLayer);
             this.figure.addChild(primaryLayer);
             this.figure.addChild(handleLayer);
             this.figure.addChild(feedbackLayer);
+            this.layers.set(anra.gef.RootEditPart.PainterLayer, painterLayer);
             this.layers.set(anra.gef.RootEditPart.PrimaryLayer, primaryLayer);
             this.layers.set(anra.gef.RootEditPart.HandleLayer, handleLayer);
             this.layers.set(anra.gef.RootEditPart.FeedbackLayer, feedbackLayer);
-//            this.layers.set(anra.gef.RootEditPart.DefineLayer, defineArea);
         }
     },
-//    getDefineArea:function () {
-//        return  this.getLayer(anra.gef.RootEditPart.DefineLayer);
-//    },
+    getPainterLayer:function(){
+        return this.getLayer(anra.gef.RootEditPart.PainterLayer);
+    },
     getHandleLayer:function () {
         return  this.getLayer(anra.gef.RootEditPart.HandleLayer);
     },
@@ -767,6 +767,7 @@ anra.gef.RootEditPart.PrimaryLayer = "Primary_Layer";
 anra.gef.RootEditPart.HandleLayer = "Handle_Layer";
 anra.gef.RootEditPart.FeedbackLayer = "Feedback_Layer";
 anra.gef.RootEditPart.DefineLayer = "defineLayer";
+anra.gef.RootEditPart.PainterLayer="painterLayer";
 
 anra.gef.LineEditPart = anra.gef.EditPart.extend({
     target:null,

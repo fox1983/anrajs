@@ -107,6 +107,8 @@ FlowEditor = anra.gef.Editor.extend({
 
         this.cmdStack.execute(cmd);
     },
+    initRootEditPart:function (editPart) {
+    },
     createLine:function (json) {
         var lineModel = new anra.gef.LineModel();
         lineModel.setProperties(json);
@@ -121,10 +123,9 @@ FlowEditor = anra.gef.Editor.extend({
 
 FlowLayoutPolicy = anra.gef.LayoutPolicy.extend({
     getLayoutEditParts:function (request) {
-        if (REQ_CREATE == request.type) {
-            var creationTool = request.event.prop.drag;
-            return creationTool.create(this.getHost());
-        }
+        var v = anra.gef.LayoutPolicy.prototype.getLayoutEditParts.call(this, request);
+        if (v != null)
+            return v;
         if (this.target != null) {
             //解析所有与target有关的editPart
             return this.target;
@@ -182,12 +183,13 @@ ChildPolicy = anra.gef.AbstractEditPolicy.extend({
         }
     },
     eraseTargetFeedback:function (request) {
-        if (REQ_MOVE== request.type) {
+        if (REQ_MOVE == request.type) {
             this.parent.eraseTargetFeedback(request);
             this.parent.target = null;
         }
     },
     getCommand:function (request) {
+        console.log(1);
     },
     getLayoutEditParts:function (request) {
         console.log(request.editPart);
@@ -230,6 +232,7 @@ SystemEditPart = CommonNodeEditPart.extend({
     },
     createEditPolicies:function () {
         this.installEditPolicy("asdfasfasdf", new TextInfoPolicy());
+        this.installEditPolicy("selection", new anra.gef.ResizableEditPolicy());
     }
 });
 SegmentEditPart = CommonNodeEditPart.extend({
@@ -339,6 +342,9 @@ Line = anra.gef.Line.extend({
                 fill:'none',
                 'stroke-width':'2'
             });
+            var marker = new anra.svg.TriangleMarker();
+//            marker.id = this.model.id;
+            this.setEndMarker(marker);
         }
     }
 );
