@@ -79,7 +79,7 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
     },
     getOrphanChildrenCommand:function (request) {
         return null;
-    },a
+    },
     getCreateCommand:function (request) {
     },
     getDeleteDependantCommand:function (request) {
