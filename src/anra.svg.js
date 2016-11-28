@@ -323,6 +323,9 @@ anra.svg.DefineArea = Composite.extend({
     tagName:'defs',
     initProp:function () {
     },
+    domContainer:function () {
+        return this.owner;
+    },
     setAttribute:function () {
     },
     setStyle:function () {
@@ -332,39 +335,66 @@ anra.svg.DefineArea = Composite.extend({
 anra.svg.Marker = Composite.extend({
     id:null,
     figure:null,
+    tagName:'marker',
     setId:function (id) {
         this.id = id;
         this.setAttribute('id', id);
     },
-    setOwner:function (owner) {
-        this.owner = owner;
+    setFigureAttribute:function (attr) {
+        this.figureAttr = attr;
+        if (this.figure != null)
+            this.figure.setAttribute(attr);
+    },
+    domContainer:function () {
+        return this.owner;
     },
     setFigure:function (figure) {
         if (this.figure != null)
             this.removeChild(this.figure);
         this.figure = figure;
         this.addChild(this.figure);
+        if (this.figureAttr != null)
+            this.figure.setAttribute(this.figureAttr);
     }
 });
 
 anra.svg.TriangleMarker = anra.svg.Marker.extend({
+    createContent:function () {
+        var p = new anra.svg.Path();
+        this.setFigure(p);
+        p.setAttribute({
+            d:'M -4 0 L 5 5 L -4 10 z'
+        });
+    },
+    _init:function () {
+        if (this.init != null)this.init();
+    },
+    afterRemoveListener:function () {
+    },
+    afterAddListener:function () {
+    },
     initProp:function () {
         this.setAttribute({
             refX:"1",
             refY:"5",
             markerWidth:"6",
             markerHeight:"6",
-            orient:"auto"});
-        var p = new anra.svg.Path();
-        p.setAttribute({
-            d:'M 0 0 L 10 5 L 0 10 z'
-        });
-        this.setFigure(p);
+            orient:"auto",
+            viewBox:"-5 0 10 10"});
     }
 });
 
-anra.svg.path = anra.svg.Control.extend({
-    tagName:'path'
+anra.svg.Path = anra.svg.Control.extend({
+    tagName:'path',
+    _init:function () {
+        if (this.init != null)this.init();
+    },
+    afterRemoveListener:function () {
+    },
+    afterAddListener:function () {
+    },
+    initProp:function () {
+    }
 });
 
 
@@ -624,8 +654,8 @@ anra.svg.EventDispatcher = Base.extend({
         e.y = location[1];
         var widget = this.focusOwner;
         widget.notifyListeners(anra.EVENT.MouseDown, e);
-        if (widget != widget.svg)
-            widget.svg.notifyListeners(anra.EVENT.MouseDown, e);
+//        if (widget != widget.svg)
+//            widget.svg.notifyListeners(anra.EVENT.MouseDown, e);
 //        widget.setFocus();
     },
     dispatchMouseMove:function (event) {

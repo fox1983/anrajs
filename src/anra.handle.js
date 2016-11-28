@@ -41,7 +41,7 @@ anra.ResizeHandle = Control.extend({
     editPart:null,
     direction:null,
     constructor:function (editPart, direction) {
-        this._Control();
+        Control.prototype.constructor.call(this);
         this.editPart = editPart;
         this.direction = direction;
         var model = editPart.model;
@@ -81,7 +81,6 @@ anra.ResizeHandle = Control.extend({
         var x = bounds[0] - this.offset;
         var y = bounds[1] - this.offset;
         var cursorStyle;
-
         cursorStyle = this.direction + '-resize';
         if (this.direction.search('e') != -1) {
             x += width;
@@ -112,15 +111,15 @@ anra.ResizeHandle = Control.extend({
         return  anra.gef.ResizeTracker.getInstance(direction);
     }
 });
-//���巽����
-anra.ResizeHandle.NORTH = "n";
-anra.ResizeHandle.SOUTH = "s";
-anra.ResizeHandle.EAST = "e";
-anra.ResizeHandle.WEST = "w";
-anra.ResizeHandle.NORTH_EAST = "ne";
-anra.ResizeHandle.NORTH_WEST = "nw";
-anra.ResizeHandle.SOUTH_EAST = "se";
-anra.ResizeHandle.SOUTH_WEST = "sw";
+
+anra.NORTH = "n";
+anra.SOUTH = "s";
+anra.EAST = "e";
+anra.WEST = "w";
+anra.NORTH_EAST = "ne";
+anra.NORTH_WEST = "nw";
+anra.SOUTH_EAST = "se";
+anra.SOUTH_WEST = "sw";
 
 anra.gef.ResizeTracker = Base.extend({
     status:null,
@@ -235,11 +234,11 @@ anra.gef.SouthEastTracker = anra.gef.ResizeTracker.extend({
 
 
 var trackPool = new Map();
-trackPool.put(anra.ResizeHandle.NORTH, new anra.gef.NorthTracker());
-trackPool.put(anra.ResizeHandle.SOUTH, new anra.gef.SouthTracker());
-trackPool.put(anra.ResizeHandle.SOUTH_EAST, new anra.gef.SouthEastTracker());
-trackPool.put(anra.ResizeHandle.SOUTH_WEST, new anra.gef.SouthWestTracker());
-trackPool.put(anra.ResizeHandle.NORTH_WEST, new anra.gef.NorthWestTracker());
-trackPool.put(anra.ResizeHandle.NORTH_EAST, new anra.gef.NorthEastTracker());
-trackPool.put(anra.ResizeHandle.EAST, new anra.gef.EastTracker());
-trackPool.put(anra.ResizeHandle.WEST, new anra.gef.WestTracker());
+trackPool.put(anra.NORTH, new anra.gef.NorthTracker());
+trackPool.put(anra.SOUTH, new anra.gef.SouthTracker());
+trackPool.put(anra.SOUTH_EAST, new anra.gef.SouthEastTracker());
+trackPool.put(anra.SOUTH_WEST, new anra.gef.SouthWestTracker());
+trackPool.put(anra.NORTH_WEST, new anra.gef.NorthWestTracker());
+trackPool.put(anra.NORTH_EAST, new anra.gef.NorthEastTracker());
+trackPool.put(anra.EAST, new anra.gef.EastTracker());
+trackPool.put(anra.WEST, new anra.gef.WestTracker());

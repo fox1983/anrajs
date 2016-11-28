@@ -32,7 +32,6 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
             this.removeFeedback(values[i]);
         }
         this.feedbackMap.clear();
-
     },
     getAddCommand:function (request) {
         return null;
@@ -66,7 +65,7 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
     getFeedback:function (ep) {
         var ghost = this.feedbackMap.get(ep.model);
         if (ghost == null) {
-            ghost = this.createFeedback(ep);
+            ghost = this.createFeedback(ep)
             this.addFeedback(ghost);
             this.feedbackMap.put(ep.model, ghost);
         }
@@ -80,7 +79,7 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
     },
     getOrphanChildrenCommand:function (request) {
         return null;
-    },
+    },a
     getCreateCommand:function (request) {
     },
     getDeleteDependantCommand:function (request) {
@@ -106,7 +105,6 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
         if (policy != null)
             child.installEditPolicy(anra.gef.Policy.PRIMARY_DRAG_ROLE, policy);
     },
-
     decorateChildren:function () {
         var children = this.getHost().children;
         for (var i = 0, len = children.length; i < len; i++)
@@ -229,7 +227,7 @@ anra.gef.SelectionPolicy = anra.gef.AbstractEditPolicy.extend({
         var policy=this;
         var SelectionEditPartListener = anra.gef.EditPartListener.extend({
             selectedStateChanged:function () {
-                switch (this.editPart.getSelected()) {
+                switch (policy.getHost().getSelected()) {
                     case SELECTED:
                         console.log("SELECTED");
                         break;
@@ -242,11 +240,10 @@ anra.gef.SelectionPolicy = anra.gef.AbstractEditPolicy.extend({
                         policy.showPrimarySelection();
                         break;
                     default :
-                        console.log(this.editPart);
                 }
             }
         });
-        this.selectionListener = new SelectionEditPartListener(this.getHost(), this);
+        this.selectionListener = new SelectionEditPartListener();
         this.getHost().addEditPartListener(this.selectionListener);
     },
     removeSelectionListener:function () {
@@ -283,14 +280,14 @@ anra.gef.ResizableEditPolicy = anra.gef.SelectionPolicy.extend({
     createSelectionHandles:function () {
         var handles = [];
         var editPart = this.getHost();
-        handles.push(new anra.Handle(editPart, anra.Handle.NORTH));
-        handles.push(new anra.Handle(editPart, anra.Handle.SOUTH));
-        handles.push(new anra.Handle(editPart, anra.Handle.EAST));
-        handles.push(new anra.Handle(editPart, anra.Handle.WEST));
-        handles.push(new anra.Handle(editPart, anra.Handle.NORTH_EAST));
-        handles.push(new anra.Handle(editPart, anra.Handle.NORTH_WEST));
-        handles.push(new anra.Handle(editPart, anra.Handle.SOUTH_EAST));
-        handles.push(new anra.Handle(editPart, anra.Handle.SOUTH_WEST));
+        handles.push(new anra.ResizeHandle(editPart, anra.NORTH));
+        handles.push(new anra.ResizeHandle(editPart, anra.SOUTH));
+        handles.push(new anra.ResizeHandle(editPart, anra.EAST));
+        handles.push(new anra.ResizeHandle(editPart, anra.WEST));
+        handles.push(new anra.ResizeHandle(editPart, anra.NORTH_EAST));
+        handles.push(new anra.ResizeHandle(editPart, anra.NORTH_WEST));
+        handles.push(new anra.ResizeHandle(editPart, anra.SOUTH_EAST));
+        handles.push(new anra.ResizeHandle(editPart, anra.SOUTH_WEST));
         return handles;
     }
 

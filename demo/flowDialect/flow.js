@@ -238,6 +238,9 @@ SystemEditPart = CommonNodeEditPart.extend({
 SegmentEditPart = CommonNodeEditPart.extend({
     getImage:function () {
         return "segment.png";
+    },
+    createEditPolicies:function () {
+        this.installEditPolicy("selection", new anra.gef.ResizableEditPolicy());
     }
 });
 BalanceEditPart = CommonNodeEditPart.extend({
@@ -274,8 +277,8 @@ TextHandle = anra.Handle.extend(anra.svg.Text).extend({
     refreshLocation:function (figure) {
         if (this.owner == null || figure == null)
             return;
-        this.owner.setAttribute('x', figure.fattr('x') - 10);
-        this.owner.setAttribute('y', figure.fattr('y') + 50);
+        this.owner.setAttribute('x', figure.fattr('x'));
+        this.owner.setAttribute('y', figure.fattr('y') + figure.fattr('height') + 10);
     }
 
 });
@@ -305,7 +308,7 @@ CommonLineEditPart = anra.gef.LineEditPart.extend({
         this.figure.paint();
     },
     createFigure:function (model) {
-        return new Line(this.source);
+        return new Line(this.model);
     }
 });
 
@@ -328,9 +331,18 @@ Line = anra.gef.Line.extend({
             };
             return  [sp, p1, p2, ep];
         },
-        init:function (source) {
-            anra.gef.Line.prototype.init.call(this, source);
-            this.source = source;
+        init:function (model) {
+            anra.gef.Line.prototype.init.call(this, model);
+        },
+        createContent:function () {
+            var marker = new anra.svg.TriangleMarker();
+            marker.setId(this.model.hashCode());
+            marker.setFigureAttribute({
+                    fill:'white',
+                    stroke:'black'}
+            );
+            this.setEndMarker(marker);
+
         },
         mouseIn:function () {
         },
@@ -342,9 +354,6 @@ Line = anra.gef.Line.extend({
                 fill:'none',
                 'stroke-width':'2'
             });
-            var marker = new anra.svg.TriangleMarker();
-//            marker.id = this.model.id;
-            this.setEndMarker(marker);
         }
     }
 );
