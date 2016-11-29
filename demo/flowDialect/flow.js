@@ -189,10 +189,8 @@ ChildPolicy = anra.gef.AbstractEditPolicy.extend({
         }
     },
     getCommand:function (request) {
-        console.log(1);
     },
     getLayoutEditParts:function (request) {
-        console.log(request.editPart);
         return null;
     }
 });
@@ -216,7 +214,7 @@ CommonNodeEditPart = anra.gef.NodeEditPart.extend({
         return new CommonLineEditPart();
     },
     createDragTracker:function (request) {
-        return new anra.gef.ShadowDragTracker();
+        return new anra.gef.DragTracker();
     },
     createFigure:function () {
         var f = new CommonFigure();

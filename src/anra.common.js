@@ -659,3 +659,57 @@ anra.CommandStack = Base.extend({
     }
 })
 ;
+
+anra.PropertyListenerSupport = Base.extend({
+    constructor:function () {
+        this.map = new anra.ArrayMap();
+    },
+    addPropertyListener:function (listener, key) {
+        if (listener == null)return;
+        this.map.put(key != null ? key : listener.key != null ? listener.key : null, listener);
+    },
+    removePropertyListener:function (listener, key) {
+        if (listener == null)return;
+        this.map.remove(key != null ? key : listener.key != null ? listener.key : null, listener);
+    },
+    firePropertyChanged:function (key, oldValue, newValue) {
+        var named = this.map.get(key);
+        this.fire(named,oldValue,newValue);
+        if (key != null) {
+            var common = this.map.get(null);
+            this.fire(common,oldValue,newValue);
+        }
+    },
+    fire:function (ls, oldValue, newValue) {
+        if (ls != null)
+            for (var i = 0, len = ls.length; i < len; i++) {
+                ls[i].propertyChanged(key, oldValue, newValue);
+            }
+    }
+});
+
+anra.ArrayMap = Base.extend({
+    map:null,
+    constructor:function () {
+        this.map = new HashMap();
+    },
+    put:function (k, v) {
+        if (v == null)return;
+        var vs = this.map.get(k);
+        if (vs == null) {
+            vs = [];
+            this.map.put(k, vs);
+        }
+        vs.push(v);
+    },
+    getListeners:function (key) {
+        return this.map.get(key);
+    },
+    remove:function (k, v) {
+        if (v == null)return;
+        var vs = this.map.get(k);
+        if (vs == null)
+            return;
+        vs.removeObject(v);
+    }
+});

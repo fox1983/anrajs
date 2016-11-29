@@ -149,6 +149,7 @@ anra.gef.ResizeTracker = Base.extend({
             width:editPart.model.getBounds()[2],
             height:editPart.model.getBounds()[3]
         }));
+        anra.gef.DragTracker.prototype.dragEnd.call({host:editPart},me,editPart);
     },
     mouseUp:function (me, editPart) {
         this.status = me.type;

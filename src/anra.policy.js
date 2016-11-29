@@ -229,14 +229,14 @@ anra.gef.SelectionPolicy = anra.gef.AbstractEditPolicy.extend({
             selectedStateChanged:function () {
                 switch (policy.getHost().getSelected()) {
                     case SELECTED:
-                        console.log("SELECTED");
+//                        console.log("SELECTED");
                         break;
                     case SELECTED_NONE:
-                        console.log("SELECTED_NONE");  //取消选中触发
+//                        console.log("SELECTED_NONE");  //取消选中触发
                         policy.hideSelection();
                         break;
                     case SELECTED_PRIMARY:
-                        console.log("SELECTED_PRIMARY");  //选中触发
+//                        console.log("SELECTED_PRIMARY");  //选中触发
                         policy.showPrimarySelection();
                         break;
                     default :
