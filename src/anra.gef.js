@@ -916,12 +916,12 @@ anra.gef.DragTracker = Base.extend({
         var cmd = this.host.getCommand(req);
         if (cmd != null)
             this.host.getRoot().editor.execute(cmd);
-        else if (this.host.parent != null) {
-            //如果本地没有命令执行，说不定上级会有
-            var dt = this.host.parent.getDragTracker();
-            if (dt != null)
-                dt.dragEnd(me, editPart);
-        }
+//        else if (this.host.parent != null) {
+//            //如果本地没有命令执行，说不定上级会有
+//            var dt = this.host.parent.getDragTracker();
+//            if (dt != null)
+//                dt.dragEnd(me, editPart);
+//        }
         this.host.eraseTargetFeedback(req);
     },
     mouseUp:function (me, editPart) {

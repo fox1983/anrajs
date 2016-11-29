@@ -143,8 +143,8 @@ FlowLayoutPolicy = anra.gef.LayoutPolicy.extend({
     },
     eraseLayoutTargetFeedback:function (request) {
         anra.gef.LayoutPolicy.prototype.eraseLayoutTargetFeedback.call(this, request);
-//        this.target = null;
-        this.layout();
+        this.target = null;
+        this.layout(); 
     },
     layout:function () {
         var children = this.getHost().children;
