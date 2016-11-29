@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="../../src/Base.js"></script>
+    <script src="../../src/anra.common.js"></script>
+    <script src="../../src/anra.svg.js"></script>
+    <script src="../../src/anra.gef.js"></script>
+    <script src="../../src/anra.policy.js"></script>
+    <script src="../../src/anra.handle.js"></script>
+    <script src="act.js"></script>
+    <script>
+        window.onload = function () {
+            var zoom = new AStarZoom();
+            zoom.setInput({width:50, hnum:20, vnum:14});
+            zoom.createContent("zoom");
+        }
+
+    </script>
+</head>
+<body>
+<div id="zoom"
+     style="position: absolute;top: 0;margin-left: -10px;width: 100%;height: 100%;background-color: rgb(13,13,13);"></div>
+</body>
+</html>

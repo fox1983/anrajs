@@ -124,6 +124,7 @@ FlowEditor = anra.gef.Editor.extend({
 FlowLayoutPolicy = anra.gef.LayoutPolicy.extend({
     getLayoutEditParts:function (request) {
         var v = anra.gef.LayoutPolicy.prototype.getLayoutEditParts.call(this, request);
+        console.log(v);
         if (v != null)
             return v;
         if (this.target != null) {
@@ -142,7 +143,7 @@ FlowLayoutPolicy = anra.gef.LayoutPolicy.extend({
     },
     eraseLayoutTargetFeedback:function (request) {
         anra.gef.LayoutPolicy.prototype.eraseLayoutTargetFeedback.call(this, request);
-        this.target = null;
+//        this.target = null;
         this.layout();
     },
     layout:function () {
@@ -184,13 +185,15 @@ ChildPolicy = anra.gef.AbstractEditPolicy.extend({
     },
     eraseTargetFeedback:function (request) {
         if (REQ_MOVE == request.type) {
-            this.parent.eraseTargetFeedback(request);
-            this.parent.target = null;
+//            this.parent.eraseTargetFeedback(request);
+//            this.parent.target = null;
         }
     },
     getCommand:function (request) {
+        console.log(1);
     },
     getLayoutEditParts:function (request) {
+        console.log(request.editPart);
         return null;
     }
 });

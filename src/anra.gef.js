@@ -411,7 +411,8 @@ anra.gef.EditPart = Base.extend({
     getDragTracker:function (request) {
         if (this.dragTracker == null && this.createDragTracker != null) {
             this.dragTracker = this.createDragTracker(request);
-            this.dragTracker.host=this;
+            if (this.dragTracker != null)
+                this.dragTracker.host = this;
         }
         return this.dragTracker;
     },
@@ -1041,6 +1042,8 @@ anra.gef.Policy = Base.extend({
     editPart:null,
     setHost:function (editPart) {
         this.editPart = editPart;
+    },
+    isActive:function () {
     },
     getHostFigure:function () {
         return this.editPart.getFigure();
