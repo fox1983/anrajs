@@ -722,17 +722,23 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
         if (this.figure != null) {
             var painterLayer = new anra.svg.Group();
             var primaryLayer = new anra.svg.Group();
+            var lineLayer = new anra.svg.Group();
             var handleLayer = new anra.svg.Group();
             var feedbackLayer = new anra.svg.Group();
             this.figure.addChild(painterLayer);
             this.figure.addChild(primaryLayer);
+            this.figure.addChild(lineLayer);
             this.figure.addChild(handleLayer);
             this.figure.addChild(feedbackLayer);
             this.layers.set(anra.gef.RootEditPart.PainterLayer, painterLayer);
             this.layers.set(anra.gef.RootEditPart.PrimaryLayer, primaryLayer);
+            this.layers.set(anra.gef.RootEditPart.LineLayer, lineLayer);
             this.layers.set(anra.gef.RootEditPart.HandleLayer, handleLayer);
             this.layers.set(anra.gef.RootEditPart.FeedbackLayer, feedbackLayer);
         }
+    },
+    getLineLayer:function () {
+        return this.getLayer(anra.gef.RootEditPart.LineLayer);
     },
     getPainterLayer:function () {
         return this.getLayer(anra.gef.RootEditPart.PainterLayer);
@@ -750,7 +756,7 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
         return this.layers.get(key);
     },
     addChildVisual:function (child, index) {
-        this.getLayer("Primary_Layer").addChild(child.getFigure());
+        this.getPrimaryLayer().addChild(child.getFigure());
     },
     regist:function (editPart) {
         this.editPartMap.put(editPart.model, editPart);
@@ -767,6 +773,7 @@ anra.gef.RootEditPart.HandleLayer = "Handle_Layer";
 anra.gef.RootEditPart.FeedbackLayer = "Feedback_Layer";
 anra.gef.RootEditPart.DefineLayer = "defineLayer";
 anra.gef.RootEditPart.PainterLayer = "painterLayer";
+anra.gef.RootEditPart.LineLayer="lineLayer";
 
 anra.gef.LineEditPart = anra.gef.EditPart.extend({
     target:null,
@@ -808,7 +815,7 @@ anra.gef.LineEditPart = anra.gef.EditPart.extend({
         this.deactivateFigure();
     },
     deactivateFigure:function () {
-        this.getRoot().figure.removeChild(this.figure);
+        this.getRoot().getLineLayer().removeChild(this.figure);
         this.figure.setSourceAnchor(null);
         this.figure.setTargetAnchor(null);
     },
@@ -822,7 +829,7 @@ anra.gef.LineEditPart = anra.gef.EditPart.extend({
         this.activateFigure();
     },
     activateFigure:function () {
-        this.getRoot().figure.addChild(this.getFigure());
+        this.getRoot().getLineLayer().addChild(this.getFigure());
     },
     getRoot:function () {
         return this.parent.getRoot();
@@ -832,7 +839,7 @@ anra.gef.LineEditPart = anra.gef.EditPart.extend({
     },
     refresh:function () {
         if (this.figure == null) {
-            this.getRoot().figure.addChild(this.getFigure());
+            this.getRoot().getLineLayer().addChild(this.getFigure());
         }
         this.refreshSourceAnchor();
         this.refreshTargetAnchor();
