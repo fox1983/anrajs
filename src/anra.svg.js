@@ -729,12 +729,9 @@ anra.svg.EventDispatcher = Base.extend({
 //            if (widget != widget.svg)
 //                widget.svg.notifyListeners(anra.EVENT.DragEnd, e);
         }
-        //global标明请求是全局还是本地的
-//        if (!global) {
         this.mouseState = anra.EVENT.MouseUp;
         e = new anra.event.Event(anra.EVENT.MouseUp, location);
         this.focusOwner.notifyListeners(anra.EVENT.MouseUp, e);
-//        }
         this.dragTarget = null;
     },
     dispatchMouseIn:function (event) {

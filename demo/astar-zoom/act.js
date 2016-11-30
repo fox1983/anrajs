@@ -211,10 +211,10 @@ ClickPolicy = anra.gef.Policy.extend({
             ep.model.setValue('color', color == 'white' ? 'gray' : 'white');
             ep.refresh();
         };
-        this.getHost().figure.addListener(anra.EVENT.MouseUp, this.listener);
+        this.getHost().figure.addListener(anra.EVENT.MouseDown, this.listener);
     },
     deactivate:function () {
-        this.getHost().figure.removeListener(anra.EVENT.MouseUp, this.listener);
+        this.getHost().figure.removeListener(anra.EVENT.MouseDown, this.listener);
     }
 });
 
