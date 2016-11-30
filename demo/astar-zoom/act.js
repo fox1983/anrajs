@@ -116,6 +116,7 @@ CommonPart = anra.gef.NodeEditPart.extend({
         var y = this.model.getValue('y');
         var w = this.model.getValue('width');
         this.figure.setBounds({x:x * w, y:y * w, width:w, height:w});
+
         this.figure.setAttribute({
             fill:this.model.getValue('color')
         });
@@ -170,7 +171,7 @@ CommonLineEditPart = anra.gef.LineEditPart.extend({
             });
         };
         line.router=function(l){
-            console.log(l.points);
+//            console.log(l.points);
 
             return l.points;
         };
@@ -186,6 +187,8 @@ DragPolicy = anra.gef.Policy.extend({
             var x = request.event.x;
             var y = request.event.y;
             var w = 50;
+
+//            console.log(x,y);
             this.getHost().model.setValue('x', Math.floor(x / w));
             this.getHost().model.setValue('y', Math.floor(y / w));
 

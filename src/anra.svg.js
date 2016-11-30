@@ -177,6 +177,7 @@ Control.prototype.create = function () {
 
         e.onmouseup = function (event) {
             dispatcher.setFocusOwner(o);
+            //因为交由父层分发了，所以不需要再触发
 //            dispatcher.dispatchMouseUp(event);
         };
 
@@ -404,7 +405,9 @@ anra.svg.Polyline = {
     tagName:'path',
     defaultEvent:{'pointer-events':'stroke'},
     applyBounds:function () {
-        this.setAttribute('d', this.compute());
+        var d = this.compute();
+        if (d != null)
+            this.setAttribute('d', d);
     },
     initProp:function () {
         this.setAttribute({
@@ -462,8 +465,8 @@ anra.SVG = Composite.extend({
         this.owner.style.position = 'absolute';
         this.owner.style.top = 0;
         this.owner.style.left = 0;
-        this.owner.style.width = '200%';
-        this.owner.style.height = '200%';
+        this.owner.style.width = '150%';
+        this.owner.style.height = '150%';
         this.svg = this;
         this.dispatcher = new anra.svg.EventDispatcher(this);
         var d = this.dispatcher;
@@ -472,20 +475,28 @@ anra.SVG = Composite.extend({
         d.setFocusOwner(t);
 //TODO
         this.element.onmousedown = function (event) {
+            if (event.target == t.owner.parentNode)
+                return;
             if (t.owner == event.target)
                 d.setFocusOwner(t);
             d.dispatchMouseDown(event);
         };
         this.element.onmousemove = function (event) {
+            if (event.target == t.owner.parentNode)
+                return;
             d.dispatchMouseMove(event);
         };
         this.element.onmouseout = function (event) {
+            if (event.target == t.owner.parentNode)
+                return;
             var x = event.clientX;
             var y = event.clientY;
             if (x < div.offsetLeft || x > div.offsetLeft + div.offsetWidth || y < div.offsetTop || y > div.offsetTop + div.offsetHeight)
                 d.dispatchMouseOutScreen(event);
         };
         this.element.onmouseup = function (event) {
+            if (event.target == t.owner.parentNode)
+                return;
             anra.Platform.focusDisplay = t;
             if (t.owner == event.target)
                 d.setFocusOwner(t);
@@ -515,9 +526,9 @@ anra.SVG = Composite.extend({
     },
     getX:function (obj) {
         if (this.left != null)
-            return this.left;
+            return this.left-obj.scrollLeft;
         var parObj = obj;
-        var left = obj.offsetLeft;
+        var left = parObj.offsetLeft;
         while (parObj = parObj.offsetParent) {
             left += parObj.offsetLeft;
         }
@@ -526,7 +537,7 @@ anra.SVG = Composite.extend({
     },
     getY:function (obj) {
         if (this.top != null)
-            return this.top;
+            return this.top-obj.scrollTop;
         var parObj = obj;
         var top = obj.offsetTop;
         while (parObj = parObj.offsetParent) {
