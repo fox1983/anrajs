@@ -1224,11 +1224,18 @@ anra.gef.Line = anra.gef.Figure.extend(anra.svg.Polyline).extend({
     sourceAnchor:null,
     targetAnchor:null,
     router:null,
+    _markListener:null,
     setStartMarker:function (marker) {
         this._setMarker('marker-start', marker);
     },
     setEndMarker:function (marker) {
         this._setMarker('marker-end', marker);
+    },
+    getStartMarker:function () {
+        return this['marker-start'];
+    },
+    getEndMarker:function () {
+        return this['marker-end'];
     },
     _setMarker:function (key, marker) {
         var m = this[key];
@@ -1236,10 +1243,20 @@ anra.gef.Line = anra.gef.Figure.extend(anra.svg.Polyline).extend({
         if (m != null) {
             this.svg.defs.removeChild(m);
             this.removeAttribute(key);
+            if (m.propertyChanged != null)
+                this.addPropertyListener(marker)
         }
+
+        if (m != null && m.propertyChanged != null)
+            this.remove.addPropertyListener(marker)
         this[key] = marker;
         this.svg.defs.addChild(marker);
         this.setAttribute(key, 'url(#' + marker.id + ')');
+    },
+    dispose:function () {
+        this.setStartMarker(null);
+        this.setEndMarker(null);
+        anra.gef.Figure.prototype.dispose.call(this);
     },
     paint:function () {
         if (this.router != null)
@@ -1310,9 +1327,9 @@ anra.gef.PathLine = anra.gef.Line.extend({
 });
 
 
-anra.gef.BaseModel = anra.PropertyListenerSupport.extend({
+anra.gef.BaseModel = Base.extend({
+    pls:null,
     constructor:function () {
-        anra.PropertyListenerSupport.prototype.constructor.call(this);
         this.properties = new Map();
     },
     /**
@@ -1320,13 +1337,13 @@ anra.gef.BaseModel = anra.PropertyListenerSupport.extend({
      * @param p
      * @param fire
      */
-    setProperties:function (p, fire) {
+    setProperties:function (p, unfire) {
         var o, key;
         for (key in p) {
             o = this.properties.get(key);
             this.properties.set(key, p[key]);
-            if (fire) {
-                this.firePropertyChanged(key, o, p[key]);
+            if (!unfire && this.pls) {
+                this.pls.firePropertyChanged(key, o, p[key]);
             }
         }
     },
@@ -1336,15 +1353,24 @@ anra.gef.BaseModel = anra.PropertyListenerSupport.extend({
     setBounds:function (b, unfire) {
         var old = this.getBounds();
         this.properties.put('bounds', b);
-        if (!unfire)
-            this.firePropertyChanged('bounds', old, b);
+        if (!unfire && this.pls)
+            this.pls.firePropertyChanged('bounds', old, b);
     },
     setValue:function (key, value, unfire) {
         var o = this.properties.get(key);
         this.properties.set(key, value);
-        if (!unfire) {
-            this.firePropertyChanged(key, o, value);
+        if (!unfire && this.pls) {
+            this.pls.firePropertyChanged(key, o, value);
         }
+    },
+    addPropertyListener:function (l, k) {
+        if (this.pls == null)
+            this.pls = new anra.PropertyListenerSupport();
+        this.pls.addPropertyListener(l, k);
+    },
+    removePropertyListener:function (l, k) {
+        if (this.pls != null)
+            this.pls.removePropertyListener(l, k);
     },
     getValue:function (key) {
         return this.properties.get(key);

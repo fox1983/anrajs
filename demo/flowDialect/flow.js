@@ -124,7 +124,6 @@ FlowEditor = anra.gef.Editor.extend({
 FlowLayoutPolicy = anra.gef.LayoutPolicy.extend({
     getLayoutEditParts:function (request) {
         var v = anra.gef.LayoutPolicy.prototype.getLayoutEditParts.call(this, request);
-        console.log(v);
         if (v != null)
             return v;
         if (this.target != null) {
@@ -223,6 +222,9 @@ CommonNodeEditPart = anra.gef.NodeEditPart.extend({
         var f = new CommonFigure();
         f.setUrl(this.getImage());
         return f;
+    },
+    deactivate:function(){
+        this.getFigure().dispose();
     }
 });
 
@@ -306,10 +308,26 @@ CommonLineEditPart = anra.gef.LineEditPart.extend({
     doActive:function () {
     },
     refreshVisual:function () {
+
+        var color=this.model.getValue('color')==null?'green':this.model.getValue('color');
+        this.figure.setAttribute('stroke',color);
         this.figure.paint();
     },
     createFigure:function (model) {
-        return new Line(this.model);
+        var f=new Line(this.model);
+        var e=this;
+        f.addListener(anra.EVENT.MouseIn,function(){
+            f.model.setValue('color','red');
+            console.log('mouseIn')
+            e.refresh();
+        });
+        f.addListener(anra.EVENT.MouseOut,function(){
+            f.model.setValue('color','green');
+            console.log('mouseOut')
+            e.refresh();
+        });
+
+        return f;
     }
 });
 
@@ -342,6 +360,9 @@ Line = anra.gef.Line.extend({
                     fill:'white',
                     stroke:'black'}
             );
+            marker.propertyChanged=function(k,o,v){
+                console.log(k,o,v);
+            }
             this.setEndMarker(marker);
 
         },
