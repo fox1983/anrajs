@@ -27,6 +27,7 @@ AStarZoom = anra.gef.Editor.extend({
                 nm.setValue('y', j);
                 nm.setValue('type', GRID);
                 nm.setValue('color', 'white');
+                nm.class=GridPart;
                 rootModel.addChild(nm);
             }
         }
@@ -39,6 +40,7 @@ AStarZoom = anra.gef.Editor.extend({
         nm.setValue('width', w);
         nm.setValue('type', SOURCE);
         nm.setValue('color', 'red');
+        nm.class=SourcePart;
         rootModel.addChild(nm);
         this.source = nm;
 
@@ -50,38 +52,9 @@ AStarZoom = anra.gef.Editor.extend({
         nm.setValue('width', w);
         nm.setValue('type', TARGET);
         nm.setValue('color', 'blue');
+        nm.class=TargetPart;
         this.target = nm;
         rootModel.addChild(nm);
-    },
-    /**
-     * 第二步，根据context（前一个EditPart）和model（数据）生成EditPart（控制器）
-     * @param context
-     * @param model
-     * @return {*}
-     */
-    createEditPart:function (context, model) {
-        if (this.editParts == null)
-            this.editParts = new Map();
-        var part;
-        /*根据type字段来确定节点类型*/
-        var type = model.getValue('type');
-        switch (type) {
-            case GRID:
-                part = new GridPart();
-                break;
-            case TARGET:
-                part = new TargetPart();
-                break;
-            case SOURCE:
-                part = new SourcePart();
-                break;
-            default:
-                return null;
-        }
-
-        part.model = model;
-        this.editParts.put(model.id, part);
-        return part;
     },
     getCustomPolicies:function () {
 //        this.put('layoutPolicy', new FlowLayoutPolicy());

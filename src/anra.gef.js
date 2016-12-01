@@ -18,7 +18,6 @@ anra.gef.Figure = anra.svg.Composite.extend({
     init:function () {
     },
     propertyChanged:function (key, ov, nv) {
-        console.log(key);
     },
     setModel:function (m) {
         this.unlisten();
@@ -169,7 +168,7 @@ anra.gef.EditPart = Base.extend({
             anra.Platform.error("EditPart的editor不能为空");
             return null;
         }
-        var child = this.editor.createEditPart(this, model);
+        var child = this.editor._createEditPart(this, model);
         child.editor = this.editor;
         return child;
     },
@@ -773,7 +772,7 @@ anra.gef.RootEditPart.HandleLayer = "Handle_Layer";
 anra.gef.RootEditPart.FeedbackLayer = "Feedback_Layer";
 anra.gef.RootEditPart.DefineLayer = "defineLayer";
 anra.gef.RootEditPart.PainterLayer = "painterLayer";
-anra.gef.RootEditPart.LineLayer="lineLayer";
+anra.gef.RootEditPart.LineLayer = "lineLayer";
 
 anra.gef.LineEditPart = anra.gef.EditPart.extend({
     target:null,
@@ -1165,8 +1164,10 @@ anra.gef.Editor = Base.extend({
     getCustomPolicies:function () {
         return null;
     },
-    createEditPart:function (context, model) {
-        var part = new anra.gef.EditPart();
+    _createEditPart:function (context, model) {
+        var part = this.createEditPart != null ? this.createEditPart(context, model) : model.class != null ? new model.class : null;
+        if (part == null)
+            return null;
         part.model = model;
         return part;
     },
@@ -1332,16 +1333,16 @@ anra.gef.BaseModel = anra.PropertyListenerSupport.extend({
     getBounds:function () {
         return this.properties.get('bounds');
     },
-    setBounds:function (b, fire) {
+    setBounds:function (b, unfire) {
         var old = this.getBounds();
         this.properties.put('bounds', b);
-        if (fire)
+        if (!unfire)
             this.firePropertyChanged('bounds', old, b);
     },
-    setValue:function (key, value, fire) {
+    setValue:function (key, value, unfire) {
         var o = this.properties.get(key);
         this.properties.set(key, value);
-        if (fire) {
+        if (!unfire) {
             this.firePropertyChanged(key, o, value);
         }
     },

@@ -673,17 +673,20 @@ anra.PropertyListenerSupport = Base.extend({
         this.map.remove(key != null ? key : listener.key != null ? listener.key : null, listener);
     },
     firePropertyChanged:function (key, oldValue, newValue) {
-        var named = this.map.get(key);
-        this.fire(named,oldValue,newValue);
+        var named = this.map.getListeners(key);
+        this.fire(named, key, oldValue, newValue);
         if (key != null) {
-            var common = this.map.get(null);
-            this.fire(common,oldValue,newValue);
+            var common = this.map.getListeners(null);
+            this.fire(common, key, oldValue, newValue);
         }
     },
-    fire:function (ls, oldValue, newValue) {
+    fire:function (ls, key, oldValue, newValue) {
         if (ls != null)
             for (var i = 0, len = ls.length; i < len; i++) {
-                ls[i].propertyChanged(key, oldValue, newValue);
+                if (typeof ls[i] == 'function')
+                    ls[i](key, oldValue, newValue);
+                else if (ls[i].propertyChanged != null)
+                    ls[i].propertyChanged(key, oldValue, newValue);
             }
     }
 });
