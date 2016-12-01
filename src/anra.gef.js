@@ -568,7 +568,7 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
         if (i < size) {
             var trash = [];
             for (; i < size; i++)
-                trash.add(this.sConns[i]);
+                trash.push(this.sConns[i]);
             for (i = 0; i < trash.length; i++)
                 this.removeSourceConnection(trash[i]);
         }
@@ -1372,12 +1372,13 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
         this.targetLines.put(line.hashCode(), line);
     },
     removeSourceLine:function (line) {
-        line.sourceNode = null;
         this.sourceLines.remove(line.hashCode());
+        line.sourceNode = null;
+
     },
     removeTargetLine:function (line) {
-        line.targetNode = null;
         this.targetLines.remove(line.hashCode());
+        line.targetNode = null;
     },
     addChild:function (model) {
         this.children.put(model.id, model);
