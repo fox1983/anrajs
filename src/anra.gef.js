@@ -1244,14 +1244,15 @@ anra.gef.Line = anra.gef.Figure.extend(anra.svg.Polyline).extend({
             this.svg.defs.removeChild(m);
             this.removeAttribute(key);
             if (m.propertyChanged != null)
-                this.addPropertyListener(marker)
+                this.model.removePropertyListener(m);
         }
-
-        if (m != null && m.propertyChanged != null)
-            this.remove.addPropertyListener(marker)
         this[key] = marker;
-        this.svg.defs.addChild(marker);
-        this.setAttribute(key, 'url(#' + marker.id + ')');
+        if (marker != null) {
+            if (marker.propertyChanged != null)
+                this.model.addPropertyListener(marker);
+            this.svg.defs.addChild(marker);
+            this.setAttribute(key, 'url(#' + marker.id + ')');
+        }
     },
     dispose:function () {
         this.setStartMarker(null);

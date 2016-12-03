@@ -223,7 +223,7 @@ CommonNodeEditPart = anra.gef.NodeEditPart.extend({
         f.setUrl(this.getImage());
         return f;
     },
-    deactivate:function(){
+    deactivate:function () {
         this.getFigure().dispose();
     }
 });
@@ -309,21 +309,19 @@ CommonLineEditPart = anra.gef.LineEditPart.extend({
     },
     refreshVisual:function () {
 
-        var color=this.model.getValue('color')==null?'green':this.model.getValue('color');
-        this.figure.setAttribute('stroke',color);
+        var color = this.model.getValue('color') == null ? 'green' : this.model.getValue('color');
+        this.figure.setAttribute('stroke', color);
         this.figure.paint();
     },
     createFigure:function (model) {
-        var f=new Line(this.model);
-        var e=this;
-        f.addListener(anra.EVENT.MouseIn,function(){
-            f.model.setValue('color','red');
-            console.log('mouseIn')
+        var f = new Line(this.model);
+        var e = this;
+        f.addListener(anra.EVENT.MouseIn, function () {
+            f.model.setValue('color', 'red');
             e.refresh();
         });
-        f.addListener(anra.EVENT.MouseOut,function(){
-            f.model.setValue('color','green');
-            console.log('mouseOut')
+        f.addListener(anra.EVENT.MouseOut, function () {
+            f.model.setValue('color', 'green');
             e.refresh();
         });
 
@@ -360,8 +358,10 @@ Line = anra.gef.Line.extend({
                     fill:'white',
                     stroke:'black'}
             );
-            marker.propertyChanged=function(k,o,v){
-                console.log(k,o,v);
+            marker.propertyChanged = function (k, o, v) {
+                if ('color' == k) {
+                    marker.setFigureAttribute({'stroke':v});
+                }
             }
             this.setEndMarker(marker);
 
