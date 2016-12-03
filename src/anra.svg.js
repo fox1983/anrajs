@@ -141,6 +141,10 @@ anra.svg.Control = anra.Control.extend({
     paint:function () {
         this.applyBounds();
         //this.repaint();
+    },
+    dispose:function () {
+        if (this.parent != null)
+            this.parent.removeChild(this);
     }
 })
 ;
@@ -248,6 +252,8 @@ anra.svg.Composite = Control.extend({
         if (c instanceof anra.svg.Control) {
             this.children.removeObject(c);
             this.domContainer().removeChild(c.owner);
+            c.parent = null;
+            c.dispose();
         } else {
             anra.Platform.error('can not remove ' + c.toString() + ' from Composite');
         }
@@ -286,6 +292,16 @@ anra.svg.Composite = Control.extend({
     },
     layout:function () {
         this.layoutManager.layout(this);
+    },
+    dispose:function () {
+        if (this.children != null) {
+            for (var i = 0; i = this.children.length; i++) {
+                this.children[i].dispose();
+            }
+            this.children = null;
+            this.layoutManager=null;
+        }
+        Control.prototype.dispose.call(this);
     }
 })
 ;

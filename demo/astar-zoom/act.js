@@ -188,9 +188,10 @@ ClickPolicy = anra.gef.Policy.extend({
     activate:function () {
         var ep = this.getHost();
         this.listener = function () {
-            var color = ep.model.getValue('color');
-            ep.model.setValue('color', color == 'white' ? 'gray' : 'white');
-            ep.refresh();
+//            var color = ep.model.getValue('color');
+//            ep.model.setValue('color', color == 'white' ? 'gray' : 'white');
+//            ep.refresh();
+            ep.unregister();
         };
         this.getHost().figure.addListener(anra.EVENT.MouseDown, this.listener);
     },
@@ -207,7 +208,6 @@ RemoveLinePolicy = anra.gef.Policy.extend({
             var line = ep.model.getTargetLine('line');
             var linePart=ep.getRoot().getEditPart(line);
             linePart.unregister();
-           var L= ep.editor.source.getSourceLine('Lsource_line');
         };
         this.getHost().figure.addListener(anra.EVENT.MouseUp, this.listener);
     },

@@ -60,9 +60,8 @@ anra.gef.Figure = anra.svg.Composite.extend({
             this.repaintListeners.remove(listener);
     },
     dispose:function () {
+        anra.svg.Composite.prototype.dispose.call(this);
         this.unlisten();
-        if (this.parent != null)
-            this.parent.removeChild(this);
         if (this.repaintListeners != null) {
             this.repaintListeners.clear();
             this.repaintListeners = null;
@@ -674,6 +673,9 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
             linepart.setModel(model);
         }
         return linepart;
+    },
+    unregisterVisuals:function () {
+        this.figure.dispose();
     },
     fireSourceConnectionAdded:function (line, i) {
         //TODO 增加连线事件类型
