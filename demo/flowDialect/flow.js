@@ -10,6 +10,7 @@ SYSTEM = 0;
 SEGMENT = 1;
 BALANCE = 2;
 
+
 FlowEditor = anra.gef.Editor.extend({
     editParts:null,
     background:'#FFFFFF',
@@ -28,6 +29,9 @@ FlowEditor = anra.gef.Editor.extend({
         for (var i = 0; i < nodes.length; i++) {
             nm = new anra.gef.NodeModel();
             nm.id = nodes[i].id;
+            //定义EditPart
+
+            nm.editPartClass=EditPartRegistry[nodes[i].type];
             //设置属性
             nm.setProperties(nodes[i]);
             lines = nodes[i]['lines'];
@@ -63,32 +67,32 @@ FlowEditor = anra.gef.Editor.extend({
         //释放缓存
         targetCache = null;
     },
-    /**
-     * 第二步，根据context（前一个EditPart）和model（数据）生成EditPart（控制器）
-     * @param context
-     * @param model
-     * @return {*}
-     */
-    createEditPart:function (context, model) {
-        if (this.editParts == null)
-            this.editParts = new Map();
-        var part;
-        /*根据type字段来确定节点类型*/
-        var type = model.getValue('type');
-        if (type == SYSTEM) {
-            //创建系统EditPart
-            part = new SystemEditPart();
-        } else if (type == SEGMENT) {
-            //创建网段EditPart
-            part = new SegmentEditPart();
-        }
-        else if (type == BALANCE)
-            part = new BalanceEditPart();
-
-        part.model = model;
-        this.editParts.put(model.id, part);
-        return part;
-    },
+//    /**
+//     * 第二步，根据context（前一个EditPart）和model（数据）生成EditPart（控制器）
+//     * @param context
+//     * @param model
+//     * @return {*}
+//     */
+//    createEditPart:function (context, model) {
+//        if (this.editParts == null)
+//            this.editParts = new Map();
+//        var part;
+//        /*根据type字段来确定节点类型*/
+//        var type = model.getValue('type');
+//        if (type == SYSTEM) {
+//            //创建系统EditPart
+//            part = new SystemEditPart();
+//        } else if (type == SEGMENT) {
+//            //创建网段EditPart
+//            part = new SegmentEditPart();
+//        }
+//        else if (type == BALANCE)
+//            part = new BalanceEditPart();
+//
+//        part.model = model;
+//        this.editParts.put(model.id, part);
+//        return part;
+//    },
     addNode:function (json) {
         var node = new anra.gef.NodeModel();
         node.setProperties(json);
@@ -201,7 +205,7 @@ ChildPolicy = anra.gef.AbstractEditPolicy.extend({
  * 节点EditPart父类，Editpart决定节点的图形、连线的控制器等
  * @type {*}
  */
-CommonNodeEditPart = anra.gef.NodeEditPart.extend({
+var CommonNodeEditPart = anra.gef.NodeEditPart.extend({
     /**
      * 用于同步model和figure。
      */
@@ -229,7 +233,7 @@ CommonNodeEditPart = anra.gef.NodeEditPart.extend({
 });
 
 /*--------详细节点控制器定义--------*/
-SystemEditPart = CommonNodeEditPart.extend({
+var SystemEditPart = CommonNodeEditPart.extend({
     getImage:function () {
         return "system.png";
     },
@@ -238,7 +242,7 @@ SystemEditPart = CommonNodeEditPart.extend({
         this.installEditPolicy("selection", new anra.gef.ResizableEditPolicy());
     }
 });
-SegmentEditPart = CommonNodeEditPart.extend({
+var SegmentEditPart = CommonNodeEditPart.extend({
     getImage:function () {
         return "segment.png";
     },
@@ -246,11 +250,19 @@ SegmentEditPart = CommonNodeEditPart.extend({
         this.installEditPolicy("selection", new anra.gef.ResizableEditPolicy());
     }
 });
-BalanceEditPart = CommonNodeEditPart.extend({
+var BalanceEditPart = CommonNodeEditPart.extend({
     getImage:function () {
         return "balance.png";
     }
 });
+
+
+var EditPartRegistry={
+    0:SystemEditPart,
+    1:SegmentEditPart,
+    2:BalanceEditPart
+};
+
 /*-------详细节点控制器定义结束-------*/
 /*-------策略------*/
 TextInfoPolicy = anra.gef.AbstractEditPolicy.extend({
@@ -353,16 +365,13 @@ Line = anra.gef.Line.extend({
         },
         createContent:function () {
             var marker = new anra.svg.TriangleMarker();
+            console.log(this.model)
             marker.setId(this.model.hashCode());
+            marker.propKey='color';
             marker.setFigureAttribute({
                     fill:'white',
                     stroke:'black'}
             );
-            marker.propertyChanged = function (k, o, v) {
-                if ('color' == k) {
-                    marker.setFigureAttribute({'stroke':v});
-                }
-            }
             this.setEndMarker(marker);
 
         },

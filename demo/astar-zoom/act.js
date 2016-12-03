@@ -27,7 +27,7 @@ AStarZoom = anra.gef.Editor.extend({
                 nm.setValue('y', j);
                 nm.setValue('type', GRID);
                 nm.setValue('color', 'white');
-                nm.class=GridPart;
+                nm.editPartClass = GridPart;
                 rootModel.addChild(nm);
             }
         }
@@ -40,7 +40,7 @@ AStarZoom = anra.gef.Editor.extend({
         nm.setValue('width', w);
         nm.setValue('type', SOURCE);
         nm.setValue('color', 'red');
-        nm.class=SourcePart;
+        nm.editPartClass = SourcePart;
         rootModel.addChild(nm);
         this.source = nm;
 
@@ -52,7 +52,7 @@ AStarZoom = anra.gef.Editor.extend({
         nm.setValue('width', w);
         nm.setValue('type', TARGET);
         nm.setValue('color', 'blue');
-        nm.class=TargetPart;
+        nm.editPartClass = TargetPart;
         this.target = nm;
         rootModel.addChild(nm);
     },
@@ -114,8 +114,10 @@ SourcePart = CommonPart.extend({
         return new anra.gef.DragTracker();
     },
     createEditPolicies:function () {
-        this.installEditPolicy('drag', new DragPolicy());
-        this.installEditPolicy('addLine', new AddLinePolicy());
+        this.installPolicies({
+            'drag':DragPolicy,
+            'addLine':AddLinePolicy
+        });
     },
     createLineEditPart:function () {
         return new CommonLineEditPart();
@@ -128,6 +130,10 @@ TargetPart = CommonPart.extend({
     },
     createEditPolicies:function () {
         this.installEditPolicy('drag', new DragPolicy());
+        this.installEditPolicy('removeLine', new RemoveLinePolicy());
+
+        this.installPolicies({drag:DragPolicy,
+            removeLine:RemoveLinePolicy});
     },
     createLineEditPart:function () {
         return new CommonLineEditPart();
@@ -143,7 +149,7 @@ CommonLineEditPart = anra.gef.LineEditPart.extend({
                 stroke:'black'
             });
         };
-        line.router=function(l){
+        line.router = function (l) {
 //            console.log(l.points);
 
             return l.points;
@@ -154,6 +160,8 @@ CommonLineEditPart = anra.gef.LineEditPart.extend({
 
 
 /*--------------------Policy-----------------*/
+
+
 DragPolicy = anra.gef.Policy.extend({
     showTargetFeedback:function (request) {
         if (REQ_MOVE == request.type) {
@@ -191,6 +199,23 @@ ClickPolicy = anra.gef.Policy.extend({
     }
 });
 
+
+RemoveLinePolicy = anra.gef.Policy.extend({
+    activate:function () {
+        var ep = this.getHost();
+        this.listener = function () {
+            var line = ep.model.getTargetLine('line');
+            var linePart=ep.getRoot().getEditPart(line);
+            linePart.unregister();
+           var L= ep.editor.source.getSourceLine('Lsource_line');
+        };
+        this.getHost().figure.addListener(anra.EVENT.MouseUp, this.listener);
+    },
+    deactivate:function () {
+        this.getHost().figure.removeListener(anra.EVENT.MouseUp, this.listener);
+    }
+});
+
 AddLinePolicy = anra.gef.Policy.extend({
     activate:function () {
         var ep = this.getHost();
@@ -201,8 +226,8 @@ AddLinePolicy = anra.gef.Policy.extend({
             ep.editor.target.addTargetLine(lineModel);
             var t = ep.getRoot().getEditPart(ep.editor.target);
             var s = ep.getRoot().getEditPart(ep.editor.source);
-            t.refresh();
             s.refresh();
+            t.refresh();
         };
         this.getHost().figure.addListener(anra.EVENT.MouseUp, this.listener);
     },

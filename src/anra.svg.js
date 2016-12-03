@@ -356,6 +356,12 @@ anra.svg.Marker = Composite.extend({
         this.addChild(this.figure);
         if (this.figureAttr != null)
             this.figure.setAttribute(this.figureAttr);
+    },
+    propertyChanged:function (k, o, v) {
+        if (this.propKey != null && this.propKey == k) {
+            this.setFigureAttribute({'stroke':v});
+            this.setFigureAttribute({'fill':v});
+        }
     }
 });
 
@@ -526,7 +532,7 @@ anra.SVG = Composite.extend({
     },
     getX:function (obj) {
         if (this.left != null)
-            return this.left-obj.scrollLeft;
+            return this.left - obj.scrollLeft;
         var parObj = obj;
         var left = parObj.offsetLeft;
         while (parObj = parObj.offsetParent) {
@@ -537,7 +543,7 @@ anra.SVG = Composite.extend({
     },
     getY:function (obj) {
         if (this.top != null)
-            return this.top-obj.scrollTop;
+            return this.top - obj.scrollTop;
         var parObj = obj;
         var top = obj.offsetTop;
         while (parObj = parObj.offsetParent) {

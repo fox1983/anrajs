@@ -296,6 +296,11 @@ anra.gef.EditPart = Base.extend({
     },
     createEditPolicies:function () {
     },
+    installPolicies:function (policies) {
+        for (var k in policies) {
+            this.installEditPolicy(k, new policies[k]);
+        }
+    },
     installEditPolicy:function (key, editPolicy) {
         if (key == null) {
             throw 'installEditPolicy:Edit Policies must be installed with key';
@@ -344,6 +349,7 @@ anra.gef.EditPart = Base.extend({
     unregister:function () {
         this.unregisterAccessable();
         this.unregisterVisuals();
+        this.deactivate();
     },
     register:function () {
         this.registerAccessable();
@@ -790,6 +796,22 @@ anra.gef.LineEditPart = anra.gef.EditPart.extend({
         if (this.source != null && this.target != null)
             this.refresh();
     },
+    deactivate:function () {
+        var i;
+        for (i = 0; i < this.children.length; i++) {
+            this.children[i].deactivate();
+        }
+        this.deactivePolicies();
+
+        if (this.model.targetNode != null) {
+            this.model.targetNode.removeTargetLine(this.model);
+            this.model.targetNode = null;
+        }
+        if (this.model.sourceNode != null) {
+            this.model.sourceNode.removeSourceLine(this.model);
+            this.model.sourceNode = null;
+        }
+    },
     setSource:function (t) {
         if (this.source == t)
             return;
@@ -1165,7 +1187,7 @@ anra.gef.Editor = Base.extend({
         return null;
     },
     _createEditPart:function (context, model) {
-        var part = this.createEditPart != null ? this.createEditPart(context, model) : model.class != null ? new model.class : null;
+        var part = this.createEditPart != null ? this.createEditPart(context, model) : model.editPartClass != null ? new model.editPartClass : null;
         if (part == null)
             return null;
         part.model = model;
@@ -1244,12 +1266,12 @@ anra.gef.Line = anra.gef.Figure.extend(anra.svg.Polyline).extend({
             this.svg.defs.removeChild(m);
             this.removeAttribute(key);
             if (m.propertyChanged != null)
-                this.model.removePropertyListener(m);
+                this.model.removePropertyListener(m, m.propKey);
         }
         this[key] = marker;
         if (marker != null) {
             if (marker.propertyChanged != null)
-                this.model.addPropertyListener(marker);
+                this.model.addPropertyListener(marker, marker.propKey);
             this.svg.defs.addChild(marker);
             this.setAttribute(key, 'url(#' + marker.id + ')');
         }
@@ -1270,6 +1292,8 @@ anra.gef.Line = anra.gef.Figure.extend(anra.svg.Polyline).extend({
     },
     setSourceAnchor:function (anchor) {
         this.sourceAnchor = anchor;
+        if (anchor == null)
+            return;
         if (this.points == null)
             this.points = [];
         this.points[0] = anchor;
@@ -1286,6 +1310,8 @@ anra.gef.Line = anra.gef.Figure.extend(anra.svg.Polyline).extend({
     },
     setTargetAnchor:function (anchor) {
         this.targetAnchor = anchor;
+        if (anchor == null)
+            return;
         if (this.points == null)
             this.points = [];
         if (this.points.length > 1)
@@ -1375,6 +1401,11 @@ anra.gef.BaseModel = Base.extend({
     },
     getValue:function (key) {
         return this.properties.get(key);
+    },
+    hashCode:function () {
+        if (this.uuid == null)
+            this.uuid = anra.genUUID();
+        return this.uuid;
     }
 });
 
@@ -1390,22 +1421,42 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
     },
     addSourceLine:function (line) {
         line.sourceNode = this;
-        this.sourceLines.put(line.hashCode(), line);
+        this.sourceLines.put(this.lineId(line.id), line);
     },
     addTargetLine:function (line) {
         if (line.sourceNode == null)
             throw 'addTargetLine: sourceNode of line is  null';
         line.targetNode = this;
-        this.targetLines.put(line.hashCode(), line);
+        this.targetLines.put(this.lineId(line.id), line);
+    },
+    getSourceLine:function (id) {
+        return this.sourceLines.get(this.lineId(id));
+    },
+    getTargetLine:function (id) {
+        return this.targetLines.get(this.lineId(id));
+    },
+    lineId:function (id) {
+        return this.id + '-' + id;
     },
     removeSourceLine:function (line) {
-        this.sourceLines.remove(line.hashCode());
-        line.sourceNode = null;
-
+        var l, lk;
+        if (line instanceof anra.gef.LineModel)
+            lk = this.lineId(line.id);
+        else
+            lk = this.lineId(line);
+        l = this.sourceLines.remove(lk);
+        if (l != null)
+            l.sourceNode = null;
     },
     removeTargetLine:function (line) {
-        this.targetLines.remove(line.hashCode());
-        line.targetNode = null;
+        var l, lk;
+        if (line instanceof anra.gef.LineModel)
+            lk = this.lineId(line.id);
+        else
+            lk = this.lineId(line);
+        l = this.targetLines.remove(lk);
+        if (l != null)
+            l.targetNode = null;
     },
     addChild:function (model) {
         this.children.put(model.id, model);
@@ -1424,9 +1475,6 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
     },
     equals:function (o) {
         return this == o || this.id == o.id;
-    },
-    hashCode:function () {
-        return this.id;
     }
 });
 
@@ -1437,9 +1485,6 @@ anra.gef.LineModel = anra.gef.BaseModel.extend({
     targetNode:null,
     equals:function (o) {
         return this == o || this.id == o.id;
-    },
-    hashCode:function () {
-        return 'L' + this.sourceNode.id + "_" + this.id;
     }
 });
 
