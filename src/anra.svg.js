@@ -253,7 +253,6 @@ anra.svg.Composite = Control.extend({
             this.children.removeObject(c);
             this.domContainer().removeChild(c.owner);
             c.parent = null;
-            c.dispose();
         } else {
             anra.Platform.error('can not remove ' + c.toString() + ' from Composite');
         }
