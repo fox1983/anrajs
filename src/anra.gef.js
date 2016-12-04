@@ -244,27 +244,26 @@ anra.gef.EditPart = Base.extend({
     _initFigureListeners:function () {
         if (this.figure != null) {
             var _ep = this;
-            var dt = this.getDragTracker();
             this.figure.addListener(anra.EVENT.MouseDown, function (e) {
                 //TODO
-                if (dt != null)
-                    dt.mouseDown(e, _ep);
+                if (_ep.getDragTracker() != null)
+                    _ep.getDragTracker().mouseDown(e, _ep);
             });
             this.figure.addListener(anra.EVENT.DragStart, function (e) {
-                if (dt != null)
-                    dt.dragStart(e, _ep);
+                if (_ep.getDragTracker() != null)
+                    _ep.getDragTracker().dragStart(e, _ep);
             });
             this.figure.addListener(anra.EVENT.DragEnd, function (e) {
-                if (dt != null)
-                    dt.dragEnd(e, _ep);
+                if (_ep.getDragTracker() != null)
+                    _ep.getDragTracker().dragEnd(e, _ep);
             });
             this.figure.addListener(anra.EVENT.MouseDrag, function (e) {
-                if (dt != null)
-                    dt.mouseDrag(e, _ep);
+                if (_ep.getDragTracker() != null)
+                    _ep.getDragTracker().mouseDrag(e, _ep);
             });
             this.figure.addListener(anra.EVENT.MouseUp, function (e) {
-                if (dt != null)
-                    dt.mouseUp(e, _ep);
+                if (_ep.getDragTracker() != null)
+                    _ep.getDragTracker().mouseUp(e, _ep);
             });
         }
     },
@@ -341,6 +340,12 @@ anra.gef.EditPart = Base.extend({
     getEditPolicy:function (key) {
         var policy = this.policies.get(key);
         return policy;
+    },
+    getLayoutPolicy:function () {
+        return this.policies.get(anra.gef.Policy.LAYOUT_POLICY);
+    },
+    installLayoutPolicy:function (p) {
+        this.installEditPolicy(anra.gef.Policy.LAYOUT_POLICY, p);
     },
     removeEditPolicy:function (key) {
         this.policies.remove(key);
@@ -922,6 +927,13 @@ anra.gef.DragTracker = Base.extend({
         else
             req.type = REQ_MOVE;
 
+        var cmd = this.host.getCommand(req);
+        if (cmd == null || !cmd.canExecute()) {
+//                editPart.figure.owner.style.cursor='wait';
+        } else {
+            editPart.getRoot().figure.owner.style.cursor = 'move';
+        }
+
         this.host.showTargetFeedback(req);
     },
     dragEnd:function (me, editPart) {
@@ -935,17 +947,19 @@ anra.gef.DragTracker = Base.extend({
             req.type = REQ_CREATE;
         else
             req.type = REQ_MOVE;
+        editPart.getRoot().figure.owner.style.cursor = 'default';
 
         var cmd = this.host.getCommand(req);
-        if (cmd != null)
+        if (cmd != null) {
             this.host.getRoot().editor.execute(cmd);
-//        else if (this.host.parent != null) {
-//            //如果本地没有命令执行，说不定上级会有
-//            var dt = this.host.parent.getDragTracker();
-//            if (dt != null)
-//                dt.dragEnd(me, editPart);
-//        }
+        }
         this.host.eraseTargetFeedback(req);
+//        if (this.host.parent != null) {
+//            var layoutPolicy = this.host.parent.getLayoutPolicy();
+//            if (layoutPolicy != null) {
+//                layoutPolicy.eraseTargetFeedback(req);
+//            }
+//        }
     },
     mouseUp:function (me, editPart) {
     }
@@ -1067,7 +1081,6 @@ anra.gef.ConstraintCommand = anra.Command.extend({
     }
 });
 
-
 anra.gef.Policy = Base.extend({
     editPart:null,
     setHost:function (editPart) {
@@ -1116,6 +1129,7 @@ anra.gef.Policy = Base.extend({
         this.getFeedbackLayer().addChild(figure);
     }
 });
+anra.gef.Policy.LAYOUT_POLICY = 'layoutPolicy';
 
 anra.gef.Palette = anra.gef.Figure.extend({});
 
@@ -1426,8 +1440,6 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
         this.sourceLines.put(this.lineId(line.id), line);
     },
     addTargetLine:function (line) {
-        if (line.sourceNode == null)
-            throw 'addTargetLine: sourceNode of line is  null';
         line.targetNode = this;
         this.targetLines.put(this.lineId(line.id), line);
     },
@@ -1438,7 +1450,7 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
         return this.targetLines.get(this.lineId(id));
     },
     lineId:function (id) {
-        return this.id + '-' + id;
+        return this.id + '_' + id;
     },
     removeSourceLine:function (line) {
         var l, lk;
@@ -1510,6 +1522,7 @@ anra.FigureUtil = {
         ghost.setOpacity(0.5);
         ghost.disableEvent();
         ghost.setBounds(editPart.getFigure().getBounds());
+//TODO
         return ghost;
     }
 }

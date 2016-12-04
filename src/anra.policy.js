@@ -13,6 +13,7 @@ anra.gef.AbstractEditPolicy = anra.gef.Policy.extend({
  */
 anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
     sizeOnDropFeedback:null,
+    ID:'layoutPolicy',
     listener:null,
     feedbackMap:null,
     constructor:function () {
@@ -28,7 +29,7 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
     eraseLayoutTargetFeedback:function (request) {
         //TODO
         var values = this.feedbackMap.values();
-        for(var i= 0,len=values.length;i<len;i++){
+        for (var i = 0, len = values.length; i < len; i++) {
             this.removeFeedback(values[i]);
         }
         this.feedbackMap.clear();
@@ -49,25 +50,38 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
             }
         } else if (editParts instanceof anra.gef.EditPart) {
             feedback = this.getFeedback(editParts);
-            this.refreshFeedback(feedback,request);
+            this.refreshFeedback(feedback, request);
         }
     },
-    refreshFeedback:function (feedback,request) {
-
+    refreshFeedback:function (feedback, request) {
     },
     getLayoutEditParts:function (request) {
         if (REQ_CREATE == request.type) {
             var creationTool = request.event.prop.drag;
             return creationTool.create(this.getHost());
+        } else if (REQ_MOVE == request.type) {
+            if (request.target.model instanceof anra.gef.NodeModel)
+                return this.getHost().getRoot().getEditPart(request.target.model);
         }
         return null;
     },
     getFeedback:function (ep) {
         var ghost = this.feedbackMap.get(ep.model);
         if (ghost == null) {
-            ghost = this.createFeedback(ep)
+            ghost = this.createFeedback(ep);
+
             this.addFeedback(ghost);
             this.feedbackMap.put(ep.model, ghost);
+
+            if (ghost.mouseUpListener == null) {
+                var p = this;
+                p.mouseUpListener = function (e) {
+                    p.eraseLayoutTargetFeedback();
+                    anra.Platform.getDisplay().removeListener(anra.EVENT.MouseUp, p.mouseUpListener);
+                    p.mouseUpListener = null;
+                };
+                anra.Platform.getDisplay().addListener(anra.EVENT.MouseUp, p.mouseUpListener);
+            }
         }
         return ghost;
     },
@@ -138,7 +152,8 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
             return this.getCreateCommand(request);
         return null;
     },
-    getMoveCommand:function(){},
+    getMoveCommand:function () {
+    },
     getLayoutContainer:function () {
         return this.getHostFigure();
     },
@@ -224,7 +239,7 @@ anra.gef.SelectionPolicy = anra.gef.AbstractEditPolicy.extend({
         }
     },
     addSelectionListener:function () {
-        var policy=this;
+        var policy = this;
         var SelectionEditPartListener = anra.gef.EditPartListener.extend({
             selectedStateChanged:function () {
                 switch (policy.getHost().getSelected()) {

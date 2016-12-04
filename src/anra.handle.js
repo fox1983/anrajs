@@ -19,12 +19,9 @@ anra.Handle = Control.extend({
         this.editPart.getFigure().addRepaintListener(this.listener);
         this.refreshLocation(this.editPart.getFigure());
     },
-    _dispose:function () {
+    dispose:function () {
         this.editPart.getFigure().removeRepaintListener(this.listener);
         this.dispose();
-    },
-    dispose:function () {
-
     },
     refreshLocation:function (figure) {
 

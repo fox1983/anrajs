@@ -84,7 +84,7 @@ anra.svg.Control = anra.Control.extend({
     },
     /**
      * 绝对位置
-     * @return {Object}
+     * @return {[x,y,width,height]}
      */
     getClientArea:function () {
         if (this.owner == null)
@@ -143,11 +143,11 @@ anra.svg.Control = anra.Control.extend({
         //this.repaint();
     },
     dispose:function () {
+        anra.Widget.prototype.dispose.call(this);
         if (this.parent != null)
             this.parent.removeChild(this);
     }
-})
-;
+});
 var Control = anra.svg.Control;
 //初始化控件
 Control.prototype.create = function () {
@@ -238,7 +238,8 @@ Control.prototype.locArea = function () {
  *容器类
  * @type {*}
  */
-anra.svg.Composite = Control.extend({
+
+var _Composite={
     children:null,
     layoutManager:null,
     selection:null,
@@ -298,12 +299,12 @@ anra.svg.Composite = Control.extend({
                 this.children[i].dispose();
             }
             this.children = null;
-            this.layoutManager=null;
+            this.layoutManager = null;
         }
         Control.prototype.dispose.call(this);
     }
-})
-;
+};
+anra.svg.Composite = Control.extend(_Composite);
 var Composite = anra.svg.Composite;
 
 /**
@@ -444,9 +445,15 @@ anra.svg.Polyline = {
         var result = '';
 
         for (var i = 0; i < this.points.length; i++) {
-            result += (i == 0 ? 'M' : 'L') + (this.points[i].x + l[0]) + ',' + (this.points[i].y + l[1]) + ' ';
+            result += this.computePoint(i,l);
         }
         return result;
+    },
+//    computePoint:function(i){
+//        return (i == 0 ? 'M' : 'L') + (this.points[i].x + l[0]) + ',' + (this.points[i].y + l[1]) + ' ';
+//    },
+    computePoint:function(i,l){
+        return (i == 0 ? 'M' : i==1?'C':'') + (this.points[i].x + l[0]) + ',' + (this.points[i].y + l[1]) + ' ';
     },
     getStartPoint:function () {
         return this.points == null || this.points.length == 0 ? null : this.points[0];
@@ -465,22 +472,19 @@ anra.svg.Animation = Control.extend({
     tagName:'animateTransform'
 });
 
-anra.SVG = Composite.extend({
+anra.SVG = Composite.extend(anra._Display).extend(anra._EventTable).extend({
     dispatcher:null,
     defs:null,
-    error:function (msg) {
-        console.log(msg);
-    },
     constructor:function (id) {
         this.element = document.getElementById(id);
         if (this.element != null) {
-            this.init();
+            this.create();
             this.element.appendChild(this.svg.owner);
         } else {
             this.error("SVG parent can not be null");
         }
     },
-    init:function () {
+    create:function () {
         this.owner = Util.createElement('svg');
         this.owner.setAttribute('version', '1.1');
         this.owner.style.position = 'absolute';
@@ -496,77 +500,36 @@ anra.SVG = Composite.extend({
         d.setFocusOwner(t);
 //TODO
         this.element.onmousedown = function (event) {
-            if (event.target == t.owner.parentNode)
-                return;
             if (t.owner == event.target)
                 d.setFocusOwner(t);
             d.dispatchMouseDown(event);
+            return false;
         };
         this.element.onmousemove = function (event) {
-            if (event.target == t.owner.parentNode)
-                return;
             d.dispatchMouseMove(event);
+            return false;
         };
         this.element.onmouseout = function (event) {
-            if (event.target == t.owner.parentNode)
-                return;
             var x = event.clientX;
             var y = event.clientY;
             if (x < div.offsetLeft || x > div.offsetLeft + div.offsetWidth || y < div.offsetTop || y > div.offsetTop + div.offsetHeight)
                 d.dispatchMouseOutScreen(event);
+            return false;
         };
         this.element.onmouseup = function (event) {
-            if (event.target == t.owner.parentNode)
-                return;
             anra.Platform.focusDisplay = t;
             if (t.owner == event.target)
                 d.setFocusOwner(t);
-            d.dispatchMouseUp(event, true);
+            d.dispatchMouseUp(event);
+            return false;
         };
         anra.Platform.regist(anra.Platform.DISPLAY, this);
         anra.Platform.focus = this;
 
         this.defs = new anra.svg.DefineArea();
         this.addChild(this.defs);
-    },
-    p2x:function (p) {
-        if (this.element == null)
-            return -1;
-        return this.element.width * p / 100;
-    },
-    p2y:function (p) {
-        if (this.element == null)
-            return -1;
-        return this.element.height * p / 100;
-    },
-    getRelativeLocation:function (event) {
-        var ev = event || window.event;
-        var x = ev.clientX - this.getX(this.element) + Math.floor(window.pageXOffset);
-        var y = ev.clientY - this.getY(this.element) + Math.floor(window.pageYOffset);
-        return [x, y];
-    },
-    getX:function (obj) {
-        if (this.left != null)
-            return this.left - obj.scrollLeft;
-        var parObj = obj;
-        var left = parObj.offsetLeft;
-        while (parObj = parObj.offsetParent) {
-            left += parObj.offsetLeft;
-        }
-        this.left = left;
-        return this.left;
-    },
-    getY:function (obj) {
-        if (this.top != null)
-            return this.top - obj.scrollTop;
-        var parObj = obj;
-        var top = obj.offsetTop;
-        while (parObj = parObj.offsetParent) {
-            top += parObj.offsetTop;
-        }
-        this.top = top;
-        return this.top;
     }
+
 });
 
 anra.svg.Rect = {};
@@ -630,7 +593,7 @@ anra.svg.Text = {
             var dispatcher = anra.Platform.getDisplay().dispatcher;
             e.onmouseup = function (event) {
                 dispatcher.setFocusOwner(o);
-                dispatcher.dispatchMouseUp(event);
+//                dispatcher.dispatchMouseUp(event);
             };
             this.setAttribute({});
             this.setStyle({});
@@ -747,13 +710,17 @@ anra.svg.EventDispatcher = Base.extend({
             }
             if (this.dragTarget != widget)
                 widget.notifyListeners(anra.EVENT.DragEnd, e);
-//            if (widget != widget.svg)
+            //下面代码是为了保证svg能接收到结束事件
+//            if (widget != widget.svg){
 //                widget.svg.notifyListeners(anra.EVENT.DragEnd, e);
+//            }
         }
         this.mouseState = anra.EVENT.MouseUp;
         e = new anra.event.Event(anra.EVENT.MouseUp, location);
         this.focusOwner.notifyListeners(anra.EVENT.MouseUp, e);
         this.dragTarget = null;
+
+        this.focusOwner.notifyListeners(anra.EVENT.MouseUp, e,true);
     },
     dispatchMouseIn:function (event) {
         var location = this.getRelativeLocation(event);

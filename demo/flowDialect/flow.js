@@ -30,8 +30,7 @@ FlowEditor = anra.gef.Editor.extend({
             nm = new anra.gef.NodeModel();
             nm.id = nodes[i].id;
             //定义EditPart
-
-            nm.editPartClass=EditPartRegistry[nodes[i].type];
+            nm.editPartClass = EditPartRegistry[nodes[i].type];
             //设置属性
             nm.setProperties(nodes[i]);
             lines = nodes[i]['lines'];
@@ -67,39 +66,14 @@ FlowEditor = anra.gef.Editor.extend({
         //释放缓存
         targetCache = null;
     },
-//    /**
-//     * 第二步，根据context（前一个EditPart）和model（数据）生成EditPart（控制器）
-//     * @param context
-//     * @param model
-//     * @return {*}
-//     */
-//    createEditPart:function (context, model) {
-//        if (this.editParts == null)
-//            this.editParts = new Map();
-//        var part;
-//        /*根据type字段来确定节点类型*/
-//        var type = model.getValue('type');
-//        if (type == SYSTEM) {
-//            //创建系统EditPart
-//            part = new SystemEditPart();
-//        } else if (type == SEGMENT) {
-//            //创建网段EditPart
-//            part = new SegmentEditPart();
-//        }
-//        else if (type == BALANCE)
-//            part = new BalanceEditPart();
-//
-//        part.model = model;
-//        this.editParts.put(model.id, part);
-//        return part;
-//    },
     addNode:function (json) {
         var node = new anra.gef.NodeModel();
         node.setProperties(json);
         node.id = json.id;
 
-        var cmd = new anra.gef.CreateNodeCommand(this.rootEditPart, node);
+        node.editPartClass = EditPartRegistry[json.type];
 
+        var cmd = new anra.gef.CreateNodeCommand(this.rootEditPart, node);
         var lines = json['lines'];
         /*--------开始添加连线---------*/
         //添加连线，根据连线定义来确定连线的source和target
@@ -120,22 +94,25 @@ FlowEditor = anra.gef.Editor.extend({
         return lineModel;
     },
     getCustomPolicies:function () {
-        this.put('layoutPolicy', new FlowLayoutPolicy());
+        this.put(anra.gef.Policy.LAYOUT_POLICY, new FlowLayoutPolicy());
     }
 });
 
 
 FlowLayoutPolicy = anra.gef.LayoutPolicy.extend({
-    getLayoutEditParts:function (request) {
-        var v = anra.gef.LayoutPolicy.prototype.getLayoutEditParts.call(this, request);
-        if (v != null)
-            return v;
-        if (this.target != null) {
-            //解析所有与target有关的editPart
-            return this.target;
-        }
-        return null;
-    },
+//    getLayoutEditParts:function (request) {
+//        var v = anra.gef.LayoutPolicy.prototype.getLayoutEditParts.call(this, request);
+//        if (v != null)
+//            return v;
+////        console.log(request.target);
+//        this.target=this.getHost().getRoot().getEditPart(request.target.model);
+//        console.log(this.target)
+//        if (this.target != null) {
+//            //解析所有与target有关的editPart
+//            return this.target;
+//        }
+//        return null;
+//    },
     refreshFeedback:function (feedback, request) {
         if (feedback != null) {
             feedback.setBounds({x:request.event.x, y:request.event.y});
@@ -157,10 +134,11 @@ FlowLayoutPolicy = anra.gef.LayoutPolicy.extend({
         }
     },
     getMoveCommand:function (request) {
-        if (this.target != null)
-            return new anra.gef.RelocalCommand(this.target, {
-                    x:this.target.getFigure().getBounds().x,
-                    y:this.target.getFigure().getBounds().y
+        var target = this.getLayoutEditParts(request);
+        if (target != null)
+            return new anra.gef.RelocalCommand(target, {
+                    x:target.getFigure().getBounds().x,
+                    y:target.getFigure().getBounds().y
                 },
                 {
                     x:request.event.x,
@@ -183,7 +161,8 @@ ChildPolicy = anra.gef.AbstractEditPolicy.extend({
     },
     showTargetFeedback:function (request) {
         if (REQ_MOVE == request.type) {
-            this.parent.target = this.getHost();
+//            this.parent.showTargetFeedback(request);
+//            this.parent.target = this.getHost();
         }
     },
     eraseTargetFeedback:function (request) {
@@ -193,14 +172,17 @@ ChildPolicy = anra.gef.AbstractEditPolicy.extend({
         }
     },
     getCommand:function (request) {
-        console.log(1);
+        return null;
     },
     getLayoutEditParts:function (request) {
-        console.log(request.editPart);
         return null;
     }
 });
-
+var c=anra.Command.extend({
+    execute:function(){
+        alert('不能移动到此处');
+    }
+});
 /**
  * 节点EditPart父类，Editpart决定节点的图形、连线的控制器等
  * @type {*}
@@ -257,7 +239,7 @@ var BalanceEditPart = CommonNodeEditPart.extend({
 });
 
 
-var EditPartRegistry={
+var EditPartRegistry = {
     0:SystemEditPart,
     1:SegmentEditPart,
     2:BalanceEditPart
@@ -272,11 +254,10 @@ TextInfoPolicy = anra.gef.AbstractEditPolicy.extend({
         this.handle = new TextHandle(this.getHost());
         this.handle.setText(this.getHost().model.getValue('name'));
         this.getHandleLayer().addChild(this.handle);
-
         var root = this.getHost().getRoot();
         this.handle.addListener(anra.EVENT.MouseUp, function (e) {
             //TODO
-            var json = {id:10, name:'C2APP1', type:0, bounds:[330, 230, 60, 60], lines:[
+            var json = {id:10, name:'C2APP1', type:2, bounds:[330, 230, 60, 60], lines:[
                 {id:0, target:2, sTML:1, tTML:1 }
             ]};
             root.editor.addNode(json);
@@ -365,9 +346,8 @@ Line = anra.gef.Line.extend({
         },
         createContent:function () {
             var marker = new anra.svg.TriangleMarker();
-            console.log(this.model)
             marker.setId(this.model.hashCode());
-            marker.propKey='color';
+            marker.propKey = 'color';
             marker.setFigureAttribute({
                     fill:'white',
                     stroke:'black'}

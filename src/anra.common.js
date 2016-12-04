@@ -172,14 +172,60 @@ anra.Rectangle = {
 anra.Platform.DISPLAY = 0;
 anra.Platform.PAINTER = 1;
 
+
+anra._EventTable = {
+    addListener:function (eventType, listener) {
+        if (listener == null)anra.Platform.getDisplay().error("listener can not be null");
+        if (this.eventTable == null)this.eventTable = new anra.event.EventTable();
+        this.eventTable.hook(eventType, listener);
+        if (this.afterAddListener != null)this.afterAddListener();
+    },
+    removeListener:function (eventType, listener) {
+        if (listener == null)anra.Platform.getDisplay().error("listener can not be null");
+        if (this.eventTable == null)return;
+        this.eventTable.unhook(eventType, listener);
+        if (this.afterRemoveListener != null)this.afterRemoveListener();
+    },
+    dispose:function () {
+        if (this.eventTable != null)
+            this.eventTable.dispose();
+    },
+    notifyListeners:function (eventType, event, isGlobalEvent) {
+        if (this.parent != null && !isGlobalEvent && anra.BubbleEvent.contains(eventType)) {
+            var ls = this.eventTable == null ? null : this.eventTable.getListeners(eventType);
+            if (ls == null || ls.length == 0) {
+                this.parent.notifyListeners(eventType, event, isGlobalEvent);
+                return;
+            }
+        }
+        if (event == null) event = new anra.event.Event();
+        event.type = eventType;
+        event.widget = this;
+        event.display = anra.Platform.getDisplay();
+        if (event.time == 0) {
+            event.time = new Date().getTime();
+        };
+        if (isGlobalEvent) {
+            anra.Platform.getDisplay().postEvent(event);
+        } else {
+            if (this.eventTable != null)
+                this.eventTable.sendEvent(event);
+        }
+    }
+};
 /**
  * 显示器
  * @type {*}
  */
-anra.Display = Base.extend({
+anra._Display = {
     id:"default canvas",
     element:null,
+    globalListener:null,
     postEvent:function (e) {
+        if (this.eventTable != null)
+            this.eventTable.sendEvent(e);
+    },
+    notifyListeners:function () {
     },
     error:function (msg) {
 //        alert(msg);
@@ -197,12 +243,36 @@ anra.Display = Base.extend({
     },
     getRelativeLocation:function (event) {
         var ev = event || window.event;
-        var x = ev.clientX - this.element.offsetLeft + Math.floor(window.pageXOffset);
-        var y = ev.clientY - this.element.offsetTop + Math.floor(window.pageYOffset);
+        var x = ev.clientX - this.getX(this.element) + Math.floor(window.pageXOffset);
+        var y = ev.clientY - this.getY(this.element) + Math.floor(window.pageYOffset);
         return [x, y];
+    },
+    getX:function (obj) {
+        if (this.left != null)
+            return this.left - obj.scrollLeft;
+        var parObj = obj;
+        var left = parObj.offsetLeft;
+        while (parObj = parObj.offsetParent) {
+            left += parObj.offsetLeft;
+        }
+        this.left = left;
+        return this.left;
+    },
+    getY:function (obj) {
+        if (this.top != null)
+            return this.top - obj.scrollTop;
+        var parObj = obj;
+        var top = obj.offsetTop;
+        while (parObj = parObj.offsetParent) {
+            top += parObj.offsetTop;
+        }
+        this.top = top;
+        return this.top;
     }
-})
+};
+anra.Display = Base.extend(anra._Display).extend(anra._EventTable)
 ;
+
 /**
  * 控件
  * @type {*}
@@ -214,52 +284,12 @@ anra.Widget = Base.extend({
     y:0,
     width:20,
     height:20,
-    eventTable:null,
     paint:function () {
-    },
-    dispose:function () {
     },
     error:function (msg) {
         this.display.error(this.id + ":" + msg);
-    },
-    addListener:function (eventType, listener) {
-        if (listener == null)anra.Platform.getDisplay().error("listener can not be null");
-        if (this.eventTable == null)this.eventTable = new anra.event.EventTable();
-        this.eventTable.hook(eventType, listener);
-        if (this.afterAddListener != null)this.afterAddListener();
-    },
-    removeListener:function (eventType, listener) {
-        if (listener == null)anra.Platform.getDisplay().error("listener can not be null");
-        if (this.eventTable == null)return;
-        this.eventTable.unhook(eventType, listener);
-        if (this.afterRemoveListener != null)this.afterRemoveListener();
-    },
-    notifyListeners:function (eventType, event, isGlobalEvent) {
-        if (this.parent != null && !isGlobalEvent && anra.BubbleEvent.contains(eventType)) {
-            var ls = this.eventTable == null ? null : this.eventTable.getListeners(eventType);
-            if (ls == null || ls.length == 0) {
-                this.parent.notifyListeners(eventType, event, isGlobalEvent);
-                return;
-            }
-        }
-        if (event == null) event = new anra.event.Event();
-        event.type = eventType;
-        event.widget = this;
-        event.display = anra.Platform.getDisplay();
-        if (event.time == 0) {
-            event.time = new Date().getTime();
-        }
-        ;
-        if (isGlobalEvent) {
-            anra.Platform.getDisplay().postEvent(event);
-        } else {
-            if (this.eventTable != null)
-                this.eventTable.sendEvent(event);
-        }
     }
-
-})
-;
+}).extend(anra._EventTable);
 anra.Control = anra.Widget.extend({
     parent:null,
     constructor:function () {
@@ -447,6 +477,10 @@ anra.event.EventTable = Base.extend({
                 return;
             }
         }
+    },
+    dispose:function () {
+        this.types.length = 0;
+        this.listeners.length = 0;
     },
     remove:function (i) {
         this.types.remove(i);
