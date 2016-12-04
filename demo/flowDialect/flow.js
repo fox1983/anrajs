@@ -239,7 +239,7 @@ var BalanceEditPart = CommonNodeEditPart.extend({
 });
 
 
-var EditPartRegistry = {
+EditPartRegistry = {
     0:SystemEditPart,
     1:SegmentEditPart,
     2:BalanceEditPart

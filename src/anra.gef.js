@@ -167,9 +167,12 @@ anra.gef.EditPart = Base.extend({
             anra.Platform.error("EditPart的editor不能为空");
             return null;
         }
-        var child = this.editor._createEditPart(this, model);
-        child.editor = this.editor;
-        return child;
+        var part = this.editor.createEditPart != null ? this.editor.createEditPart(this, model) : model.editPartClass != null ? new model.editPartClass : null;
+        if (part == null)
+            return null;
+        part.model = model;
+        part.editor = this.editor;
+        return part;
     },
     addChild:function (child, index) {
         if (this.children == null)
@@ -900,7 +903,7 @@ anra.gef.CreationTool = Base.extend({
     },
     create:function (editPart) {
         if (editPart != null) {
-            return editPart.getRoot().editor.createEditPart(editPart, this.model);
+            return editPart.createChild(this.model);
         }
     },
     disableEvent:function () {
@@ -1021,26 +1024,27 @@ anra.gef.CreateLineCommand = anra.Command.extend({
     constructor:function (rootEditPart, line, sourceId, targetId) {
         this.rootEditPart = rootEditPart;
         this.line = line;
-        this.sourceId = sourceId;
         this.targetId = targetId;
+        this.sourceId = sourceId;
+
     },
     canExecute:function () {
-        return this.rootEditPart != null && this.line != null && this.sourceId != null && this.targetId != null;
+        return this.rootEditPart != null && this.line != null && this.sourceId != null && this.targetId != null
     },
     execute:function () {
-        var target = this.target = this.rootEditPart.model.getChild(this.targetId);
-        var source = this.source = this.rootEditPart.model.getChild(this.sourceId);
-        if (target == null)
+        this.target = this.rootEditPart.model.getChild(this.targetId);
+        this.source = this.rootEditPart.model.getChild(this.sourceId);
+        if (this.target == null)
             anra.Platform.error('can not found line target id: ' + this.targetId);
-        if (source == null)
+        if (this.source == null)
             anra.Platform.error('can not found line source id: ' + this.sourceId);
-        source.addSourceLine(this.line);
-        target.addTargetLine(this.line);
-        var sourcePart = this.sourcePart = this.rootEditPart.getEditPart(source);
+        this.source.addSourceLine(this.line);
+        this.target.addTargetLine(this.line);
+        var sourcePart = this.sourcePart = this.rootEditPart.getEditPart(this.source);
         if (sourcePart != null)
             sourcePart.refresh();
 
-        var targetPart = this.targetPart = this.rootEditPart.getEditPart(target);
+        var targetPart = this.targetPart = this.rootEditPart.getEditPart(this.target);
         if (targetPart != null)
             targetPart.refresh();
     },
@@ -1201,13 +1205,6 @@ anra.gef.Editor = Base.extend({
     },
     getCustomPolicies:function () {
         return null;
-    },
-    _createEditPart:function (context, model) {
-        var part = this.createEditPart != null ? this.createEditPart(context, model) : model.editPartClass != null ? new model.editPartClass : null;
-        if (part == null)
-            return null;
-        part.model = model;
-        return part;
     },
     initRootEditPart:function (editPart) {
     },
@@ -1435,6 +1432,20 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
         this.targetLines = new Map();
         this.children = new Map();
     },
+    hasSourceLine:function (line) {
+        if (line instanceof anra.gef.LineModel) {
+            return this.sourceLines.has(this.lineId(line.id))
+        } else {
+            return this.sourceLines.has(line);
+        }
+    },
+    hasTargetLine:function (line) {
+        if (line instanceof anra.gef.LineModel) {
+            return this.targetLines.has(this.lineId(line.id));
+        } else {
+            return this.targetLines.has(line);
+        }
+    },
     addSourceLine:function (line) {
         var nId = this.lineId(line.id);
         line.sourceNode = this;
@@ -1527,9 +1538,13 @@ anra.gef.EditPartListener = Base.extend({
 anra.FigureUtil = {
     createGhostFigure:function (editPart) {
         var ghost = editPart.createFigure();
+        editPart.refreshVisual.call({
+            figure:ghost,
+            model:editPart.model
+        });
         ghost.setOpacity(0.5);
         ghost.disableEvent();
-        ghost.setBounds(editPart.getFigure().getBounds());
+//        ghost.setBounds(editPart.getFigure().getBounds());
 //TODO
         return ghost;
     }

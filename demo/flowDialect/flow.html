@@ -40,10 +40,11 @@
             plt.onmousedown = function () {
                 var dp = editor.rootEditPart.getFigure().svg.dispatcher;
 
-                var json = {id:8, name:'CIVR', type:2, bounds:[430, 280, 30, 30]};
+                var json = {id:8, name:'CIVR', type:2, bounds:[430, 280, 50, 50]};
                 var node = new anra.gef.NodeModel();
                 node.setProperties(json);
                 node.id = json.id;
+                node.editPartClass=EditPartRegistry[json.type];
                 dp.dragTarget = new anra.gef.CreationTool(node);
                 dp.mouseState = anra.EVENT.MouseDrag;
             };
