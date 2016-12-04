@@ -1436,12 +1436,20 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
         this.children = new Map();
     },
     addSourceLine:function (line) {
+        var nId = this.lineId(line.id);
         line.sourceNode = this;
-        this.sourceLines.put(this.lineId(line.id), line);
+        if (!this.sourceLines.has(nId))
+            this.sourceLines.put(nId, line);
+        else
+            console.log('duplicate line id: ' + line.id);
     },
     addTargetLine:function (line) {
+        var nId = this.lineId(line.id);
         line.targetNode = this;
-        this.targetLines.put(this.lineId(line.id), line);
+        if (!this.targetLines.has(nId))
+            this.targetLines.put(nId, line);
+        else
+            console.log('duplicate line id: ' + line.id);
     },
     getSourceLine:function (id) {
         return this.sourceLines.get(this.lineId(id));

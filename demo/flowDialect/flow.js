@@ -258,7 +258,7 @@ TextInfoPolicy = anra.gef.AbstractEditPolicy.extend({
         this.handle.addListener(anra.EVENT.MouseUp, function (e) {
             //TODO
             var json = {id:10, name:'C2APP1', type:2, bounds:[330, 230, 60, 60], lines:[
-                {id:0, target:2, sTML:1, tTML:1 }
+                {id:1, target:2, sTML:1, tTML:1 }
             ]};
             root.editor.addNode(json);
             root.refresh();
