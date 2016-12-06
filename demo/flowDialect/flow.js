@@ -101,13 +101,7 @@ FlowEditor = anra.gef.Editor.extend({
 
 
 FlowLayoutPolicy = anra.gef.LayoutPolicy.extend({
-    refreshFeedback:function (feedback, request, offsetX, offsetY) {
-        if (feedback != null)
-            feedback.setBounds({
-                x:request.event.x - feedback.bounds.width / 2 + (offsetX == null ? 0 : offsetX),
-                y:request.event.y - feedback.bounds.height / 2 + (offsetY == null ? 0 : offsetY)
-            });
-    },
+
     createChildEditPolicy:function (child) {
         return new ChildPolicy(this);
     }
@@ -168,7 +162,7 @@ var SystemEditPart = CommonNodeEditPart.extend({
         return "system.png";
     },
     createEditPolicies:function () {
-        this.installEditPolicy("asdfasfasdf", new TextInfoPolicy());
+        this.installEditPolicy("casdasdasda", new TextInfoPolicy());
         this.installEditPolicy("selection", new anra.gef.ResizableEditPolicy());
     }
 });
@@ -177,6 +171,7 @@ var SegmentEditPart = CommonNodeEditPart.extend({
         return "segment.png";
     },
     createEditPolicies:function () {
+        this.installEditPolicy("casdasdasda", new TextInfoPolicy());
         this.installEditPolicy("selection", new anra.gef.ResizableEditPolicy());
     }
 });
@@ -205,15 +200,15 @@ TextInfoPolicy = anra.gef.AbstractEditPolicy.extend({
         this.handle = new TextHandle(this.getHost());
         this.handle.setText(this.getHost().model.getValue('name'));
         this.getHandleLayer().addChild(this.handle);
-        var root = this.getHost().getRoot();
-        this.handle.addListener(anra.EVENT.MouseUp, function (e) {
-            //TODO
-            var json = {id:10, name:'C2APP1', type:2, bounds:[330, 230, 60, 60], lines:[
-                {id:1, target:2, sTML:1, tTML:1 }
-            ]};
-            root.editor.addNode(json);
-            root.refresh();
-        });
+//        var root = this.getHost().getRoot();
+//        this.handle.addListener(anra.EVENT.MouseUp, function (e) {
+//            //TODO
+//            var json = {id:10, name:'C2APP1', type:2, bounds:[330, 230, 60, 60], lines:[
+//                {id:1, target:2, sTML:1, tTML:1 }
+//            ]};
+//            root.editor.addNode(json);
+//            root.refresh();
+//        });
     },
     deactivate:function () {
         this.getHandleLayer().removeChild(this.handle);

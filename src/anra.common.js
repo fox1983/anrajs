@@ -260,26 +260,26 @@ anra._Display = {
         return [x, y];
     },
     getX:function (obj) {
-        if (this.left != null)
-            return this.left - obj.scrollLeft;
+//        if (this.left != null)
+//            return this.left - obj.scrollLeft;
         var parObj = obj;
         var left = parObj.offsetLeft;
         while (parObj = parObj.offsetParent) {
             left += parObj.offsetLeft;
         }
-        this.left = left;
-        return this.left;
+//        this.left = left;
+        return left;
     },
     getY:function (obj) {
-        if (this.top != null)
-            return this.top - obj.scrollTop;
+//        if (this.top != null)
+//            return this.top - obj.scrollTop;
         var parObj = obj;
         var top = obj.offsetTop;
         while (parObj = parObj.offsetParent) {
             top += parObj.offsetTop;
         }
-        this.top = top;
-        return this.top;
+//        this.top = top;
+        return top;
     }
 };
 anra.Display = Base.extend(anra._Display).extend(anra._EventTable)

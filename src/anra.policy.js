@@ -12,7 +12,7 @@ anra.gef.AbstractEditPolicy = anra.gef.Policy.extend({
 anra.gef.MarqueeSelectPolicy = anra.gef.Policy.extend({
     marquee:null,
     showTargetFeedback:function (req) {
-        if (req.type == REQ_MOVE && req.target == this.getHostFigure()) {
+        if (req.type == REQ_MOVE && req.target == this.getHostFigure()) {0
             var marquee = this.getFeedback(req)
             this.refreshMarquee(marquee, req);
             this.calculateSelection(marquee);
@@ -29,8 +29,6 @@ anra.gef.MarqueeSelectPolicy = anra.gef.Policy.extend({
 //                children[i].setSelected(SELECTED_NONE);
         }
         this.getHost().getRoot().setSelection(selection);
-
-
     },
     getFeedback:function (req) {
         if (req.type == REQ_MOVE) {
@@ -85,6 +83,13 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
     constructor:function () {
         this.feedbackMap = new Map();
     },
+    refreshFeedback:function (feedback, request, offsetX, offsetY) {
+        if (feedback != null)
+            feedback.setBounds({
+                x:request.event.x - feedback.bounds.width / 2 + (offsetX == null ? 0 : offsetX),
+                y:request.event.y - feedback.bounds.height / 2 + (offsetY == null ? 0 : offsetY)
+            });
+    },
     activate:function () {
         this.setListener(this.createListener());
         this.decorateChildren();
@@ -120,8 +125,6 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
             feedback = this.getFeedback(editParts);
             this.refreshFeedback(feedback, request);
         }
-    },
-    refreshFeedback:function (feedback, request) {
     },
     getLayoutEditParts:function (request) {
         if (REQ_CREATE == request.type) {
@@ -420,6 +423,6 @@ anra.gef.ResizableEditPolicy = anra.gef.SelectionPolicy.extend({
 
 });
 
-anra.gef.CreateLinePolicy= anra.gef.
+//anra.gef.CreateLinePolicy= anra.gef.
 
 anra.gef.Policy.PRIMARY_DRAG_ROLE = "PrimaryDrag Policy";
