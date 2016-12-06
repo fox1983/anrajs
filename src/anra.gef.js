@@ -907,7 +907,9 @@ anra.gef.LineEditPart = anra.gef.EditPart.extend({
         return {x:100, y:100};
     }
 });
-anra.gef.CreationTool = Base.extend({
+
+anra.gef.Tool
+anra.gef.CreationTool = anra.gef.Tool.extend({
     constructor:function (m) {
         this.model = m;
     },
@@ -1259,6 +1261,23 @@ anra.gef.Editor = Base.extend({
         div.style.background = this.background;
         this.element.appendChild(div);
         return new anra.SVG(i);
+    },
+    getEventDispatcher:function(){
+        return this.rootEditPart.getFigure().svg.dispatcher;
+    },
+    setActiveTool:function(tool){
+        if(this.activeTool==tool)return;
+        if(this.activeTool!=null){
+            this.activeTool.deactivate();
+        }
+        this.activeTool=tool;
+        this.activeTool.setHost(this.rootEditPart)
+        this.activeTool.activate();
+
+        var dp=this.getEventDispatcher();
+        dp.dragTarget =tool;
+        dp.mouseState = anra.EVENT.MouseDrag;
+
     }
 });
 
