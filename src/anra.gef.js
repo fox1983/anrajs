@@ -908,22 +908,55 @@ anra.gef.LineEditPart = anra.gef.EditPart.extend({
     }
 });
 
-anra.gef.Tool
-anra.gef.CreationTool = anra.gef.Tool.extend({
-    constructor:function (m) {
-        this.model = m;
+anra.gef.Tool = Base.extend({
+    activate:function () {
+        var dp = this.getEventDispatcher();
+        dp.dragTarget = this;
+        dp.mouseState = anra.EVENT.MouseDrag;
+    },
+    deactivate:function () {
+
+        //TODO 待考虑
+        var dp = this.getEventDispatcher();
+        dp.dragTarget = null;
+        dp.mouseState = anra.EVENT.NONE;
+
+        this.host = null;
+    },
+    setHost:function (host) {
+        this.host = host;
+    },
+    getEventDispatcher:function () {
+        if (this.host == null)return null;
+        return this.host.getFigure().svg.dispatcher;
     },
     notifyListeners:function (eventType, func) {
         //TODO
+    },
+    disableEvent:function () {
+    },
+    enableEvent:function () {
+    }
+});
+anra.gef.CreationTool = anra.gef.Tool.extend({
+    constructor:function (m) {
+        this.model = m;
     },
     create:function (editPart) {
         if (editPart != null) {
             return editPart.createChild(this.model);
         }
+    }
+});
+
+anra.gef.LinkLineTool=anra.gef.Tool.extend({
+    constructor:function (m) {
+        this.model = m;
     },
-    disableEvent:function () {
-    },
-    enableEvent:function () {
+    create:function (editPart) {
+        if (editPart != null) {
+            return editPart.createLineEditPart(this.model);
+        }
     }
 });
 /**
@@ -1262,22 +1295,14 @@ anra.gef.Editor = Base.extend({
         this.element.appendChild(div);
         return new anra.SVG(i);
     },
-    getEventDispatcher:function(){
-        return this.rootEditPart.getFigure().svg.dispatcher;
-    },
-    setActiveTool:function(tool){
-        if(this.activeTool==tool)return;
-        if(this.activeTool!=null){
+    setActiveTool:function (tool) {
+        if (this.activeTool == tool)return;
+        if (this.activeTool != null) {
             this.activeTool.deactivate();
         }
-        this.activeTool=tool;
+        this.activeTool = tool;
         this.activeTool.setHost(this.rootEditPart)
         this.activeTool.activate();
-
-        var dp=this.getEventDispatcher();
-        dp.dragTarget =tool;
-        dp.mouseState = anra.EVENT.MouseDrag;
-
     }
 });
 

@@ -38,8 +38,6 @@
             editor.createContent("my");
             var plt = document.getElementById('myPlt');
             plt.onmousedown = function () {
-                var dp = editor.getEventDispatcher();
-
                 var json = {id:8, name:'CIVR', type:2, bounds:[430, 280, 50, 50]};
                 var node = new anra.gef.NodeModel();
                 node.setProperties(json);
