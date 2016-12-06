@@ -45,7 +45,8 @@ anra.ResizeHandle = Control.extend({
         if (model != null) {
             this.setLocator(model.getBounds());
             this.setStyle({
-                'stroke':'#000000'
+                'stroke':'#000000',
+                'fill':'#FFFFFF'
             });
             var dt = this.getResizeTracker(direction);
             this.addListener(anra.EVENT.MouseDown, function (e) {
@@ -67,6 +68,10 @@ anra.ResizeHandle = Control.extend({
             this.addListener(anra.EVENT.MouseUp, function (e) {
                 if (dt != null)
                     dt.mouseUp(e, editPart);
+            });
+            this.addListener(anra.EVENT.MouseClick, function (e) {
+                if (dt != null&&dt.mouseClick!=null)
+                    dt.mouseClick(e, editPart);
             });
         }
 

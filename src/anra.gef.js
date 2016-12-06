@@ -10,14 +10,22 @@ anra.gef = {};
  */
 anra.gef.Figure = anra.svg.Composite.extend({
     class:'Figure',
-    strokeIn:'blue',
-    stroke:'black',
-    strokeSelected:'green',
     isSelected:SELECTED_NONE,
     repaintListeners:null,
     init:function () {
     },
     propertyChanged:function (key, ov, nv) {
+    },
+    selectionChanged:function (value) {
+        switch (value) {
+            case SELECTED_NONE:
+                this.owner.style.cursor = 'default';
+                break;
+            case SELECTED_PRIMARY:
+            case SELECTED:
+                this.owner.style.cursor = 'move';
+        }
+
     },
     setModel:function (m) {
         this.unlisten();
@@ -109,9 +117,9 @@ anra.gef.EditPart = Base.extend({
         if (this.children != null) {
             var map = new Map();
             //增量修改当前children
-            for (var e in this.children) {
-                map.set(e.model, e);
-            }
+
+            for (i = 0; i < this.children.length; i++)
+                map.set(this.children[i].model, this.children[i]);
             var model, editPart;
             var modelChildren = this.getModelChildren();
             for (i = 0; i < modelChildren.length; i++) {
@@ -248,9 +256,12 @@ anra.gef.EditPart = Base.extend({
         if (this.figure != null) {
             var _ep = this;
             this.figure.addListener(anra.EVENT.MouseDown, function (e) {
-                //TODO
                 if (_ep.getDragTracker() != null)
                     _ep.getDragTracker().mouseDown(e, _ep);
+            });
+            this.figure.addListener(anra.EVENT.MouseClick, function (e) {
+                if (_ep.getDragTracker() != null)
+                    _ep.getDragTracker().mouseClick(e, _ep);
             });
             this.figure.addListener(anra.EVENT.DragStart, function (e) {
                 if (_ep.getDragTracker() != null)
@@ -504,6 +515,8 @@ anra.gef.EditPart = Base.extend({
     },
     setSelected:function (value) {
         this.selected = value;
+        if (this.figure != null && this.figure.selectionChanged != null)
+            this.figure.selectionChanged(value);
         this.fireSelectionChanged();
     },
     understandsRequest:function (req) {
@@ -713,8 +726,8 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
         this.clearSelection();
         this.selection = o;
         if (o instanceof Array) {
-            for (var e in o)
-                o.setSelected(SELECTED_PRIMARY);
+            for (var i = 0; i < o.length; i++)
+                o[i].setSelected(SELECTED_PRIMARY);
         } else if (o instanceof anra.gef.EditPart) {
             o.setSelected(SELECTED_PRIMARY);
         }
@@ -723,8 +736,8 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
         if (this.selection != null) {
             var o = this.selection;
             if (o instanceof Array) {
-                for (var e in o)
-                    o.setSelected(SELECTED_NONE);
+                for (var i = 0; i < o.length; i++)
+                    o[i].setSelected(SELECTED_NONE);
             } else if (o instanceof anra.gef.EditPart) {
                 o.setSelected(SELECTED_NONE);
             }
@@ -911,8 +924,14 @@ anra.gef.CreationTool = Base.extend({
     enableEvent:function () {
     }
 });
+/**
+ * 处理EditPart级别的鼠标事件
+ * @type {*}
+ */
 anra.gef.DragTracker = Base.extend({
     mouseDown:function (me, editPart) {
+    },
+    mouseClick:function (me, editPart) {
         this.host.getRoot().setSelection(editPart);
     },
     dragStart:function (me, editPart) {
@@ -936,7 +955,6 @@ anra.gef.DragTracker = Base.extend({
         } else {
             editPart.getRoot().figure.owner.style.cursor = 'move';
         }
-
         this.host.showTargetFeedback(req);
     },
     dragEnd:function (me, editPart) {
@@ -957,12 +975,6 @@ anra.gef.DragTracker = Base.extend({
             this.host.getRoot().editor.execute(cmd);
         }
         this.host.eraseTargetFeedback(req);
-//        if (this.host.parent != null) {
-//            var layoutPolicy = this.host.parent.getLayoutPolicy();
-//            if (layoutPolicy != null) {
-//                layoutPolicy.eraseTargetFeedback(req);
-//            }
-//        }
     },
     mouseUp:function (me, editPart) {
     }
@@ -1544,8 +1556,6 @@ anra.FigureUtil = {
         });
         ghost.setOpacity(0.5);
         ghost.disableEvent();
-//        ghost.setBounds(editPart.getFigure().getBounds());
-//TODO
         return ghost;
     }
 }

@@ -7,6 +7,72 @@
 
 anra.gef.AbstractEditPolicy = anra.gef.Policy.extend({
 });
+
+
+anra.gef.MarqueeSelectPolicy = anra.gef.Policy.extend({
+    marquee:null,
+    showTargetFeedback:function (req) {
+        if (req.type == REQ_MOVE && req.target == this.getHostFigure()) {
+            var marquee = this.getFeedback(req)
+            this.refreshMarquee(marquee, req);
+            this.calculateSelection(marquee);
+        }
+    },
+    calculateSelection:function (marquee) {
+        var b = marquee.bounds;
+        var children = this.getHost().children;
+        var selection = [];
+        for (var i = 0; i < children.length; i++) {
+            if (anra.Rectangle.observe(b, children[i].figure.bounds))
+                selection.push(children[i])
+//            else
+//                children[i].setSelected(SELECTED_NONE);
+        }
+        this.getHost().getRoot().setSelection(selection);
+
+
+    },
+    getFeedback:function (req) {
+        if (req.type == REQ_MOVE) {
+            if (this.marquee == null)
+                this.marquee = this.createMarquee(req);
+            return this.marquee;
+        }
+    },
+    refreshMarquee:function (f, req) {
+        var nx = req.event.x;
+        var ny = req.event.y;
+        var mX = this.x < nx ? this.x : nx;
+        var mY = this.y < ny ? this.y : ny;
+        f.setBounds({
+            x:mX,
+            y:mY,
+            width:Math.abs(this.x - nx),
+            height:Math.abs(this.y - ny)
+        });
+    },
+    createMarquee:function (req) {
+        var marquee = new anra.svg.Control();
+        marquee.setOpacity(0.3);
+        marquee.disableEvent();
+        this.addFeedback(marquee);
+        marquee.setAttribute({
+            stroke:'black',
+            fill:'grey'
+        });
+        this.x = req.event.x;
+        this.y = req.event.y;
+        return marquee;
+    },
+    eraseTargetFeedback:function (req) {
+        if (req.type == REQ_MOVE) {
+            if (this.marquee != null)
+                this.removeFeedback(this.marquee);
+            this.marquee = null;
+        }
+    }
+});
+
 /**
  * 布局策略
  * @type {*}
@@ -42,13 +108,15 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
     },
     showLayoutTargetFeedback:function (request) {
         var feedback;
-        var editParts = this.getLayoutEditParts(request);
+        var editParts = this.editParts = this.getLayoutEditParts(request);
         if (editParts instanceof Array) {
+            var ox = request.target.bounds.x,
+                oy = request.target.bounds.y;
             for (var i = 0, len = editParts.length; i < len; i++) {
                 feedback = this.getFeedback(editParts[i]);
-                this.refreshFeedback(feedback);
+                this.refreshFeedback(feedback, request, editParts[i].figure.bounds.x - ox, editParts[i].figure.bounds.y - oy);
             }
-        } else if (editParts instanceof anra.gef.EditPart) {
+        } else if (editParts instanceof anra.gef.NodeEditPart) {
             feedback = this.getFeedback(editParts);
             this.refreshFeedback(feedback, request);
         }
@@ -60,8 +128,26 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
             var creationTool = request.event.prop.drag;
             return creationTool.create(this.getHost());
         } else if (REQ_MOVE == request.type) {
-            if (request.target.model instanceof anra.gef.NodeModel)
-                return this.getHost().getRoot().getEditPart(request.target.model);
+            if (request.target.model instanceof anra.gef.NodeModel) {
+                var selection = this.getHost().getRoot().selection;
+                if (selection == null)return null;
+                if (selection.figure == request.target)
+                    return selection;
+                /*验证已选节点里包含拖拽目标节点*/
+                if (selection instanceof Array) {
+                    var s = [];
+                    var valid;
+                    for (var i = 0, len = selection.length; i < len; i++) {
+                        if (selection[i].figure == request.target) {
+                            s.insert(selection[i]);
+                            valid = true;
+                        } else {
+                            s.push(selection[i]);
+                        }
+                    }
+                    if (valid)return s;
+                }
+            }
         }
         return null;
     },
@@ -73,7 +159,7 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
             this.addFeedback(ghost);
             this.feedbackMap.put(ep.model, ghost);
 
-            if (ghost.mouseUpListener == null) {
+            if (this.mouseUpListener == null) {
                 var p = this;
                 p.mouseUpListener = function (e) {
                     p.eraseLayoutTargetFeedback();
@@ -94,10 +180,42 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
     getOrphanChildrenCommand:function (request) {
         return null;
     },
-    getCreateCommand:function (request) {
-    },
     getDeleteDependantCommand:function (request) {
         return null;
+    },
+    getMoveCommand:function (request) {
+        var target = this.editParts;
+        if (target instanceof anra.gef.NodeEditPart)
+            return this.movecmd(target, request);
+        else if (target instanceof Array) {
+            var cmd, offx, offy;
+            var ox = request.target.bounds.x,
+                oy = request.target.bounds.y;
+            for (var i = 0; i < target.length; i++) {
+                offx = target[i].figure.bounds.x - ox;
+                offy = target[i].figure.bounds.y - oy;
+                cmd = cmd == null ?
+                    this.movecmd(target[i], request, offx,offy) :
+                    cmd.chain(this.movecmd(target[i], request,offx,offy));
+            }
+            return cmd;
+        }
+    },
+    movecmd:function (target, request,offx,offy) {
+        return  new anra.gef.RelocalCommand(target, {
+                x:target.getFigure().getBounds().x,
+                y:target.getFigure().getBounds().y
+            },
+            {
+                x:request.event.x - target.getFigure().getBounds().width / 2+(offx?offx:0),
+                y:request.event.y - target.getFigure().getBounds().height / 2+(offy?offy:0)
+            });
+    },
+    getCreateCommand:function (request) {
+        var model = request.event.prop.drag.model;
+        var b = model.getBounds();
+        model.setValue('bounds', [request.event.x - b[2] / 2, request.event.y - b[3] / 2, b[2], b[3]]);
+        return new anra.gef.CreateNodeCommand(this.getHost().getRoot(), model);
     },
     createListener:function () {
         var listener = new anra.gef.EditPartListener();
@@ -151,8 +269,6 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
         if (REQ_CREATE == request.type)
             return this.getCreateCommand(request);
         return null;
-    },
-    getMoveCommand:function () {
     },
     getLayoutContainer:function () {
         return this.getHostFigure();
@@ -241,17 +357,13 @@ anra.gef.SelectionPolicy = anra.gef.AbstractEditPolicy.extend({
     addSelectionListener:function () {
         var policy = this;
         var SelectionEditPartListener = anra.gef.EditPartListener.extend({
-            selectedStateChanged:function () {
-                switch (policy.getHost().getSelected()) {
-                    case SELECTED:
-//                        console.log("SELECTED");
-                        break;
+            selectedStateChanged:function (editPart) {
+                switch (editPart.getSelected()) {
                     case SELECTED_NONE:
-//                        console.log("SELECTED_NONE");  //取消选中触发
                         policy.hideSelection();
                         break;
+                    case SELECTED:
                     case SELECTED_PRIMARY:
-//                        console.log("SELECTED_PRIMARY");  //选中触发
                         policy.showPrimarySelection();
                         break;
                     default :
@@ -286,7 +398,7 @@ anra.gef.SelectionPolicy = anra.gef.AbstractEditPolicy.extend({
         }
         this.handles = [];
     },
-    createSelectionHandles:function () {
+    createSelectionHandles:function (selection) {
 
     }
 });
@@ -307,4 +419,7 @@ anra.gef.ResizableEditPolicy = anra.gef.SelectionPolicy.extend({
     }
 
 });
+
+anra.gef.CreateLinePolicy= anra.gef.
+
 anra.gef.Policy.PRIMARY_DRAG_ROLE = "PrimaryDrag Policy";

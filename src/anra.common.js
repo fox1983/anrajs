@@ -75,7 +75,15 @@ var anra = anra || {
 };
 
 SELECTED = 0;
+/**
+ * 反选
+ * @type {Number}
+ */
 SELECTED_NONE = 1;
+/**
+ *
+ * @type {Number}
+ */
 SELECTED_PRIMARY = 2;
 /*图片加载器，用于内存管理*/
 anra.ImageRegistry = Base.extend({
@@ -164,6 +172,9 @@ anra.Rectangle = {
             return false;
         return (x >= rect.x) && (y >= rect.y) && x < (rect.x + rect.width) && y < (rect.y + rect.height);
     },
+    observe:function (r1, r2) {
+        return (r1.x < r2.x) && (r1.y < r2.y ) && ( r1.x + r1.width > r2.x + r2.width) && ( r1.y + r1.height > r2.y + r2.height);
+    },
     distance:function (r1, r2) {
         return Math.sqrt((r1[0] - r2[0]) * (r1[0] - r2[0]) + (r1[1] - r2[1]) * (r1[1] - r2[1]));
     }
@@ -204,7 +215,8 @@ anra._EventTable = {
         event.display = anra.Platform.getDisplay();
         if (event.time == 0) {
             event.time = new Date().getTime();
-        };
+        }
+        ;
         if (isGlobalEvent) {
             anra.Platform.getDisplay().postEvent(event);
         } else {
@@ -379,6 +391,7 @@ anra.EVENT = {
     MouseOver:3,
     MouseIn:4,
     MouseOut:5,
+    MouseClick:5.5,
     MouseDoubleClick:6,
     MouseDrag:7,
     MouseMove:8,

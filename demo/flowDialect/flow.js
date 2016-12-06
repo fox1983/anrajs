@@ -95,91 +95,39 @@ FlowEditor = anra.gef.Editor.extend({
     },
     getCustomPolicies:function () {
         this.put(anra.gef.Policy.LAYOUT_POLICY, new FlowLayoutPolicy());
+        this.put('marquee', new anra.gef.MarqueeSelectPolicy());
     }
 });
 
 
 FlowLayoutPolicy = anra.gef.LayoutPolicy.extend({
-//    getLayoutEditParts:function (request) {
-//        var v = anra.gef.LayoutPolicy.prototype.getLayoutEditParts.call(this, request);
-//        if (v != null)
-//            return v;
-////        console.log(request.target);
-//        this.target=this.getHost().getRoot().getEditPart(request.target.model);
-//        console.log(this.target)
-//        if (this.target != null) {
-//            //解析所有与target有关的editPart
-//            return this.target;
-//        }
-//        return null;
-//    },
-    refreshFeedback:function (feedback, request) {
-        if (feedback != null) {
-            feedback.setBounds({x:request.event.x, y:request.event.y});
-        }
+    refreshFeedback:function (feedback, request, offsetX, offsetY) {
+        if (feedback != null)
+            feedback.setBounds({
+                x:request.event.x - feedback.bounds.width / 2 + (offsetX == null ? 0 : offsetX),
+                y:request.event.y - feedback.bounds.height / 2 + (offsetY == null ? 0 : offsetY)
+            });
     },
     createChildEditPolicy:function (child) {
         return new ChildPolicy(this);
-    },
-    eraseLayoutTargetFeedback:function (request) {
-        anra.gef.LayoutPolicy.prototype.eraseLayoutTargetFeedback.call(this, request);
-        this.target = null;
-        this.layout();
-    },
-    layout:function () {
-        var children = this.getHost().children;
-        for (var i = 0, len = children.length; i < len; i++) {
-//            var m = children[i].model;
-
-        }
-    },
-    getMoveCommand:function (request) {
-        var target = this.getLayoutEditParts(request);
-        if (target != null)
-            return new anra.gef.RelocalCommand(target, {
-                    x:target.getFigure().getBounds().x,
-                    y:target.getFigure().getBounds().y
-                },
-                {
-                    x:request.event.x,
-                    y:request.event.y
-                });
-    },
-    getCreateCommand:function (request) {
-        var model = request.event.prop.drag.model;
-        var b = model.getValue('bounds');
-        model.setValue('bounds', [request.event.x, request.event.y, b[2], b[3]]);
-        return new anra.gef.CreateNodeCommand(this.getHost().getRoot(), model);
     }
 });
 
 ChildPolicy = anra.gef.AbstractEditPolicy.extend({
     class:'ShadowPolicy',
-    constructor:function (parent) {
-        anra.gef.AbstractEditPolicy.prototype.constructor.call(this);
-        this.parent = parent;
-    },
     showTargetFeedback:function (request) {
-        if (REQ_MOVE == request.type) {
-//            this.parent.showTargetFeedback(request);
-//            this.parent.target = this.getHost();
-        }
     },
     eraseTargetFeedback:function (request) {
-        if (REQ_MOVE == request.type) {
-//            this.parent.eraseTargetFeedback(request);
-//            this.parent.target = null;
-        }
     },
     getCommand:function (request) {
-        return null;
+        return new c();
     },
     getLayoutEditParts:function (request) {
         return null;
     }
 });
-var c=anra.Command.extend({
-    execute:function(){
+var c = anra.Command.extend({
+    execute:function () {
         alert('不能移动到此处');
     }
 });
@@ -235,6 +183,9 @@ var SegmentEditPart = CommonNodeEditPart.extend({
 var BalanceEditPart = CommonNodeEditPart.extend({
     getImage:function () {
         return "balance.png";
+    },
+    createEditPolicies:function () {
+        this.installEditPolicy("selection", new anra.gef.ResizableEditPolicy());
     }
 });
 
