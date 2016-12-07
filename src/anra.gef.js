@@ -201,10 +201,10 @@ anra.gef.EditPart = Base.extend({
             listeners[i].childAdded(child, index);
     },
     reorderChild:function (editpart, index) {
-        this.removeChildVisual(editpart);
+//        this.removeChildVisual(editpart);
         this.children.removeObject(editpart);
-        this.children[index] = editpart;
-        this.addChildVisual(editpart, index);
+        this.children.insert(editpart, index);
+//        this.addChildVisual(editpart, index);
     },
     removeChildVisual:function (child) {
         this.getFigure().removeChild(child.getFigure());
@@ -254,30 +254,31 @@ anra.gef.EditPart = Base.extend({
     },
     _initFigureListeners:function () {
         if (this.figure != null) {
+            var _dt = this.getRoot().editor.getTopDragTracker();
             var _ep = this;
             this.figure.addListener(anra.EVENT.MouseDown, function (e) {
-                if (_ep.getDragTracker() != null)
-                    _ep.getDragTracker().mouseDown(e, _ep);
+//                if (_dt.getDragTracker() != null)
+                _dt.mouseDown(e, _ep);
             });
             this.figure.addListener(anra.EVENT.MouseClick, function (e) {
-                if (_ep.getDragTracker() != null)
-                    _ep.getDragTracker().mouseClick(e, _ep);
+//                if (_ep != null)
+                _dt.mouseClick(e, _ep);
             });
             this.figure.addListener(anra.EVENT.DragStart, function (e) {
-                if (_ep.getDragTracker() != null)
-                    _ep.getDragTracker().dragStart(e, _ep);
+//                if (_ep != null)
+                _dt.dragStart(e, _ep);
             });
             this.figure.addListener(anra.EVENT.DragEnd, function (e) {
-                if (_ep.getDragTracker() != null)
-                    _ep.getDragTracker().dragEnd(e, _ep);
+//                if (_ep != null)
+                _dt.dragEnd(e, _ep);
             });
             this.figure.addListener(anra.EVENT.MouseDrag, function (e) {
-                if (_ep.getDragTracker() != null)
-                    _ep.getDragTracker().mouseDrag(e, _ep);
+//                if (_ep != null)
+                _dt.mouseDrag(e, _ep);
             });
             this.figure.addListener(anra.EVENT.MouseUp, function (e) {
-                if (_ep.getDragTracker() != null)
-                    _ep.getDragTracker().mouseUp(e, _ep);
+//                if (_ep != null)
+                _dt.mouseUp(e, _ep);
             });
         }
     },
@@ -423,19 +424,18 @@ anra.gef.EditPart = Base.extend({
         var command = null;
         if (this.policies != null) {
             var plist = this.policies.values();
-            for (var i = 0, len = plist.length; i < len; i++)
+            for (var i = 0, len = plist.length; i < len; i++) {
                 if (command != null)
                     command = command.chain(plist[i].getCommand(request));
                 else
                     command = plist[i].getCommand(request);
+            }
         }
         return command;
     },
     getDragTracker:function (request) {
         if (this.dragTracker == null && this.createDragTracker != null) {
             this.dragTracker = this.createDragTracker(request);
-            if (this.dragTracker != null)
-                this.dragTracker.host = this;
         }
         return this.dragTracker;
     },
@@ -719,7 +719,7 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
         this.layers = new Map();
     },
     createDragTracker:function () {
-        return new anra.gef.DragTracker();
+        return new anra.gef.RootDragTracker();
     },
     setSelection:function (o) {
         if (this.selection == o)return;
@@ -785,6 +785,9 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
     },
     addChildVisual:function (child, index) {
         this.getPrimaryLayer().addChild(child.getFigure());
+    },
+    removeChildVisual:function (child) {
+        this.getPrimaryLayer().removeChild(child.getFigure());
     },
     regist:function (editPart) {
         this.editPartMap.put(editPart.model, editPart);
@@ -946,10 +949,13 @@ anra.gef.CreationTool = anra.gef.Tool.extend({
         if (editPart != null) {
             return editPart.createChild(this.model);
         }
+    },
+    getType:function () {
+        return REQ_CREATE;
     }
 });
 
-anra.gef.LinkLineTool=anra.gef.Tool.extend({
+anra.gef.LinkLineTool = anra.gef.Tool.extend({
     constructor:function (m) {
         this.model = m;
     },
@@ -959,59 +965,97 @@ anra.gef.LinkLineTool=anra.gef.Tool.extend({
         }
     }
 });
+
+/**
+ * DragTracker总控，如果子DragTracker对应方法不为true，则交由父级处理
+ *
+ * @type {*}
+ */
+anra.gef.TopDragTracker = Base.extend({
+    invoke:function (me, editPart, method) {
+        return editPart.getDragTracker() && editPart.getDragTracker()[method] != null &&
+            editPart.getDragTracker()[method](me, editPart);
+    },
+    invokeLoop:function (me, editPart, method) {
+        var p = editPart;
+        while (!this.invoke(me, p, method) && p.parent != null) {
+            p = p.parent;
+        }
+    },
+    mouseDown:function (me, editPart) {
+        this.invokeLoop(me, editPart, 'mouseDown');
+    },
+    mouseClick:function (me, editPart) {
+        this.invokeLoop(me, editPart, 'mouseClick');
+    },
+    dragStart:function (me, editPart) {
+        this.invokeLoop(me, editPart, 'dragStart');
+    },
+    mouseDrag:function (me, editPart) {
+        this.invokeLoop(me, editPart, 'mouseDrag');
+    },
+    dragEnd:function (me, editPart) {
+        this.invokeLoop(me, editPart, 'dragEnd');
+    },
+    mouseUp:function (me, editPart) {
+        this.invokeLoop(me, editPart, 'mouseUp');
+    }
+});
+
 /**
  * 处理EditPart级别的鼠标事件
  * @type {*}
  */
-anra.gef.DragTracker = Base.extend({
+anra.gef.RootDragTracker = Base.extend({
     mouseDown:function (me, editPart) {
     },
     mouseClick:function (me, editPart) {
-        this.host.getRoot().setSelection(editPart);
+        editPart.getRoot().setSelection(editPart);
     },
     dragStart:function (me, editPart) {
         this.mouseDrag(me, editPart);
     },
     mouseDrag:function (me, editPart) {
+        var v = this;
         var req = {
             editPart:editPart,
-            host:this.host,
             target:me.prop.drag,
-            event:me
+            event:me,
+            type:v.getRequestType(me.prop.drag)
         };
-        if (me.prop.drag != null && me.prop.drag instanceof anra.gef.CreationTool)
-            req.type = REQ_CREATE;
-        else
-            req.type = REQ_MOVE;
-
-        var cmd = this.host.getCommand(req);
-        if (cmd == null || !cmd.canExecute()) {
-//                editPart.figure.owner.style.cursor='wait';
-        } else {
-            editPart.getRoot().figure.owner.style.cursor = 'move';
-        }
-        this.host.showTargetFeedback(req);
+        editPart.showTargetFeedback(req);
+    },
+    getRequestType:function (target) {
+        if (target instanceof anra.gef.Tool)
+            return  target.getType();
+        if (target instanceof anra.SVG)
+            return REQ_MOVE;
+        return null;
     },
     dragEnd:function (me, editPart) {
+        var v = this;
         var req = {
             editPart:editPart,
-            host:this.host,
             target:me.prop.drag,
-            event:me
+            event:me,
+            type:v.getRequestType(me.prop.drag)
         };
-        if (me.prop.drag != null && me.prop.drag instanceof anra.gef.CreationTool)
-            req.type = REQ_CREATE;
-        else
-            req.type = REQ_MOVE;
-        editPart.getRoot().figure.owner.style.cursor = 'default';
-
-        var cmd = this.host.getCommand(req);
+        var cmd = editPart.getCommand(req);
         if (cmd != null) {
-            this.host.getRoot().editor.execute(cmd);
+            editPart.getRoot().editor.execute(cmd);
         }
-        this.host.eraseTargetFeedback(req);
+        editPart.eraseTargetFeedback(req);
     },
     mouseUp:function (me, editPart) {
+        console.log('root');
+    }
+});
+
+
+anra.gef.DragTracker = Base.extend({
+    mouseUp:function (me, editPart) {
+        console.log('node');
+//        return true;
     }
 });
 
@@ -1195,7 +1239,7 @@ anra.gef.Editor = Base.extend({
     background:'#EEFFEE',
     setInput:function (input) {
         this.input = input;
-        this.rootModel = new anra.gef.NodeModel();
+        this.rootModel = new anra.gef.ContentModel();
         this.input2model(this.input, this.rootModel);
     },
     input2model:function (input) {
@@ -1209,7 +1253,7 @@ anra.gef.Editor = Base.extend({
             anra.Platform.error('GEF的父级元素不能为空');
             return;
         }
-        this.palette = this.createPalette(parentId);
+//        this.palette = this.createPalette(parentId);
         this.canvas = this.createCanvas(parentId);
 
         this._initCanvasListeners(this.canvas);
@@ -1225,10 +1269,8 @@ anra.gef.Editor = Base.extend({
     },
     _initCanvasListeners:function (cav) {
         var editor = this;
-        this.canvas.addKeyListener({
-            handleEvent:function (e) {
-                editor.actionRegistry.keyHandle(e);
-            }
+        this.canvas.addKeyListener(function (e) {
+            editor.actionRegistry.keyHandle(e);
         });
     },
     registActions:function () {
@@ -1273,7 +1315,7 @@ anra.gef.Editor = Base.extend({
     createPalette:function (id) {
         var i = id + 'Plt';
         var div = document.createElement('div');
-        div.setAttribute('id', i);
+        div.setAttribute('id', id + 'Plt');
         div.style.position = 'relative';
         div.style.width = '10%';
         div.style.height = '100%';
@@ -1303,6 +1345,14 @@ anra.gef.Editor = Base.extend({
         this.activeTool = tool;
         this.activeTool.setHost(this.rootEditPart)
         this.activeTool.activate();
+    },
+    getTopDragTracker:function () {
+        if (this.topDragTracker == null)
+            this.topDragTracker = this.createTopDragTracker();
+        return this.topDragTracker;
+    },
+    createTopDragTracker:function () {
+        return new anra.gef.TopDragTracker();
     }
 });
 

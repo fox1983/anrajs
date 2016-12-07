@@ -103,7 +103,7 @@ FlowEditor = anra.gef.Editor.extend({
 FlowLayoutPolicy = anra.gef.LayoutPolicy.extend({
 
     createChildEditPolicy:function (child) {
-        return new ChildPolicy(this);
+        return new ChildPolicy();
     }
 });
 

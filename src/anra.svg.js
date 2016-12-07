@@ -144,8 +144,6 @@ anra.svg.Control = anra.Control.extend({
     },
     dispose:function () {
         anra.Widget.prototype.dispose.call(this);
-        if (this.parent != null)
-            this.parent.removeChild(this);
     }
 });
 var Control = anra.svg.Control;
@@ -504,7 +502,7 @@ anra.SVG = Composite.extend(anra._Display).extend(anra._EventTable).extend({
             d.dispatchMouseDown(event);
             return false;
         };
-        this.element.onclick=function(event){
+        this.element.onclick = function (event) {
             d.dispatchMouseClick(event);
             return false;
         };
@@ -656,8 +654,8 @@ anra.svg.EventDispatcher = Base.extend({
 //            widget.svg.notifyListeners(anra.EVENT.MouseDown, e);
 //        widget.setFocus();
     },
-    dispatchMouseClick:function(event){
-        this.mouseState=anra.EVENT.MouseUp;
+    dispatchMouseClick:function (event) {
+        this.mouseState = anra.EVENT.MouseUp;
         var e = new anra.event.Event(anra.EVENT.MouseDown);
         var location = this.getRelativeLocation(event);
         e.x = location[0];
@@ -667,7 +665,7 @@ anra.svg.EventDispatcher = Base.extend({
     },
     dispatchMouseMove:function (event) {
         //提高效率
-        if ((++count ) % 2 != 0) {
+        if ((++count ) % 5 != 0) {
             if (count > 101)
                 count = 0;
             return;
@@ -704,10 +702,10 @@ anra.svg.EventDispatcher = Base.extend({
             e.prop = {drag:this.dragTarget, target:this.focusOwner};
             this.dragTarget.notifyListeners(anra.EVENT.MouseDrag, e);
             //TODO
-            widget = this.focusOwner;
-            if (this.dragTarget != widget.svg) {
-                widget.svg.notifyListeners(anra.EVENT.MouseDrag, e);
-            }
+//            widget = this.focusOwner;
+//            if (this.dragTarget != widget.svg) {
+//                widget.svg.notifyListeners(anra.EVENT.MouseDrag, e);
+//            }
         }
     },
     dispatchMouseUp:function (event, global) {
@@ -722,17 +720,15 @@ anra.svg.EventDispatcher = Base.extend({
             }
 
             widget.notifyListeners(anra.EVENT.DragEnd, e);
-            //下面代码是为了保证svg能接收到结束事件
-            if (widget != widget.svg){
-                widget.svg.notifyListeners(anra.EVENT.DragEnd, e);
-            }
+            //下面代码是为了保证svg能接收到结束事件，目前由于提供了DragTracker总控，不再需要了
+//            if (widget != widget.svg){
+//                widget.svg.notifyListeners(anra.EVENT.DragEnd, e);
+//            }
         }
         this.mouseState = anra.EVENT.MouseUp;
         e = new anra.event.Event(anra.EVENT.MouseUp, location);
         this.focusOwner.notifyListeners(anra.EVENT.MouseUp, e);
         this.dragTarget = null;
-
-        this.focusOwner.notifyListeners(anra.EVENT.MouseUp, e, true);
     },
     dispatchMouseIn:function (event) {
         var location = this.getRelativeLocation(event);

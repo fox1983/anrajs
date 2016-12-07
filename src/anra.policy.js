@@ -12,8 +12,8 @@ anra.gef.AbstractEditPolicy = anra.gef.Policy.extend({
 anra.gef.MarqueeSelectPolicy = anra.gef.Policy.extend({
     marquee:null,
     showTargetFeedback:function (req) {
-        if (req.type == REQ_MOVE && req.target == this.getHostFigure()) {0
-            var marquee = this.getFeedback(req)
+        if (req.type == REQ_MOVE && req.target == this.getHostFigure()) {
+            var marquee = this.getFeedback(req);
             this.refreshMarquee(marquee, req);
             this.calculateSelection(marquee);
         }
@@ -24,9 +24,7 @@ anra.gef.MarqueeSelectPolicy = anra.gef.Policy.extend({
         var selection = [];
         for (var i = 0; i < children.length; i++) {
             if (anra.Rectangle.observe(b, children[i].figure.bounds))
-                selection.push(children[i])
-//            else
-//                children[i].setSelected(SELECTED_NONE);
+                selection.push(children[i]);
         }
         this.getHost().getRoot().setSelection(selection);
     },
@@ -99,6 +97,7 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
     },
     eraseLayoutTargetFeedback:function (request) {
         //TODO
+        this.editParts = null;
         var values = this.feedbackMap.values();
         for (var i = 0, len = values.length; i < len; i++) {
             this.removeFeedback(values[i]);
@@ -128,7 +127,7 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
     },
     getLayoutEditParts:function (request) {
         if (REQ_CREATE == request.type) {
-            var creationTool = request.event.prop.drag;
+            var creationTool = request.target;
             return creationTool.create(this.getHost());
         } else if (REQ_MOVE == request.type) {
             if (request.target.model instanceof anra.gef.NodeModel) {
@@ -191,27 +190,31 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
         if (target instanceof anra.gef.NodeEditPart)
             return this.movecmd(target, request);
         else if (target instanceof Array) {
-            var cmd, offx, offy;
-            var ox = request.target.bounds.x,
-                oy = request.target.bounds.y;
+            var cmd, offx, offy, ox, oy;
+            if (request.target.bounds == null) {
+                ox = 0;
+                oy = 0
+            } else
+                ox = request.target.bounds.x,
+                    oy = request.target.bounds.y;
             for (var i = 0; i < target.length; i++) {
                 offx = target[i].figure.bounds.x - ox;
                 offy = target[i].figure.bounds.y - oy;
                 cmd = cmd == null ?
-                    this.movecmd(target[i], request, offx,offy) :
-                    cmd.chain(this.movecmd(target[i], request,offx,offy));
+                    this.movecmd(target[i], request, offx, offy) :
+                    cmd.chain(this.movecmd(target[i], request, offx, offy));
             }
             return cmd;
         }
     },
-    movecmd:function (target, request,offx,offy) {
+    movecmd:function (target, request, offx, offy) {
         return  new anra.gef.RelocalCommand(target, {
                 x:target.getFigure().getBounds().x,
                 y:target.getFigure().getBounds().y
             },
             {
-                x:request.event.x - target.getFigure().getBounds().width / 2+(offx?offx:0),
-                y:request.event.y - target.getFigure().getBounds().height / 2+(offy?offy:0)
+                x:request.event.x - target.getFigure().getBounds().width / 2 + (offx ? offx : 0),
+                y:request.event.y - target.getFigure().getBounds().height / 2 + (offy ? offy : 0)
             });
     },
     getCreateCommand:function (request) {

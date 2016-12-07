@@ -36,16 +36,23 @@
 
             editor.setInput(input);
             editor.createContent("my");
-            var plt = document.getElementById('myPlt');
-            plt.onmousedown = function () {
-                var json = {id:8, name:'CIVR', type:2, bounds:[430, 280, 50, 50]};
+
+
+            var e2 = new FlowEditor();
+            e2.setInput(input);
+            e2.createContent('m2');
+
+            id = 8;
+            paint = function (type) {
+                var json = {id:id++, name:'CIVR' + id, type:type, bounds:[0, 0, 50, 50]};
                 var node = new anra.gef.NodeModel();
                 node.setProperties(json);
                 node.id = json.id;
-                node.editPartClass=EditPartRegistry[json.type];
+                node.editPartClass = EditPartRegistry[json.type];
 
                 editor.setActiveTool(new anra.gef.CreationTool(node));
-            };
+                return false;
+            }
         }
 
     </script>
@@ -56,6 +63,7 @@
             -ms-user-select: none;
             user-select: none;
         }
+
         svg text::selection {
             background: none;
         }
@@ -63,6 +71,15 @@
 </head>
 <body>
 <div id="my"
-     style="position: absolute;top: 0;margin-left: -10px;width: 100%;height: 100%;background-color: rgb(13,13,13);"></div>
+     style="position: absolute;left:0px;top: 0px;margin-left: -10px;width: 50%;height: 100%;background-color: rgb(13,13,13);float: left;">
+    <div id="palatte" style="position: relative;top: 0;width: 10%;height: 100%;background-color: #d3d3d3;float:left">
+        <image src="balance.png" onmousedown='paint(2)' ondragstart='return false'></image>
+        <image src="system.png" onmousedown='paint(0)' ondragstart='return false'></image>
+        <image src="segment.png" onmousedown='paint(1)' ondragstart='return false'></image>
+    </div>
+</div>
+
+<div id="m2"
+     style="position: absolute;left:50%;top: 0;margin-left: -10px;width: 50%;height: 100%;background-color: rgb(13,13,13);float:right"></div>
 </body>
 </html>
