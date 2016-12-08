@@ -1,0 +1,30 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <script src="../anrajs/src/Base.js"></script>
+    <script src="../anrajs/src/anra.common.js"></script>
+    <script src="../anrajs/src/anra.svg.js"></script>
+    <script src="../anrajs/src/anra.gef.js"></script>
+    <script src="../anrajs/src/anra.policy.js"></script>
+    <script src="../anrajs/src/anra.handle.js"></script>
+    <script src="TestFrameWork.js"></script>
+    <script>
+        window.onload = function() {
+            var test = new TestFrameEditor();
+            test.setInput({
+                width: 50,
+                hnum: 20,
+                vnum: 20
+            });
+            test.createContent("test");
+        }
+
+    </script>
+</head>
+
+<body>
+    <div id="test" style="position: absolute;top: 0;margin-left: -10px;width: 100%;height: 100%;background-color: rgb(13,13,13);"></div>
+</body>
+
+</html>
