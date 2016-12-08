@@ -257,27 +257,21 @@ anra.gef.EditPart = Base.extend({
             var _dt = this.getRoot().editor.getTopDragTracker();
             var _ep = this;
             this.figure.addListener(anra.EVENT.MouseDown, function (e) {
-//                if (_dt.getDragTracker() != null)
                 _dt.mouseDown(e, _ep);
             });
             this.figure.addListener(anra.EVENT.MouseClick, function (e) {
-//                if (_ep != null)
                 _dt.mouseClick(e, _ep);
             });
             this.figure.addListener(anra.EVENT.DragStart, function (e) {
-//                if (_ep != null)
                 _dt.dragStart(e, _ep);
             });
             this.figure.addListener(anra.EVENT.DragEnd, function (e) {
-//                if (_ep != null)
                 _dt.dragEnd(e, _ep);
             });
             this.figure.addListener(anra.EVENT.MouseDrag, function (e) {
-//                if (_ep != null)
                 _dt.mouseDrag(e, _ep);
             });
             this.figure.addListener(anra.EVENT.MouseUp, function (e) {
-//                if (_ep != null)
                 _dt.mouseUp(e, _ep);
             });
         }
@@ -523,7 +517,7 @@ anra.gef.EditPart = Base.extend({
         if (this.policies != null) {
             var list = this.policies.values();
             for (var i = 0; i < list.length; i++) {
-                if (list[i].understandsRequest(req))return true;
+                if (list[i].understandsRequest != null && list[i].understandsRequest(req))return true;
             }
         }
         return false;
@@ -723,7 +717,7 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
         return new anra.gef.RootDragTracker();
     },
     setSelection:function (o) {
-        if (this.selection == o)return;
+        if (this.selection == o||(this.selection!=null&&this.selection instanceof Array&&this.selection.contains(o)))return;
         this.clearSelection();
         this.selection = o;
         if (o instanceof Array) {
@@ -919,11 +913,10 @@ anra.gef.Tool = Base.extend({
         dp.mouseState = anra.EVENT.MouseDrag;
     },
     deactivate:function () {
-
         //TODO 待考虑
-        var dp = this.getEventDispatcher();
-        dp.dragTarget = null;
-        dp.mouseState = anra.EVENT.NONE;
+//        var dp = this.getEventDispatcher();
+//        dp.dragTarget = null;
+//        dp.mouseState = anra.EVENT.NONE;
 
         this.host = null;
     },
@@ -942,6 +935,7 @@ anra.gef.Tool = Base.extend({
     enableEvent:function () {
     }
 });
+
 anra.gef.CreationTool = anra.gef.Tool.extend({
     constructor:function (m) {
         this.model = m;
@@ -1009,12 +1003,18 @@ anra.gef.TopDragTracker = Base.extend({
  */
 anra.gef.RootDragTracker = Base.extend({
     mouseDown:function (me, editPart) {
-    },
-    mouseClick:function (me, editPart) {
         editPart.getRoot().setSelection(editPart);
     },
+    mouseClick:function (me, editPart) {
+    },
     dragStart:function (me, editPart) {
-        this.mouseDrag(me, editPart);
+        var req = {
+            editPart:editPart,
+            target:me.prop.drag,
+            event:me,
+            type:REQ_DRAG_START
+        };
+        editPart.showSourceFeedback(req);
     },
     mouseDrag:function (me, editPart) {
         var v = this;
@@ -1022,16 +1022,16 @@ anra.gef.RootDragTracker = Base.extend({
             editPart:editPart,
             target:me.prop.drag,
             event:me,
-            type:v.getRequestType(me.prop.drag)
+            type:v.getRequestType(me.prop.drag, REQ_MOVE)
         };
+        if (req.type == null)return false;
         editPart.showTargetFeedback(req);
     },
-    getRequestType:function (target) {
-        if (target instanceof anra.gef.Tool)
+    getRequestType:function (target, defaultReq) {
+        if (target instanceof anra.gef.Tool) {
             return  target.getType();
-        if (target instanceof anra.SVG)
-            return REQ_MOVE;
-        return null;
+        }
+        return defaultReq;
     },
     dragEnd:function (me, editPart) {
         var v = this;
@@ -1039,7 +1039,7 @@ anra.gef.RootDragTracker = Base.extend({
             editPart:editPart,
             target:me.prop.drag,
             event:me,
-            type:v.getRequestType(me.prop.drag)
+            type:v.getRequestType(me.prop.drag, REQ_MOVE)
         };
         var cmd = editPart.getCommand(req);
         if (cmd != null) {
@@ -1048,15 +1048,45 @@ anra.gef.RootDragTracker = Base.extend({
         editPart.eraseTargetFeedback(req);
     },
     mouseUp:function (me, editPart) {
-        console.log('root');
+        var v = this;
+        var req = {
+            editPart:editPart,
+            event:me,
+            type:REQ_MOUSE_UP
+        };
+        editPart.eraseTargetFeedback(req);
     }
 });
 
 
-anra.gef.DragTracker = Base.extend({
-    mouseUp:function (me, editPart) {
-        console.log('node');
-//        return true;
+anra.gef.DragTracker = anra.gef.RootDragTracker.extend({
+
+    mouseDrag:function (me, editPart) {
+    },
+
+    dragStart:function (me, editPart) {
+        return true;
+    },
+    dragEnd:function (me, editPart) {
+        var v = this;
+        var req = {
+            editPart:editPart,
+            target:me.prop.drag,
+            event:me,
+            type:v.getRequestType(me.prop.drag, 'MOVE')
+        };
+        if (req.type == null)return false;
+        var cmd = editPart.getCommand(req);
+        if (cmd != null) {
+            editPart.getRoot().editor.execute(cmd);
+        }
+        editPart.eraseTargetFeedback(req);
+
+        return cmd != null && cmd.canExecute();
+    },
+    mouseDown:function (me, editPart) {
+        editPart.getRoot().setSelection(editPart);
+        return true;
     }
 });
 
@@ -1344,8 +1374,10 @@ anra.gef.Editor = Base.extend({
             this.activeTool.deactivate();
         }
         this.activeTool = tool;
-        this.activeTool.setHost(this.rootEditPart)
-        this.activeTool.activate();
+        if (this.activeTool != null) {
+            this.activeTool.setHost(this.rootEditPart);
+            this.activeTool.activate();
+        }
     },
     getTopDragTracker:function () {
         if (this.topDragTracker == null)
@@ -1685,3 +1717,6 @@ REQ_SELECTION_HOVER = "selection hover";
 REQ_DRAG_START = 'REQ_DRAG_START';
 REQ_DRAG_MOVE = 'REQ_DRAG_MOVE';
 REQ_DRAG_END = 'REQ_DRAG_END';
+
+REQ_MOUSE_DOWN='REQ_MOUSE_DOWN';
+REQ_MOUSE_UP='REQ_MOUSE_UP';

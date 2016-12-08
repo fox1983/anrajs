@@ -9,13 +9,37 @@ anra.gef.AbstractEditPolicy = anra.gef.Policy.extend({
 });
 
 
+anra.gef.MarqueeTool = anra.gef.Tool.extend({
+    create:function () {
+        var marquee = new anra.svg.Control();
+        marquee.setOpacity(0.3);
+        marquee.disableEvent();
+        marquee.setAttribute({
+            stroke:'black',
+            fill:'grey'
+        });
+        return marquee;
+    },
+    getType:function () {
+        return 'marquee';
+    }
+});
+
 anra.gef.MarqueeSelectPolicy = anra.gef.Policy.extend({
     marquee:null,
     showTargetFeedback:function (req) {
-        if (req.type == REQ_MOVE && req.target == this.getHostFigure()) {
+        if (req.type == 'marquee' && req.target == this.tool) {
             var marquee = this.getFeedback(req);
             this.refreshMarquee(marquee, req);
             this.calculateSelection(marquee);
+        }
+    },
+    showSourceFeedback:function (req) {
+        if (req.type == REQ_DRAG_START) {
+            this.tool = new anra.gef.MarqueeTool();
+            this.getHost().editor.setActiveTool(this.tool);
+        } else {
+            this.eraseTargetFeedback(req);
         }
     },
     calculateSelection:function (marquee) {
@@ -29,43 +53,36 @@ anra.gef.MarqueeSelectPolicy = anra.gef.Policy.extend({
         this.getHost().getRoot().setSelection(selection);
     },
     getFeedback:function (req) {
-        if (req.type == REQ_MOVE) {
-            if (this.marquee == null)
-                this.marquee = this.createMarquee(req);
+        if (req.type == 'marquee') {
+            if (this.marquee == null) {
+                this.marquee = this.tool.create();
+                this.marquee.x = req.event.x;
+                this.marquee.y = req.event.y;
+                this.addFeedback(this.marquee);
+            }
             return this.marquee;
         }
     },
     refreshMarquee:function (f, req) {
         var nx = req.event.x;
         var ny = req.event.y;
-        var mX = this.x < nx ? this.x : nx;
-        var mY = this.y < ny ? this.y : ny;
+        var mX = f.x < nx ? f.x : nx;
+        var mY = f.y < ny ? f.y : ny;
         f.setBounds({
             x:mX,
             y:mY,
-            width:Math.abs(this.x - nx),
-            height:Math.abs(this.y - ny)
+            width:Math.abs(f.x - nx),
+            height:Math.abs(f.y - ny)
         });
-    },
-    createMarquee:function (req) {
-        var marquee = new anra.svg.Control();
-        marquee.setOpacity(0.3);
-        marquee.disableEvent();
-        this.addFeedback(marquee);
-        marquee.setAttribute({
-            stroke:'black',
-            fill:'grey'
-        });
-        this.x = req.event.x;
-        this.y = req.event.y;
-        return marquee;
     },
     eraseTargetFeedback:function (req) {
-        if (req.type == REQ_MOVE) {
+//        if (req.type == 'marquee') {
+            this.getHost().editor.setActiveTool(null);
+            this.tool = null;
             if (this.marquee != null)
                 this.removeFeedback(this.marquee);
             this.marquee = null;
-        }
+//        }
     }
 });
 
@@ -130,7 +147,7 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
             var creationTool = request.target;
             return creationTool.create(this.getHost());
         } else if (REQ_MOVE == request.type) {
-            if (request.target.model instanceof anra.gef.NodeModel) {
+//            if (request.target.model instanceof anra.gef.NodeModel) {
                 var selection = this.getHost().getRoot().selection;
                 if (selection == null)return null;
                 if (selection.figure == request.target)
@@ -149,7 +166,7 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
                     }
                     if (valid)return s;
                 }
-            }
+//            }
         }
         return null;
     },

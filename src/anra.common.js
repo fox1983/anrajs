@@ -123,8 +123,14 @@ anra.Platform = {
     pool:new Map(),
     ready:false,
     focus:null,
+    displayList:[],
     regist:function (key, object) {
-        this.pool.set(key, object);
+        var list = this.pool.get(key);
+        if (list == null) {
+            list = [];
+            this.pool.set(key, list);
+        }
+        list.push(object);
         if (!this.ready)
             this.init();
     },
@@ -155,7 +161,7 @@ anra.Platform = {
         return canvas.scenes[canvas.currentScene];
     },
     getDisplay:function () {
-        return this.get(this.DISPLAY);
+        return this.focus == null ? this.get(this.DISPLAY)[0] : this.focus;
     },
     error:function (e) {
         this.getDisplay().error(e);

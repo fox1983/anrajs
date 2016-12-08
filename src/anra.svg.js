@@ -168,12 +168,14 @@ Control.prototype.create = function () {
 //        };
 
         e.onmouseout = function (event) {
-            dispatcher.setFocusOwner(o);
+//            dispatcher.setFocusOwner(o);
+            event.target = o;
             dispatcher.dispatchMouseOut(event);
         };
 
         e.onmouseover = function (event) {
-            dispatcher.setFocusOwner(o);
+//            dispatcher.setFocusOwner(o);
+            event.target = o;
             dispatcher.dispatchMouseIn(event);
         };
 
@@ -497,6 +499,7 @@ anra.SVG = Composite.extend(anra._Display).extend(anra._EventTable).extend({
         d.setFocusOwner(t);
 //TODO
         this.element.onmousedown = function (event) {
+            anra.Platform.focus = t;
             if (t.owner == event.target)
                 d.setFocusOwner(t);
             d.dispatchMouseDown(event);
@@ -518,7 +521,7 @@ anra.SVG = Composite.extend(anra._Display).extend(anra._EventTable).extend({
             return false;
         };
         this.element.onmouseup = function (event) {
-            anra.Platform.focusDisplay = t;
+            anra.Platform.focus = t;
             if (t.owner == event.target)
                 d.setFocusOwner(t);
             d.dispatchMouseUp(event);
@@ -648,6 +651,7 @@ anra.svg.EventDispatcher = Base.extend({
         var location = this.getRelativeLocation(event);
         e.x = location[0];
         e.y = location[1];
+        e.prop = {drag:this.dragTarget, target:this.focusOwner};
         var widget = this.focusOwner;
         widget.notifyListeners(anra.EVENT.MouseDown, e);
 //        if (widget != widget.svg)
@@ -660,6 +664,7 @@ anra.svg.EventDispatcher = Base.extend({
         var location = this.getRelativeLocation(event);
         e.x = location[0];
         e.y = location[1];
+        e.prop = {drag:this.dragTarget, target:this.focusOwner};
         var widget = this.focusOwner;
         widget.notifyListeners(anra.EVENT.MouseClick, e);
     },
@@ -680,10 +685,10 @@ anra.svg.EventDispatcher = Base.extend({
                 e = new anra.event.Event(anra.EVENT.DragStart, location);
                 e.prop = {drag:this.dragTarget, target:this.focusOwner};
                 this.dragTarget.notifyListeners(anra.EVENT.DragStart, e);
-                var widget = this.focusOwner;
-                if (widget != widget.svg) {
-                    widget.svg.notifyListeners(anra.EVENT.DragStart, e);
-                }
+//                var widget = this.focusOwner;
+//                if (widget != widget.svg) {
+//                    widget.svg.notifyListeners(anra.EVENT.DragStart, e);
+//                }
             }
             if (!this.dragTarget.disabled)
                 this.dragTarget.disableEvent();
@@ -700,7 +705,7 @@ anra.svg.EventDispatcher = Base.extend({
             e.x = location[0];
             e.y = location[1];
             e.prop = {drag:this.dragTarget, target:this.focusOwner};
-            this.dragTarget.notifyListeners(anra.EVENT.MouseDrag, e);
+            this.focusOwner.notifyListeners(anra.EVENT.MouseDrag, e);
             //TODO
 //            widget = this.focusOwner;
 //            if (this.dragTarget != widget.svg) {
