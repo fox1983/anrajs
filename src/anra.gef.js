@@ -520,11 +520,12 @@ anra.gef.EditPart = Base.extend({
         this.fireSelectionChanged();
     },
     understandsRequest:function (req) {
-//        var iter = getEditPolicyIterator();
-//        while (iter.hasNext()) {
-//            if (iter.next().understandsRequest(req))
-//                return true;
-//        }
+        if (this.policies != null) {
+            var list = this.policies.values();
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].understandsRequest(req))return true;
+            }
+        }
         return false;
     }
 });
