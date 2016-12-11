@@ -94,8 +94,7 @@ FlowEditor = anra.gef.Editor.extend({
         return lineModel;
     },
     getCustomPolicies:function () {
-        this.put(anra.gef.Policy.LAYOUT_POLICY, new FlowLayoutPolicy());
-        this.put('marquee', new anra.gef.MarqueeSelectPolicy());
+        this.put(anra.gef.LAYOUT_POLICY, new FlowLayoutPolicy());
     }
 });
 
@@ -162,7 +161,8 @@ var SystemEditPart = CommonNodeEditPart.extend({
         return "system.png";
     },
     createEditPolicies:function () {
-        this.installEditPolicy("casdasdasda", new TextInfoPolicy());
+        this.installEditPolicy('text', new TextInfoPolicy());
+        this.installEditPolicy(anra.gef.CONNECTION_POLICY, new anra.gef.ConnectionPolicy());
         this.installEditPolicy("selection", new anra.gef.ResizableEditPolicy());
     }
 });
@@ -171,7 +171,8 @@ var SegmentEditPart = CommonNodeEditPart.extend({
         return "segment.png";
     },
     createEditPolicies:function () {
-        this.installEditPolicy("casdasdasda", new TextInfoPolicy());
+        this.installEditPolicy('text', new TextInfoPolicy());
+        this.installEditPolicy(anra.gef.CONNECTION_POLICY, new anra.gef.ConnectionPolicy());
         this.installEditPolicy("selection", new anra.gef.ResizableEditPolicy());
     }
 });
@@ -292,7 +293,7 @@ Line = anra.gef.Line.extend({
         },
         createContent:function () {
             var marker = new anra.svg.TriangleMarker();
-            marker.setId(this.model.hashCode());
+//            marker.setId(this.model.hashCode());
             marker.propKey = 'color';
             marker.setFigureAttribute({
                     fill:'white',

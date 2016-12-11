@@ -9,83 +9,6 @@ anra.gef.AbstractEditPolicy = anra.gef.Policy.extend({
 });
 
 
-anra.gef.MarqueeTool = anra.gef.Tool.extend({
-    create:function () {
-        var marquee = new anra.svg.Control();
-        marquee.setOpacity(0.3);
-        marquee.disableEvent();
-        marquee.setAttribute({
-            stroke:'black',
-            fill:'grey'
-        });
-        return marquee;
-    },
-    getType:function () {
-        return 'marquee';
-    }
-});
-
-anra.gef.MarqueeSelectPolicy = anra.gef.Policy.extend({
-    marquee:null,
-    showTargetFeedback:function (req) {
-        if (req.type == 'marquee' && req.target == this.tool) {
-            var marquee = this.getFeedback(req);
-            this.refreshMarquee(marquee, req);
-            this.calculateSelection(marquee);
-        }
-    },
-    showSourceFeedback:function (req) {
-        if (req.type == REQ_DRAG_START) {
-            this.tool = new anra.gef.MarqueeTool();
-            this.getHost().editor.setActiveTool(this.tool);
-        } else {
-            this.eraseTargetFeedback(req);
-        }
-    },
-    calculateSelection:function (marquee) {
-        var b = marquee.bounds;
-        var children = this.getHost().children;
-        var selection = [];
-        for (var i = 0; i < children.length; i++) {
-            if (anra.Rectangle.observe(b, children[i].figure.bounds))
-                selection.push(children[i]);
-        }
-        this.getHost().getRoot().setSelection(selection);
-    },
-    getFeedback:function (req) {
-        if (req.type == 'marquee') {
-            if (this.marquee == null) {
-                this.marquee = this.tool.create();
-                this.marquee.x = req.event.x;
-                this.marquee.y = req.event.y;
-                this.addFeedback(this.marquee);
-            }
-            return this.marquee;
-        }
-    },
-    refreshMarquee:function (f, req) {
-        var nx = req.event.x;
-        var ny = req.event.y;
-        var mX = f.x < nx ? f.x : nx;
-        var mY = f.y < ny ? f.y : ny;
-        f.setBounds({
-            x:mX,
-            y:mY,
-            width:Math.abs(f.x - nx),
-            height:Math.abs(f.y - ny)
-        });
-    },
-    eraseTargetFeedback:function (req) {
-//        if (req.type == 'marquee') {
-            this.getHost().editor.setActiveTool(null);
-            this.tool = null;
-            if (this.marquee != null)
-                this.removeFeedback(this.marquee);
-            this.marquee = null;
-//        }
-    }
-});
-
 /**
  * 布局策略
  * @type {*}
@@ -145,27 +68,27 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
     getLayoutEditParts:function (request) {
         if (REQ_CREATE == request.type) {
             var creationTool = request.target;
-            return creationTool.create(this.getHost());
+            return creationTool.getEditPart(this.getHost());
         } else if (REQ_MOVE == request.type) {
 //            if (request.target.model instanceof anra.gef.NodeModel) {
-                var selection = this.getHost().getRoot().selection;
-                if (selection == null)return null;
-                if (selection.figure == request.target)
-                    return selection;
-                /*验证已选节点里包含拖拽目标节点*/
-                if (selection instanceof Array) {
-                    var s = [];
-                    var valid;
-                    for (var i = 0, len = selection.length; i < len; i++) {
-                        if (selection[i].figure == request.target) {
-                            s.insert(selection[i]);
-                            valid = true;
-                        } else {
-                            s.push(selection[i]);
-                        }
+            var selection = this.getHost().getRoot().selection;
+            if (selection == null)return null;
+            if (selection.figure == request.target)
+                return selection;
+            /*验证已选节点里包含拖拽目标节点*/
+            if (selection instanceof Array) {
+                var s = [];
+                var valid;
+                for (var i = 0, len = selection.length; i < len; i++) {
+                    if (selection[i].figure == request.target) {
+                        s.insert(selection[i]);
+                        valid = true;
+                    } else {
+                        s.push(selection[i]);
                     }
-                    if (valid)return s;
                 }
+                if (valid)return s;
+            }
 //            }
         }
         return null;
@@ -355,6 +278,82 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
     }
 });
 
+anra.gef.ConnectionPolicy = anra.gef.AbstractEditPolicy.extend({
+    showSourceFeedback:function (req) {
+        if (REQ_CONNECTION_START == req.type) {
+            var anchor = this.getHost().getSourceAnchor(req);
+            this.refreshSourceAnchorFeedback(anchor);
+        }
+    },
+    eraseSourceFeedback:function (req) {
+        if (this.sourceAnchor != null) {
+            this.getFeedbackLayer().removeChild(this.sourceAnchor);
+            this.sourceAnchor = null;
+        }
+    },
+    showTargetFeedback:function (req) {
+        if (REQ_RECONNECT_TARGET == req.type) {
+            var anchor = this.getHost().getTargetAnchor(req);
+            this.refreshTargetAnchorFeedback(anchor);
+        }
+    },
+    eraseTargetFeedback:function (req) {
+        if (this.targetAnchor != null) {
+            this.getFeedbackLayer().removeChild(this.targetAnchor);
+            this.targetAnchor = null;
+        }
+    },
+    refreshTargetAnchorFeedback:function (anchor) {
+        if (this.targetAnchor == null) {
+            this.targetAnchor = this.createTargetAnchorFeedback();
+            this.getFeedbackLayer().addChild(this.targetAnchor);
+        }
+        this.targetAnchor.setBounds({x:anchor.x, y:anchor.y, width:10, height:10});
+    },
+    refreshSourceAnchorFeedback:function (anchor) {
+        if (this.sourceAnchor == null) {
+            this.sourceAnchor = this.createSourceAnchorFeedback();
+            this.getFeedbackLayer().addChild(this.sourceAnchor);
+        }
+        this.sourceAnchor.setBounds({x:anchor.x, y:anchor.y, width:10, height:10});
+    },
+    createSourceAnchorFeedback:function () {
+        var Circle = anra.svg.Control.extend(anra.svg.Circle);
+        Circle = new Circle();
+        Circle.setAttribute({
+            fill:'red'
+        });
+        Circle.setOpacity(0.5);
+        return Circle;
+    },
+    createTargetAnchorFeedback:function () {
+        var Rect = anra.svg.Control.extend(anra.svg.Circle);
+        Rect = new Rect();
+        Rect.setAttribute({
+            stroke:'yellow'
+        });
+//        Circle.setOpacity(0.5);
+        return Rect;
+    },
+    getCreateConnectionCommand:function (req) {
+        var cmd = new anra.gef.CreateLineCommand();
+
+        cmd.line = new anra.gef.LineModel();
+        cmd.line.id = 123;
+        cmd.rootEditPart = this.getHost().getRoot();
+
+        cmd.sourceId = this.getHost().model.id;
+
+        return  cmd;
+    },
+    getConnectionCompleteCommand:function (req) {
+        var cmd = req.command;
+        if (cmd == null)return null;
+        cmd.targetId = this.getHost().model.id;
+        return cmd;
+    }
+});
+
 /**
  * 选中节点策略
  * @type {*}
@@ -363,11 +362,10 @@ anra.gef.SelectionPolicy = anra.gef.AbstractEditPolicy.extend({
     handles:[],
     selectionListener:null,
     activate:function () {
-        this.base();
         this.addSelectionListener();
     },
     deactivate:function () {
-        this.base();
+        this.removeSelectionHandles();
         this.removeSelectionListener();
     },
     validatePolicy:function () {
@@ -400,10 +398,21 @@ anra.gef.SelectionPolicy = anra.gef.AbstractEditPolicy.extend({
         this.getHost().removeEditPartListener(this.selectionListener);
     },
     showPrimarySelection:function () {
-        this.addSelectionHandles();
+        if (this.handles == null || this.handles.isEmpty())
+            this.addSelectionHandles();
+        else {
+            for (var i = 0; i < this.handles.length; i++) {
+                this.handles[i].setVisible(true);
+            }
+        }
     },
     hideSelection:function () {
-        this.removeSelectionHandles();
+        if (this.handles.isEmpty()) {
+            return;
+        }
+        for (var i = 0; i < this.handles.length; i++) {
+            this.handles[i].setVisible(false);
+        }
     },
     addSelectionHandles:function () {
         this.removeSelectionHandles();

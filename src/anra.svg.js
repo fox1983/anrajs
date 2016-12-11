@@ -20,10 +20,12 @@ anra.svg.Util = {
     applyAttr:function (container, a, v) {
         if (a != null && typeof(a) == 'object')
             for (var k in a) {
-                container.setAttribute(k, a[k]);
+                if (!(container.getAttribute(k) == a[k]))
+                    container.setAttribute(k, a[k]);
             }
         else if (typeof(a) == 'string') {
-            container.setAttribute(a, v);
+            if (!(container.getAttribute(a) == v))
+                container.setAttribute(a, v);
         }
     }
 };
@@ -44,7 +46,7 @@ anra.svg.Control = anra.Control.extend({
     _attr:null,
     _style:null,
     ready:false,
-    disabled:false,
+    enable:true,
     defaultEvent:{'pointer-events':'visible'},
     _init:function () {
         this.bounds = {'x':0, 'y':0, 'width':100, 'height':100};
@@ -64,11 +66,11 @@ anra.svg.Control = anra.Control.extend({
             this.enableEvent();
     },
     disableEvent:function () {
-        this.disabled = true;
+        this.enable = true;
         this.setStyle('pointer-events', 'none');
     },
     enableEvent:function () {
-        this.disabled = false;
+        this.enable = false;
         this.setStyle(this.defaultEvent);
     },
     applyBounds:function () {
@@ -79,6 +81,12 @@ anra.svg.Control = anra.Control.extend({
         this.setAttribute('y', this.bounds.y + l[1]);
         this.setAttribute('width', this.bounds.width);
         this.setAttribute('height', this.bounds.height);
+    },
+    setVisible:function (visible) {
+        this.visible = visible;
+        this.setStyle({
+            visibility:visible ? 'visible' : 'hidden'
+        });
     },
     createContent:function () {
     },
@@ -114,7 +122,7 @@ anra.svg.Control = anra.Control.extend({
             return;
         }
         if (this._attr != null) {
-            Util.apply(this.owner, this._attr);
+            Util.applyAttr(this.owner, this._attr);
             this._attr = null;
         }
         Util.applyAttr(this.owner, a, v);
@@ -156,37 +164,38 @@ Control.prototype.create = function () {
         var dispatcher = anra.Platform.getDisplay().dispatcher;
         e.onmousedown = function (event) {
             //TODO
-            dispatcher.setFocusOwner(o);
+            dispatcher.setMouseTarget(o);
 //            dispatcher.dispatchMouseDown(event);
         };
         e.ondragstart = function (event) {
             return false;
         };
 //        e.onmousemove = function (event) {
-//            dispatcher.setFocusOwner(o);
+//            dispatcher.setMouseTarget(o);
 //            dispatcher.dispatchMouseMove(event);
 //        };
 
         e.onmouseout = function (event) {
-//            dispatcher.setFocusOwner(o);
-            event.target = o;
+            event.figure = o;
             dispatcher.dispatchMouseOut(event);
+            return false;
         };
 
         e.onmouseover = function (event) {
-//            dispatcher.setFocusOwner(o);
-            event.target = o;
+//            dispatcher.setMouseTarget(o);
+            event.figure = o;
             dispatcher.dispatchMouseIn(event);
+//            return false;
         };
 
         e.onmouseup = function (event) {
-            dispatcher.setFocusOwner(o);
+            dispatcher.setMouseTarget(o);
             //因为交由父层分发了，所以不需要再触发
 //            dispatcher.dispatchMouseUp(event);
         };
 
         e.ondblclick = function (event) {
-            dispatcher.setFocusOwner(o);
+            dispatcher.setMouseTarget(o);
             dispatcher.dispatchDoubleClick(event);
         };
         this.ready = true;
@@ -250,6 +259,7 @@ var _Composite = {
     },
     removeChild:function (c) {
         if (c instanceof anra.svg.Control) {
+            c.dispose();
             this.children.removeObject(c);
             this.domContainer().removeChild(c.owner);
             c.parent = null;
@@ -294,7 +304,7 @@ var _Composite = {
     },
     dispose:function () {
         if (this.children != null) {
-            for (var i = 0; i = this.children.length; i++) {
+            for (var i = 0; i < this.children.length; i++) {
                 this.children[i].dispose();
             }
             this.children = null;
@@ -352,6 +362,10 @@ anra.svg.Marker = Composite.extend({
     id:null,
     figure:null,
     tagName:'marker',
+    constructor:function () {
+        Composite.prototype.constructor.call(this);
+        this.setId(anra.genUUID());
+    },
     setId:function (id) {
         this.id = id;
         this.setAttribute('id', id);
@@ -496,34 +510,51 @@ anra.SVG = Composite.extend(anra._Display).extend(anra._EventTable).extend({
         var d = this.dispatcher;
         var t = this;
         var div = this.element;
-        d.setFocusOwner(t);
+        d.setMouseTarget(t);
 //TODO
         this.element.onmousedown = function (event) {
             anra.Platform.focus = t;
             if (t.owner == event.target)
-                d.setFocusOwner(t);
+                d.setMouseTarget(t);
             d.dispatchMouseDown(event);
             return false;
         };
-        this.element.onclick = function (event) {
-            d.dispatchMouseClick(event);
+        this.element.ondragstart = function (event) {
             return false;
-        };
+        },
+            this.element.onclick = function (event) {
+                d.dispatchMouseClick(event);
+                return false;
+            };
         this.element.onmousemove = function (event) {
             d.dispatchMouseMove(event);
+            return false;
+        };
+
+//        this.element.ondrag=function(event){
+//            console.log('drag')
+//            return true;
+//        };
+        this.element.onmouseover = function (event) {
+            if (t.owner == event.target || t.owner.parentNode == event.target) {
+                event.figure = t;
+                d.dispatchMouseIn(event);
+            }
             return false;
         };
         this.element.onmouseout = function (event) {
             var x = event.clientX;
             var y = event.clientY;
-            if (x < div.offsetLeft || x > div.offsetLeft + div.offsetWidth || y < div.offsetTop || y > div.offsetTop + div.offsetHeight)
+            if (x < div.offsetLeft || x > div.offsetLeft + div.offsetWidth || y < div.offsetTop || y > div.offsetTop + div.offsetHeight) {
+                event.target = t;
                 d.dispatchMouseOutScreen(event);
+            }
             return false;
         };
         this.element.onmouseup = function (event) {
             anra.Platform.focus = t;
             if (t.owner == event.target)
-                d.setFocusOwner(t);
+                d.setMouseTarget(t);
             d.dispatchMouseUp(event);
             return false;
         };
@@ -596,7 +627,7 @@ anra.svg.Text = {
             var e = this.owner;
             var dispatcher = anra.Platform.getDisplay().dispatcher;
             e.onmouseup = function (event) {
-                dispatcher.setFocusOwner(o);
+                dispatcher.setMouseTarget(o);
 //                dispatcher.dispatchMouseUp(event);
             };
             this.setAttribute({});
@@ -643,7 +674,7 @@ anra.svg.EventDispatcher = Base.extend({
     constructor:function (display) {
         this.display = display;
     },
-    focusOwner:null,
+    mouseTarget:null,
     mouseState:0,
     dispatchMouseDown:function (event) {
         this.mouseState = anra.EVENT.MouseDown;
@@ -651,8 +682,8 @@ anra.svg.EventDispatcher = Base.extend({
         var location = this.getRelativeLocation(event);
         e.x = location[0];
         e.y = location[1];
-        e.prop = {drag:this.dragTarget, target:this.focusOwner};
-        var widget = this.focusOwner;
+        e.prop = {drag:this.dragTarget, target:this.mouseTarget};
+        var widget = this.mouseTarget;
         widget.notifyListeners(anra.EVENT.MouseDown, e);
 //        if (widget != widget.svg)
 //            widget.svg.notifyListeners(anra.EVENT.MouseDown, e);
@@ -664,8 +695,8 @@ anra.svg.EventDispatcher = Base.extend({
         var location = this.getRelativeLocation(event);
         e.x = location[0];
         e.y = location[1];
-        e.prop = {drag:this.dragTarget, target:this.focusOwner};
-        var widget = this.focusOwner;
+        e.prop = {drag:this.dragTarget, target:this.mouseTarget};
+        var widget = this.mouseTarget;
         widget.notifyListeners(anra.EVENT.MouseClick, e);
     },
     dispatchMouseMove:function (event) {
@@ -681,47 +712,48 @@ anra.svg.EventDispatcher = Base.extend({
         if ((this.mouseState == anra.EVENT.MouseDown) || (this.mouseState == anra.EVENT.MouseDrag)) {
             this.mouseState = anra.EVENT.MouseDrag;
             if (this.dragTarget == null) {
-                this.dragTarget = this.focusOwner;
+                this.dragTarget = this.mouseTarget;
                 e = new anra.event.Event(anra.EVENT.DragStart, location);
-                e.prop = {drag:this.dragTarget, target:this.focusOwner};
+                e.prop = {drag:this.dragTarget, target:this.mouseTarget};
                 this.dragTarget.notifyListeners(anra.EVENT.DragStart, e);
-//                var widget = this.focusOwner;
+//                var widget = this.mouseTarget;
 //                if (widget != widget.svg) {
 //                    widget.svg.notifyListeners(anra.EVENT.DragStart, e);
 //                }
             }
-            if (!this.dragTarget.disabled)
+            if (this.dragTarget.enable)
                 this.dragTarget.disableEvent();
         } else {
             this.mouseState = anra.EVENT.MouseMove;
             e = new anra.event.Event(anra.EVENT.MouseMove);
             e.x = location[0];
             e.y = location[1];
-            this.focusOwner.notifyListeners(anra.EVENT.MouseMove, e);
-
+            this.mouseTarget.notifyListeners(anra.EVENT.MouseMove, e);
         }
         if (this.dragTarget != null && (this.mouseState == anra.EVENT.MouseDrag)) {
             e = new anra.event.Event(anra.EVENT.MouseDrag);
             e.x = location[0];
             e.y = location[1];
-            e.prop = {drag:this.dragTarget, target:this.focusOwner};
-            this.focusOwner.notifyListeners(anra.EVENT.MouseDrag, e);
+            e.prop = {drag:this.dragTarget, target:this.mouseTarget};
+            this.mouseTarget.notifyListeners(anra.EVENT.MouseDrag, e);
             //TODO
-//            widget = this.focusOwner;
+//            widget = this.mouseTarget;
 //            if (this.dragTarget != widget.svg) {
 //                widget.svg.notifyListeners(anra.EVENT.MouseDrag, e);
 //            }
         }
     },
     dispatchMouseUp:function (event, global) {
-        var widget = this.focusOwner;
+        var widget = this.mouseTarget;
         var location = this.getRelativeLocation(event);
+        var notified = false;
         if (this.mouseState == anra.EVENT.MouseDrag) {
             var e = new anra.event.Event(anra.EVENT.DragEnd, location);
             e.prop = {drag:this.dragTarget, target:widget};
-            if (this.dragTarget != null) {
+            if (this.dragTarget instanceof anra.gef.Figure) {
                 this.dragTarget.notifyListeners(anra.EVENT.Dropped, e);
                 this.dragTarget.enableEvent();
+                notified = true;
             }
 
             widget.notifyListeners(anra.EVENT.DragEnd, e);
@@ -731,21 +763,24 @@ anra.svg.EventDispatcher = Base.extend({
 //            }
         }
         this.mouseState = anra.EVENT.MouseUp;
-        e = new anra.event.Event(anra.EVENT.MouseUp, location);
-        this.focusOwner.notifyListeners(anra.EVENT.MouseUp, e);
+        if (!notified) {
+            e = new anra.event.Event(anra.EVENT.MouseUp, location);
+            this.mouseTarget.notifyListeners(anra.EVENT.MouseUp, e);
+        }
         this.dragTarget = null;
     },
     dispatchMouseIn:function (event) {
         var location = this.getRelativeLocation(event);
         var e = new anra.event.Event(anra.EVENT.MouseIn, location);
-        this.focusOwner.notifyListeners(anra.EVENT.MouseIn, e);
+        this.mouseTarget = event.figure;
+        event.figure.notifyListeners(anra.EVENT.MouseIn, e);
     },
     dispatchMouseOut:function (event) {
         var loc = this.getRelativeLocation(event);
-        if (anra.Rectangle.contains(this.focusOwner.bounds, loc[0], loc[1]))
+        if (anra.Rectangle.contains(this.mouseTarget.bounds, loc[0], loc[1]))
             return;
         var e = new anra.event.Event(anra.EVENT.MouseOut, loc);
-        this.focusOwner.notifyListeners(anra.EVENT.MouseOut, e);
+        event.figure.notifyListeners(anra.EVENT.MouseOut, e);
     },
     dispatchMouseOutScreen:function (event) {
 //        this.mouseState = anra.EVENT.MouseOut;
@@ -754,42 +789,42 @@ anra.svg.EventDispatcher = Base.extend({
     dispatchDoubleClick:function (event) {
         var location = this.getRelativeLocation(event);
         var e = new anra.event.Event(anra.EVENT.MouseDoubleClick, location);
-        this.focusOwner.notifyListeners(anra.EVENT.MouseDoubleClick, e);
+        this.mouseTarget.notifyListeners(anra.EVENT.MouseDoubleClick, e);
     },
     dispatchKeyDown:function (event) {
         var e = new anra.event.KeyEvent(anra.EVENT.KeyDown, this.getRelativeLocation(event), event);
-        var f = this.focusOwner == null ? this.display : this.focusOwner;
+        var f = this.mouseTarget == null ? this.display : this.mouseTarget;
         f.notifyListeners(e.type, e);
     },
     dispatchKeyUp:function (event) {
         var e = new anra.event.KeyEvent(anra.EVENT.KeyUp, this.getRelativeLocation(event), event);
-        var f = this.focusOwner == null ? this.display : this.focusOwner;
+        var f = this.mouseTarget == null ? this.display : this.mouseTarget;
         f.notifyListeners(e.type, event);
     },
     dispatchTouchStart:function (event) {
         var location = this.getRelativeLocation(event.touches[0]);
         var e = new anra.event.TouchEvent(anra.EVENT.TouchStart, location, event);
-        this.focusOwner.notifyListeners(anra.EVENT.TouchStart, e);
+        this.mouseTarget.notifyListeners(anra.EVENT.TouchStart, e);
     },
     dispatchTouchMove:function (event) {
         var location = this.getRelativeLocation(event.touches[0]);
         if (location[0] == null)
             return;
         var e = new anra.event.TouchEvent(anra.EVENT.TouchMove, location, event);
-        this.focusOwner.notifyListeners(anra.EVENT.TouchMove, e);
+        this.mouseTarget.notifyListeners(anra.EVENT.TouchMove, e);
     },
     dispatchTouchEnd:function (event) {
         var location = this.getRelativeLocation(event.touches[0]);
         if (location[0] == null)
             return;
         var e = new anra.event.TouchEvent(anra.EVENT.TouchEnd, location, event);
-        this.focusOwner.notifyListeners(anra.EVENT.TouchEnd, e);
+        this.mouseTarget.notifyListeners(anra.EVENT.TouchEnd, e);
     },
-    setFocusOwner:function (o) {
-        if (this.focusOwner != null) {
-            this.focusOwner.enableEvent();
+    setMouseTarget:function (o) {
+        if (this.mouseTarget != null) {
+            this.mouseTarget.enableEvent();
         }
-        this.focusOwner = o;
+        this.mouseTarget = o;
     },
     getRelativeLocation:function (event) {
         return this.display.getRelativeLocation(event);

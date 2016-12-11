@@ -53,6 +53,22 @@
                 editor.setActiveTool(new anra.gef.CreationTool(node));
                 return false;
             }
+            var linking = true;
+            link = function () {
+                linking = !linking;
+                if (linking) {
+
+                    editor.setActiveTool(editor.getDefaultTool());
+                    return;
+                }
+                var json = {id:3, target:5, sTML:1, tTML:2 };
+                var line = new anra.gef.LineModel();
+                line.setProperties(json);
+                line.id = 3;
+
+                editor.setActiveTool(new anra.gef.LinkLineTool(line));
+                return false;
+            }
         }
 
     </script>
@@ -71,15 +87,16 @@
 </head>
 <body>
 <div id="my"
-     style="position: absolute;left:0px;top: 0px;margin-left: -10px;width: 50%;height: 100%;background-color: rgb(13,13,13);float: left;">
+     style="position: absolute;left:0px;top: 0px;width: 50%;height: 100%;background-color: rgb(13,13,13);float: left;">
     <div id="palatte" style="position: relative;top: 0;width: 10%;height: 100%;background-color: #d3d3d3;float:left">
         <image src="balance.png" onmousedown='paint(2)' ondragstart='return false'></image>
         <image src="system.png" onmousedown='paint(0)' ondragstart='return false'></image>
         <image src="segment.png" onmousedown='paint(1)' ondragstart='return false'></image>
+        <button onmousedown='link()'>link</button>
     </div>
 </div>
 
 <div id="m2"
-     style="position: absolute;left:50%;top: 0;margin-left: -10px;width: 50%;height: 100%;background-color: rgb(13,13,13);float:right"></div>
+     style="position: absolute;left:50%;top: 0;width: 50%;height: 100%;background-color: rgb(13,13,13);float:right"></div>
 </body>
 </html>

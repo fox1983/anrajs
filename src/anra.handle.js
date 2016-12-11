@@ -48,31 +48,31 @@ anra.ResizeHandle = Control.extend({
                 'stroke':'#000000',
                 'fill':'#FFFFFF'
             });
-            var dt = this.getResizeTracker(direction);
-            this.addListener(anra.EVENT.MouseDown, function (e) {
-                if (dt != null)
-                    dt.mouseDown(e, editPart);
-            });
-            this.addListener(anra.EVENT.DragStart, function (e) {
-                if (dt != null)
-                    dt.dragStart(e, editPart);
-            });
-            this.addListener(anra.EVENT.DragEnd, function (e) {
-                if (dt != null)
-                    dt.dragEnd(e, editPart);
-            });
-            this.addListener(anra.EVENT.MouseDrag, function (e) {
-                if (dt != null)
-                    dt.mouseDrag(e, editPart);
-            });
-            this.addListener(anra.EVENT.MouseUp, function (e) {
-                if (dt != null)
-                    dt.mouseUp(e, editPart);
-            });
-            this.addListener(anra.EVENT.MouseClick, function (e) {
-                if (dt != null&&dt.mouseClick!=null)
-                    dt.mouseClick(e, editPart);
-            });
+//            var dt = this.getResizeTracker(direction);
+//            this.addListener(anra.EVENT.MouseDown, function (e) {
+//                if (dt != null)
+//                    dt.mouseDown(e, editPart);
+//            });
+//            this.addListener(anra.EVENT.DragStart, function (e) {
+//                if (dt != null)
+//                    dt.dragStart(e, editPart);
+//            });
+//            this.addListener(anra.EVENT.DragEnd, function (e) {
+//                if (dt != null)
+//                    dt.dragEnd(e, editPart);
+//            });
+//            this.addListener(anra.EVENT.MouseDrag, function (e) {
+//                if (dt != null)
+//                    dt.mouseDrag(e, editPart);
+//            });
+//            this.addListener(anra.EVENT.MouseUp, function (e) {
+//                if (dt != null)
+//                    dt.mouseUp(e, editPart);
+//            });
+//            this.addListener(anra.EVENT.MouseClick, function (e) {
+//                if (dt != null&&dt.mouseClick!=null)
+//                    dt.mouseClick(e, editPart);
+//            });
         }
 
     },
@@ -132,6 +132,7 @@ anra.gef.ResizeTracker = Base.extend({
         this.status = me.type;
     },
     dragStart:function (me, editPart) {
+        this.ondrag=true;
         this.status = me.type;
         this.xStart = me.x;
         this.yStart = me.y;
@@ -144,6 +145,7 @@ anra.gef.ResizeTracker = Base.extend({
 
     },
     dragEnd:function (me, editPart) {
+        if(!this.ondrag)return;
         this.status = me.type;
         editPart.editor.execute(new anra.gef.RelocalCommand(editPart, this.oldConstraint, {
             x:editPart.model.getBounds()[0],
@@ -152,6 +154,7 @@ anra.gef.ResizeTracker = Base.extend({
             height:editPart.model.getBounds()[3]
         }));
         anra.gef.DragTracker.prototype.dragEnd.call({host:editPart},me,editPart);
+        this.ondrag=false;
     },
     mouseUp:function (me, editPart) {
         this.status = me.type;
