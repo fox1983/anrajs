@@ -15,6 +15,31 @@ FlowEditor = anra.gef.Editor.extend({
     editParts:null,
     background:'#FFFFFF',
 
+    registActions:function () {
+        var editor=this;
+        this.actionRegistry.regist({
+            id:1,
+            type:ACTION_SELECTION,
+            key:'ctrl+z',
+            run:function(){
+                editor.cmdStack.undo();
+            }
+        }).regist({
+                id:2,
+                type:ACTION_SELECTION,
+                key:'delete',
+                run:function(){
+
+                }
+            }).regist({
+                id:3,
+                type:ACTION_SELECTION,
+                key:'ctrl+y',
+                run:function(){
+                    editor.cmdStack.redo();
+                }
+            });
+    },
     /**
      *第一步，把json输入解析为model
      *
@@ -149,9 +174,6 @@ var CommonNodeEditPart = anra.gef.NodeEditPart.extend({
         var f = new CommonFigure();
         f.setUrl(this.getImage());
         return f;
-    },
-    deactivate:function () {
-        this.getFigure().dispose();
     }
 });
 
@@ -201,15 +223,6 @@ TextInfoPolicy = anra.gef.AbstractEditPolicy.extend({
         this.handle = new TextHandle(this.getHost());
         this.handle.setText(this.getHost().model.getValue('name'));
         this.getHandleLayer().addChild(this.handle);
-//        var root = this.getHost().getRoot();
-//        this.handle.addListener(anra.EVENT.MouseUp, function (e) {
-//            //TODO
-//            var json = {id:10, name:'C2APP1', type:2, bounds:[330, 230, 60, 60], lines:[
-//                {id:1, target:2, sTML:1, tTML:1 }
-//            ]};
-//            root.editor.addNode(json);
-//            root.refresh();
-//        });
     },
     deactivate:function () {
         this.getHandleLayer().removeChild(this.handle);

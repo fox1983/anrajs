@@ -22,11 +22,12 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
         this.feedbackMap = new Map();
     },
     refreshFeedback:function (feedback, request, offsetX, offsetY) {
-        if (feedback != null)
+        if (feedback != null){
             feedback.setBounds({
                 x:request.event.x - feedback.bounds.width / 2 + (offsetX == null ? 0 : offsetX),
                 y:request.event.y - feedback.bounds.height / 2 + (offsetY == null ? 0 : offsetY)
             });
+        }
     },
     activate:function () {
         this.setListener(this.createListener());
@@ -337,13 +338,10 @@ anra.gef.ConnectionPolicy = anra.gef.AbstractEditPolicy.extend({
     },
     getCreateConnectionCommand:function (req) {
         var cmd = new anra.gef.CreateLineCommand();
-
         cmd.line = new anra.gef.LineModel();
-        cmd.line.id = 123;
+        cmd.line.id = anra.genUUID();
         cmd.rootEditPart = this.getHost().getRoot();
-
         cmd.sourceId = this.getHost().model.id;
-
         return  cmd;
     },
     getConnectionCompleteCommand:function (req) {

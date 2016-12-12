@@ -261,7 +261,8 @@ var _Composite = {
         if (c instanceof anra.svg.Control) {
             c.dispose();
             this.children.removeObject(c);
-            this.domContainer().removeChild(c.owner);
+            if (this.domContainer().contains(c.owner))
+                this.domContainer().removeChild(c.owner);
             c.parent = null;
         } else {
             anra.Platform.error('can not remove ' + c.toString() + ' from Composite');
@@ -531,17 +532,18 @@ anra.SVG = Composite.extend(anra._Display).extend(anra._EventTable).extend({
             return false;
         };
 
+
 //        this.element.ondrag=function(event){
 //            console.log('drag')
 //            return true;
 //        };
-        this.element.onmouseover = function (event) {
-            if (t.owner == event.target || t.owner.parentNode == event.target) {
-                event.figure = t;
-                d.dispatchMouseIn(event);
-            }
-            return false;
-        };
+//        this.element.onmouseover = function (event) {
+//            if (t.owner == event.target || t.owner.parentNode == event.target) {
+//                event.figure = t;
+//                d.dispatchMouseIn(event);
+//            }
+//            return false;
+//        };
         this.element.onmouseout = function (event) {
             var x = event.clientX;
             var y = event.clientY;
@@ -701,7 +703,7 @@ anra.svg.EventDispatcher = Base.extend({
     },
     dispatchMouseMove:function (event) {
         //提高效率
-        if ((++count ) % 5 != 0) {
+        if ((++count ) % 2 != 0) {
             if (count > 101)
                 count = 0;
             return;
@@ -793,12 +795,15 @@ anra.svg.EventDispatcher = Base.extend({
     },
     dispatchKeyDown:function (event) {
         var e = new anra.event.KeyEvent(anra.EVENT.KeyDown, this.getRelativeLocation(event), event);
-        var f = this.mouseTarget == null ? this.display : this.mouseTarget;
+        //TODO 此处需要优化，考虑到底是目标还是画布来触发事件
+//        var f = this.mouseTarget == null ? this.display : this.mouseTarget;
+        var f = this.display;
         f.notifyListeners(e.type, e);
     },
     dispatchKeyUp:function (event) {
         var e = new anra.event.KeyEvent(anra.EVENT.KeyUp, this.getRelativeLocation(event), event);
-        var f = this.mouseTarget == null ? this.display : this.mouseTarget;
+//        var f = this.mouseTarget == null ? this.display : this.mouseTarget;
+        var f = this.display;
         f.notifyListeners(e.type, event);
     },
     dispatchTouchStart:function (event) {

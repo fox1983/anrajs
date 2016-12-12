@@ -33,21 +33,6 @@ Array.prototype.isEmpty = function () {
 Array.prototype.last = function () {
     return this[this.length - 1];
 };
-//Object.prototype.equals = function (o) {
-//    if (this == o)return true;
-//    if (typeof(o) == 'object') {
-//        var tp = Object.getOwnPropertyNames(this);
-//        var op = Object.getOwnPropertyNames(o);
-//        if (tp.length != op.length)return false;
-//        for (var i = 0; i < tp.length; i++) {
-//            var n = tp[i];
-//            if (this[n] != o[n])
-//                return false;
-//        }
-//        return true;
-//    }
-//    return false;
-//};
 
 Array.prototype.contains = function (obj) {
     var i = this.length;
@@ -135,19 +120,19 @@ anra.Platform = {
             this.init();
     },
     init:function () {
-        //全局事件
+        //TODO 全局事件
         var p = this;
-        document.onkeydown = function (event) {
+        window.addEventListener('keydown', function (event) {
             var d = p.focus;
             if (d != null && d.dispatcher != null)
                 d.dispatcher.dispatchKeyDown(event);
-        };
+        });
 
-        document.onkeyup = function (event) {
+        window.addEventListener('keyUp', function (event) {
             var d = p.focus;
             if (d != null && d.dispatcher != null)
                 d.dispatcher.dispatchKeyUp(event);
-        };
+        });
         this.ready = true;
     },
     get:function (key) {
@@ -263,6 +248,7 @@ anra._Display = {
         var ev = event || window.event;
         var x = ev.clientX - this.getX(this.element) + Math.floor(window.pageXOffset);
         var y = ev.clientY - this.getY(this.element) + Math.floor(window.pageYOffset);
+
         return [x, y];
     },
     getX:function (obj) {
@@ -274,9 +260,10 @@ anra._Display = {
             left += parObj.offsetLeft;
         }
 //        this.left = left;
-        return left;
+        return left - obj.scrollLeft;
     },
     getY:function (obj) {
+        /*在外框发生变化时，top也应该随时变化，当然，可以考虑监听外部元素的位置变化来实现*/
 //        if (this.top != null)
 //            return this.top - obj.scrollTop;
         var parObj = obj;
@@ -285,7 +272,8 @@ anra._Display = {
             top += parObj.offsetTop;
         }
 //        this.top = top;
-        return top;
+        /*scrollTop是为了考虑滚动条位置*/
+        return top - obj.scrollTop;
     }
 };
 anra.Display = Base.extend(anra._Display).extend(anra._EventTable)
@@ -628,17 +616,71 @@ PRE_REDO = 2;
 PRE_UNDO = 4;
 POST_EXECUTE = 3;
 
+ACTION_SELECTION = 0;
+ACTION_COMMAND_STACK = 1;
+ACTION_PROPERTY = 0;
 /**
  * 动作注册器
  * @type {*}
  */
 anra.ActionRegistry = Base.extend({
-    handlers:null,
-    keyHandle:function (e) {
-
+    constructor:function () {
+        this.selectionActions = new Map();
+        this.cmdStackActions = new Map();
+        this.propertyActions = new Map();
+        this.handles = new Map();
     },
-    registKeyHandler:function (key, action) {
+    keyHandle:function (e) {
+//        console.log(e.ctrlKey, e.altKey, e.shiftKey, e.code, String.fromCharCode(e.keyCode));
+//        var key = (e.altKey ? 'alt+' : '') + (e.altKey ? 'al  t+' : '') + (e.altKey ? 'alt+' : '');
+        var keys = [];
+        if (e.altKey)
+            keys.push('alt');
+        if (e.ctrlKey)
+            keys.push('ctrl');
+        if (e.shiftKey)
+            keys.push('shift');
+        keys.push(this.getKeyString(e.keyCode, e.code));
 
+        var action = this.handles.get(keys.sort().join('+'));
+        if (action != null)action.run();
+    },
+    getKeyString:function (keycode, code) {
+        if ((keycode > 64 && keycode < 91) ||
+            (keycode > 47 && keycode < 58) ||
+            (keycode > 95 && keycode < 106)) {
+            return String.fromCharCode(keycode).toLowerCase();
+        }
+        return code.toLowerCase();
+    },
+    regist:function (action) {
+        this.registAction(action);
+        return this;
+    },
+    registAction:function (action) {
+        if (action.id == null) {
+            console.log('action id can not be null');
+            return;
+        }
+
+        switch (action.type) {
+            case ACTION_SELECTION:
+                this.selectionActions.put(action.id, action);
+                break;
+            case ACTION_COMMAND_STACK:
+                this.cmdStackActions.put(action.id, action);
+                break;
+            case ACTION_PROPERTY:
+                this.propertyActions.put(action.id, action);
+                break;
+        }
+
+        this.registKeyHandler(action);
+    },
+    registKeyHandler:function (action) {
+        var key = action.key;
+        if (key == null)return;
+        this.handles.put(key.toLowerCase().split('+').sort().join('+'), action);
     }
 
 });
@@ -665,9 +707,25 @@ anra.CommandStack = Base.extend({
         return this.redoable.length > 0;
     },
     canUndo:function () {
-        return this.undoable.length == 0 ? false : this.undoable.last.canUndo();
+        return this.undoable.length == 0 ? false : this.undoable[this.undoable.length - 1].canUndo();
     },
-    notifyListeners:function (command, state) {
+    redo:function () {
+        if (!this.canRedo())
+            return;
+        var command = this.redoable.pop();
+        this.notifyListeners(command, PRE_REDO);
+        command.redo();
+        this.undoable.push(command);
+        this.notifyListeners();
+    },
+    undo:function () {
+        if (!this.canUndo())return;
+        var command = this.undoable.pop();
+        this.notifyListeners(command, PRE_UNDO);
+        command.undo();
+        this.redoable.push(command);
+        this.notifyListeners();
+    }, notifyListeners:function (command, state) {
         for (var i = 0; i < this.listeners.length; i++)
             this.listeners[i].handleEvent(event);
     },
@@ -692,17 +750,21 @@ anra.CommandStack = Base.extend({
         this.notifyListeners(c, PRE_EXECUTE);
         try {
             c.execute();
-            while (this.undoable.length > 0) {
-                this.undoable.remove(0).dispose();
-                if (this.saveLocation > -1)
-                    this.saveLocation--;
-            }
+            if (this.getUndoLimit() > 0)
+                while (this.undoable.length > this.getUndoLimit()) {
+                    this.undoable.remove(0).dispose();
+                    if (this.saveLocation > -1)
+                        this.saveLocation--;
+                }
             if (this.saveLocation > this.undoable.length)
                 this.saveLocation = -1;
             this.undoable.push(c);
         } finally {
             this.notifyListeners(c, POST_EXECUTE);
         }
+    },
+    getUndoLimit:function(){
+        return 15;
     },
     markSaveLocation:function () {
         this.saveLocation = this.undoable.length;

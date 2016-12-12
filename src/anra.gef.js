@@ -221,6 +221,7 @@ anra.gef.EditPart = Base.extend({
         for (i = 0; i < this.sConns.length; i++) {
             this.sConns[i].deactivate();
         }
+        this.deactivePolicies();
     },
     activate:function () {
         this.setFlag(FLAG_ACTIVE, true);
@@ -1166,8 +1167,11 @@ anra.gef.LinkLineTool = anra.gef.Tool.extend({
                 event:e,
                 type:v.type
             };
-            if (policy != null)
+            if (policy != null) {
                 this.command = policy.getCreateConnectionCommand(req);
+                policy.eraseSourceFeedback(req);
+                policy.eraseTargetFeedback(req);
+            }
         }
     },
     mouseDrag:function (e, p) {
@@ -1179,26 +1183,26 @@ anra.gef.LinkLineTool = anra.gef.Tool.extend({
         return true;
     },
     mouseUp:function (e, p) {
-        if (p instanceof anra.gef.NodeEditPart) {
-            if (this.type == REQ_RECONNECT_TARGET) {
-                this.type = REQ_CONNECTION_END;
-                this.targetEditPart = p;
-                this.targetAnchor = p.getTargetAnchor({x:e.x, y:e.y, source:p});
-                var policy = p.getConnectionPolicy();
-                var v = this;
-                var req = {
-                    editPart:p,
-                    target:v,
-                    event:e,
-                    type:v.type,
-                    command:v.command
-                };
-                if (policy != null)
-                    this.command = policy.getConnectionCompleteCommand(req);
-console.log(this.command)
-                if (this.command != null)
-                    p.getRoot().editor.execute(this.command);
+        if (p instanceof anra.gef.NodeEditPart && this.type == REQ_RECONNECT_TARGET) {
+            this.type = REQ_CONNECTION_END;
+            this.targetEditPart = p;
+            this.targetAnchor = p.getTargetAnchor({x:e.x, y:e.y, source:p});
+            var policy = p.getConnectionPolicy();
+            var v = this;
+            var req = {
+                editPart:p,
+                target:v,
+                event:e,
+                type:v.type,
+                command:v.command
+            };
+            if (policy != null) {
+                this.command = policy.getConnectionCompleteCommand(req);
+                policy.eraseSourceFeedback(req);
+                policy.eraseTargetFeedback(req);
             }
+            if (this.command != null)
+                p.getRoot().editor.execute(this.command);
         }
         this.reset();
         return true;
@@ -1371,12 +1375,17 @@ anra.gef.RelocalCommand = anra.Command.extend({
     constructor:function (editPart, sp, ep) {
         this.sp = sp;
         this.ep = ep;
-        this.editPart = editPart;
+        this.model = editPart.model;
+        this.root = editPart.getRoot();
+    },
+    dispose:function () {
+        this.editPart = null;
     },
     canExecute:function () {
-        return this.editPart != null && this.sp != null && this.ep != null;
+        return this.model != null && this.sp != null && this.ep != null;
     },
     execute:function () {
+        this.editPart = this.root.getEditPart(this.model);
         this.editPart.model.getBounds()[0] = this.ep.x;
         this.editPart.model.getBounds()[1] = this.ep.y;
         this.editPart.refresh();
@@ -1436,8 +1445,10 @@ anra.gef.CreateLineCommand = anra.Command.extend({
             anra.Platform.error('can not found line target id: ' + this.targetId);
         if (this.source == null)
             anra.Platform.error('can not found line source id: ' + this.sourceId);
-        this.source.addSourceLine(this.line);
-        this.target.addTargetLine(this.line);
+        var flag = this.source.addSourceLine(this.line);
+        if (!flag)return;
+        flag &= this.target.addTargetLine(this.line);
+        if (!flag)return;
         var sourcePart = this.sourcePart = this.rootEditPart.getEditPart(this.source);
         if (sourcePart != null)
             sourcePart.refresh();
@@ -1877,18 +1888,22 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
     addSourceLine:function (line) {
         var nId = this.lineId(line.id);
         line.sourceNode = this;
-        if (!this.sourceLines.has(nId))
+        if (!this.sourceLines.has(nId)) {
             this.sourceLines.put(nId, line);
-        else
-            console.log('duplicate line id: ' + line.id);
+            return true;
+        }
+        console.log('duplicate line id: ' + line.id);
+        return false;
     },
     addTargetLine:function (line) {
         var nId = this.lineId(line.id);
         line.targetNode = this;
-        if (!this.targetLines.has(nId))
+        if (!this.targetLines.has(nId)) {
             this.targetLines.put(nId, line);
-        else
-            console.log('duplicate line id: ' + line.id);
+            return true;
+        }
+        console.log('duplicate line id: ' + line.id);
+        return false;
     },
     getSourceLine:function (id) {
         return this.sourceLines.get(this.lineId(id));
