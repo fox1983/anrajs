@@ -14,6 +14,18 @@ Array.prototype.remove = function (val) {
         return val;
     }
 };
+
+Base.prototype._do = function (func) {
+    func.call(this);
+};
+
+Array.prototype._do = function (func) {
+    for (var i = 0; i < this.length; i++) {
+        func.call(this[i]);
+    }
+};
+
+
 Array.prototype.insert = function (item, index) {
     this.splice(index, 0, item);
 };
@@ -58,6 +70,12 @@ var anra = anra || {
     },
     util:{}
 };
+
+anra.EAST = 0x1;
+anra.WEST = 0x1 << 1;
+anra.SOUTH = 0x1 << 2;
+anra.NORTH = 0x1 << 3;
+anra.CENTER = 0x1 << 4;
 
 SELECTED = 0;
 /**
@@ -583,6 +601,10 @@ anra.ChainedCompoundCommand = anra.Command.extend({
             this.commandList[i].execute();
         }
     },
+    undo:function () {
+        for (var i = this.commandList.length - 1; i >= 0; i--)
+            this.commandList[i].undo();
+    },
     getCommands:function () {
         return this.commandList;
     },
@@ -593,7 +615,8 @@ anra.ChainedCompoundCommand = anra.Command.extend({
         return this.commandList.length;
     },
     chain:function (c) {
-        this.add(c);
+        if (c != null)
+            this.add(c);
         return this;
     }
 });
@@ -654,7 +677,12 @@ anra.ActionRegistry = Base.extend({
         return code.toLowerCase();
     },
     regist:function (action) {
-        this.registAction(action);
+        if (action instanceof Array) {
+            for (var i = 0; i < action.length; i++) {
+                this.registAction(action[i]);
+            }
+        } else
+            this.registAction(action);
         return this;
     },
     registAction:function (action) {
@@ -763,7 +791,7 @@ anra.CommandStack = Base.extend({
             this.notifyListeners(c, POST_EXECUTE);
         }
     },
-    getUndoLimit:function(){
+    getUndoLimit:function () {
         return 15;
     },
     markSaveLocation:function () {

@@ -10,7 +10,46 @@ anra.gef.AbstractEditPolicy = anra.gef.Policy.extend({
 
 
 /**
- * 布局策略
+ * 连线模式策略，展示选中线的可拖拽点，展示所有节点的可连接点，只能安装在RootEditPart上
+ * @type {*}
+ */
+anra.gef.LinkModPolicy = anra.gef.Policy.extend({
+
+    /**
+     * 激活连线模式，展示相关UI
+     */
+    showSourceFeedback:function (req) {
+
+        if (REQ_CONNECTION_MOD == req.type) {
+            /*遍历所有子EditPart，展示可连接点UI，由于每个节点的性质不一样，可连接点的样式由各个节点自己负责*/
+            var editParts = this.getHost().children;
+            var childPolicy;
+            if (editParts != null)
+                for (var i = 0; i < editParts.length; i++) {
+                    childPolicy = editParts[i].getConnectionPolicy();
+                    childPolicy && childPolicy.showSourceFeedback(req);
+                }
+        }
+    },
+    /**
+     * 反激活连线模式，消除相关UI
+     */
+    eraseSourceFeedback:function (req) {
+        if (REQ_CONNECTION_MOD == req.type) {
+            var editParts = this.getHost().children;
+            var childPolicy;
+            if (editParts != null)
+                for (var i = 0; i < editParts.length; i++) {
+                    childPolicy = editParts[i].getConnectionPolicy();
+                    childPolicy && childPolicy.eraseSourceFeedback(req);
+                }
+        }
+    }
+
+});
+
+/**
+ * 布局策略，决定了拖拽节点的样式和结果，只能安装在RootEditPart上
  * @type {*}
  */
 anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
@@ -22,7 +61,7 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
         this.feedbackMap = new Map();
     },
     refreshFeedback:function (feedback, request, offsetX, offsetY) {
-        if (feedback != null){
+        if (feedback != null) {
             feedback.setBounds({
                 x:request.event.x - feedback.bounds.width / 2 + (offsetX == null ? 0 : offsetX),
                 y:request.event.y - feedback.bounds.height / 2 + (offsetY == null ? 0 : offsetY)
@@ -280,36 +319,77 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
 });
 
 anra.gef.ConnectionPolicy = anra.gef.AbstractEditPolicy.extend({
+    showAnchors:function () {
+        if (this.anchorHandles == null)
+            this.anchorHandles = [];
+        var anchors = this.getHost().getAnchors();
+        if (anchors != null)
+            for (var i = 0; i < anchors.length; i++) {
+                var h = this.createAttarchHandle(anchors[i]);
+                this.anchorHandles.push(h);
+                this.addHandle(h);
+            }
+    },
+    eraseAnchors:function () {
+        if (this.anchorHandles != null) {
+            for (var i = 0; i < this.anchorHandles.length; i++) {
+                this.removeHandle(this.anchorHandles[i]);
+            }
+            this.anchorHandles = null;
+        }
+    },
+    createAttarchHandle:function (anchor) {
+        if (anchor == null)return null;
+        var handle = anra.svg.Control.extend(anra.svg.Circle);
+        handle = new handle();
+        handle.setBounds({
+            x:anchor.x,
+            y:anchor.y,
+            width:5
+        });
+        handle.setAttribute({
+            fill:'blue'
+        });
+        handle.setOpacity(0.5);
+        return handle;
+    },
     showSourceFeedback:function (req) {
-        if (REQ_CONNECTION_START == req.type) {
+        if (REQ_CONNECTION_START == req.type || REQ_RECONNECT_SOURCE == req.type) {
             var anchor = this.getHost().getSourceAnchor(req);
             this.refreshSourceAnchorFeedback(anchor);
+        } else if (REQ_CONNECTION_MOD == req.type) {
+            this.showAnchors(req);
         }
     },
     eraseSourceFeedback:function (req) {
+        if (REQ_CONNECTION_MOD == req.type) {
+            this.eraseAnchors(req);
+        }
         if (this.sourceAnchor != null) {
             this.getFeedbackLayer().removeChild(this.sourceAnchor);
             this.sourceAnchor = null;
         }
     },
     showTargetFeedback:function (req) {
-        if (REQ_RECONNECT_TARGET == req.type) {
+//        console.log('show')
+        if (REQ_RECONNECT_TARGET == req.type || REQ_CONNECTION_END == req.type) {
             var anchor = this.getHost().getTargetAnchor(req);
             this.refreshTargetAnchorFeedback(anchor);
         }
     },
     eraseTargetFeedback:function (req) {
-        if (this.targetAnchor != null) {
-            this.getFeedbackLayer().removeChild(this.targetAnchor);
-            this.targetAnchor = null;
+//        console.log('erase')
+        if (this.targetAnchorFeedback != null) {
+            this.removeFeedback(this.targetAnchorFeedback);
+            this.targetAnchorFeedback = null;
         }
     },
     refreshTargetAnchorFeedback:function (anchor) {
-        if (this.targetAnchor == null) {
-            this.targetAnchor = this.createTargetAnchorFeedback();
-            this.getFeedbackLayer().addChild(this.targetAnchor);
+        if (this.targetAnchorFeedback == null) {
+            this.targetAnchorFeedback = this.createTargetAnchorFeedback();
+            this.addFeedback(this.targetAnchorFeedback);
         }
-        this.targetAnchor.setBounds({x:anchor.x, y:anchor.y, width:10, height:10});
+        this.targetAnchorFeedback.setBounds({x:anchor.x, y:anchor.y, width:10, height:10});
     },
     refreshSourceAnchorFeedback:function (anchor) {
         if (this.sourceAnchor == null) {
@@ -333,13 +413,39 @@ anra.gef.ConnectionPolicy = anra.gef.AbstractEditPolicy.extend({
         Rect.setAttribute({
             stroke:'yellow'
         });
-//        Circle.setOpacity(0.5);
+        Rect.setOpacity(0.5);
         return Rect;
+    },
+    getCommand:function (req) {
+        if (req.type == REQ_RECONNECT_TARGET) {
+            return this.getReconnectTargetCommand(req);
+        } else if (req.type == REQ_RECONNECT_SOURCE) {
+            return this.getReconnectSourceCommand(req);
+        } else if (req.type == REQ_CONNECTION_START) {
+            return this.getCreateConnectionCommand(req);
+        } else if (req.type == REQ_CONNECTION_END) {
+            return this.getConnectionCompleteCommand(req);
+        }
+    },
+    getReconnectTargetCommand:function (req) {
+        var cmd = new anra.gef.ReconnectTargetCommand();
+        cmd.line = req.line;
+        cmd.terminal = req.anchor.id;
+        cmd.target = this.getHost();
+        return cmd;
+    },
+    getReconnectSourceCommand:function (req) {
+        var cmd = new anra.gef.ReconnectSourceCommand();
+        cmd.line = req.line;
+        cmd.terminal = req.anchor.id;
+        cmd.source = this.getHost();
+        return cmd;
     },
     getCreateConnectionCommand:function (req) {
         var cmd = new anra.gef.CreateLineCommand();
         cmd.line = new anra.gef.LineModel();
         cmd.line.id = anra.genUUID();
+        cmd.line.sourceTerminal = req.anchor.id;
         cmd.rootEditPart = this.getHost().getRoot();
         cmd.sourceId = this.getHost().model.id;
         return  cmd;
@@ -348,6 +454,7 @@ anra.gef.ConnectionPolicy = anra.gef.AbstractEditPolicy.extend({
         var cmd = req.command;
         if (cmd == null)return null;
         cmd.targetId = this.getHost().model.id;
+        cmd.line.targetTerminal = req.anchor.id;
         return cmd;
     }
 });
@@ -405,7 +512,7 @@ anra.gef.SelectionPolicy = anra.gef.AbstractEditPolicy.extend({
         }
     },
     hideSelection:function () {
-        if (this.handles.isEmpty()) {
+        if (this.handles == null || this.handles.isEmpty()) {
             return;
         }
         for (var i = 0; i < this.handles.length; i++) {
@@ -415,21 +522,37 @@ anra.gef.SelectionPolicy = anra.gef.AbstractEditPolicy.extend({
     addSelectionHandles:function () {
         this.removeSelectionHandles();
         this.handles = this.createSelectionHandles();
-        for (var i = 0; i < this.handles.length; i++) {
-            this.getHandleLayer().addChild(this.handles[i]);
-        }
+        if (this.handles != null)
+            for (var i = 0; i < this.handles.length; i++) {
+                this.getHandleLayer().addChild(this.handles[i]);
+            }
     },
     removeSelectionHandles:function () {
         if (this.handles.isEmpty()) {
             return;
         }
-        for (var i = 0; i < this.handles.length; i++) {
-            this.getHandleLayer().removeChild(this.handles[i]);
-        }
+        if (this.handles != null)
+            for (var i = 0; i < this.handles.length; i++) {
+                this.getHandleLayer().removeChild(this.handles[i]);
+            }
         this.handles = [];
     },
     createSelectionHandles:function (selection) {
+        return [];
+    }
+});
 
+anra.gef.LineSelectionPolicy = anra.gef.SelectionPolicy.extend({
+//    showPrimarySelection:function (selection) {
+//        anra.gef.SelectionPolicy.prototype.showPrimarySelection.call(this, selection);
+//        this.getHost().getRoot().  editor.setActiveTool(new anra.gef.LinkLineTool());
+//    },
+//    hideSelection:function(selection){
+//        anra.gef.SelectionPolicy.prototype.hideSelection.call(this, selection);
+//        console.log(selection)
+//    },
+    createSelectionHandles:function (selection) {
+        return [new anra.gef.LineHandle(this.getHost(), REQ_RECONNECT_SOURCE), new anra.gef.LineHandle(this.getHost(), REQ_RECONNECT_TARGET)];
     }
 });
 

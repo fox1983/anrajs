@@ -126,6 +126,7 @@ anra.svg.Control = anra.Control.extend({
             this._attr = null;
         }
         Util.applyAttr(this.owner, a, v);
+        return this;
     },
     setStyle:function (a, v) {
         if (this.owner == null) {
@@ -139,6 +140,7 @@ anra.svg.Control = anra.Control.extend({
             this._style = null;
         }
         Util.apply(this.owner.style, a, v);
+        return this;
     },
     /**
      * 初始化属性，在构建完成后调用。
@@ -182,10 +184,8 @@ Control.prototype.create = function () {
         };
 
         e.onmouseover = function (event) {
-//            dispatcher.setMouseTarget(o);
             event.figure = o;
             dispatcher.dispatchMouseIn(event);
-//            return false;
         };
 
         e.onmouseup = function (event) {
@@ -260,7 +260,8 @@ var _Composite = {
     removeChild:function (c) {
         if (c instanceof anra.svg.Control) {
             c.dispose();
-            this.children.removeObject(c);
+            if (this.children != null)
+                this.children.removeObject(c);
             if (this.domContainer().contains(c.owner))
                 this.domContainer().removeChild(c.owner);
             c.parent = null;
@@ -326,6 +327,9 @@ anra.svg.Group = Composite.extend({
     tagName:'g',
     domContainer:function () {
         return this.owner;
+    },
+    _init:function () {
+        if (this.init != null)this.init();
     },
     applyBounds:function () {
     },
@@ -417,7 +421,7 @@ anra.svg.TriangleMarker = anra.svg.Marker.extend({
             markerWidth:"6",
             markerHeight:"6",
             orient:"auto",
-            viewBox:"-5 0 10 10"});
+            viewBox:"-5 0 15 15"});
     }
 });
 
@@ -537,13 +541,13 @@ anra.SVG = Composite.extend(anra._Display).extend(anra._EventTable).extend({
 //            console.log('drag')
 //            return true;
 //        };
-//        this.element.onmouseover = function (event) {
-//            if (t.owner == event.target || t.owner.parentNode == event.target) {
-//                event.figure = t;
-//                d.dispatchMouseIn(event);
-//            }
-//            return false;
-//        };
+        this.element.onmouseover = function (event) {
+            if (t.owner == event.target || t.owner.parentNode == event.target) {
+                event.figure = t;
+                d.dispatchMouseIn(event);
+            }
+            return false;
+        };
         this.element.onmouseout = function (event) {
             var x = event.clientX;
             var y = event.clientY;
@@ -676,7 +680,7 @@ anra.svg.EventDispatcher = Base.extend({
     constructor:function (display) {
         this.display = display;
     },
-    mouseTarget:null,
+    focusTarget:null,
     mouseState:0,
     dispatchMouseDown:function (event) {
         this.mouseState = anra.EVENT.MouseDown;
@@ -684,8 +688,8 @@ anra.svg.EventDispatcher = Base.extend({
         var location = this.getRelativeLocation(event);
         e.x = location[0];
         e.y = location[1];
-        e.prop = {drag:this.dragTarget, target:this.mouseTarget};
-        var widget = this.mouseTarget;
+        e.prop = {drag:this.dragTarget, target:this.focusTarget};
+        var widget = this.focusTarget;
         widget.notifyListeners(anra.EVENT.MouseDown, e);
 //        if (widget != widget.svg)
 //            widget.svg.notifyListeners(anra.EVENT.MouseDown, e);
@@ -697,8 +701,8 @@ anra.svg.EventDispatcher = Base.extend({
         var location = this.getRelativeLocation(event);
         e.x = location[0];
         e.y = location[1];
-        e.prop = {drag:this.dragTarget, target:this.mouseTarget};
-        var widget = this.mouseTarget;
+        e.prop = {drag:this.dragTarget, target:this.focusTarget};
+        var widget = this.focusTarget;
         widget.notifyListeners(anra.EVENT.MouseClick, e);
     },
     dispatchMouseMove:function (event) {
@@ -708,20 +712,17 @@ anra.svg.EventDispatcher = Base.extend({
                 count = 0;
             return;
         }
+        if (this.mouseOnTarget == null)this.mouseOnTarget = this.focusTarget;
         //模拟拖拽
         var e;
         var location = this.getRelativeLocation(event);
         if ((this.mouseState == anra.EVENT.MouseDown) || (this.mouseState == anra.EVENT.MouseDrag)) {
             this.mouseState = anra.EVENT.MouseDrag;
             if (this.dragTarget == null) {
-                this.dragTarget = this.mouseTarget;
+                this.dragTarget = this.focusTarget;
                 e = new anra.event.Event(anra.EVENT.DragStart, location);
-                e.prop = {drag:this.dragTarget, target:this.mouseTarget};
-                this.dragTarget.notifyListeners(anra.EVENT.DragStart, e);
-//                var widget = this.mouseTarget;
-//                if (widget != widget.svg) {
-//                    widget.svg.notifyListeners(anra.EVENT.DragStart, e);
-//                }
+                e.prop = {drag:this.dragTarget, target:this.mouseOnTarget};
+                this.mouseOnTarget.notifyListeners(anra.EVENT.DragStart, e);
             }
             if (this.dragTarget.enable)
                 this.dragTarget.disableEvent();
@@ -730,34 +731,28 @@ anra.svg.EventDispatcher = Base.extend({
             e = new anra.event.Event(anra.EVENT.MouseMove);
             e.x = location[0];
             e.y = location[1];
-            this.mouseTarget.notifyListeners(anra.EVENT.MouseMove, e);
+            this.mouseOnTarget.notifyListeners(anra.EVENT.MouseMove, e);
         }
         if (this.dragTarget != null && (this.mouseState == anra.EVENT.MouseDrag)) {
             e = new anra.event.Event(anra.EVENT.MouseDrag);
             e.x = location[0];
             e.y = location[1];
-            e.prop = {drag:this.dragTarget, target:this.mouseTarget};
-            this.mouseTarget.notifyListeners(anra.EVENT.MouseDrag, e);
-            //TODO
-//            widget = this.mouseTarget;
-//            if (this.dragTarget != widget.svg) {
-//                widget.svg.notifyListeners(anra.EVENT.MouseDrag, e);
-//            }
+            e.prop = {drag:this.dragTarget, target:this.mouseOnTarget};
+            this.mouseOnTarget.notifyListeners(anra.EVENT.MouseDrag, e);
         }
     },
     dispatchMouseUp:function (event, global) {
-        var widget = this.mouseTarget;
+        var widget = this.mouseOnTarget;
         var location = this.getRelativeLocation(event);
         var notified = false;
         if (this.mouseState == anra.EVENT.MouseDrag) {
             var e = new anra.event.Event(anra.EVENT.DragEnd, location);
             e.prop = {drag:this.dragTarget, target:widget};
-            if (this.dragTarget instanceof anra.gef.Figure) {
+            if (this.dragTarget instanceof anra.svg.Control) {
                 this.dragTarget.notifyListeners(anra.EVENT.Dropped, e);
                 this.dragTarget.enableEvent();
                 notified = true;
             }
-
             widget.notifyListeners(anra.EVENT.DragEnd, e);
             //下面代码是为了保证svg能接收到结束事件，目前由于提供了DragTracker总控，不再需要了
 //            if (widget != widget.svg){
@@ -767,19 +762,23 @@ anra.svg.EventDispatcher = Base.extend({
         this.mouseState = anra.EVENT.MouseUp;
         if (!notified) {
             e = new anra.event.Event(anra.EVENT.MouseUp, location);
-            this.mouseTarget.notifyListeners(anra.EVENT.MouseUp, e);
+            if (this.mouseOnTarget != null)
+                this.mouseOnTarget.notifyListeners(anra.EVENT.MouseUp, e);
+            else
+                this.focusTarget.notifyListeners(anra.EVENT.MouseUp, e);
         }
         this.dragTarget = null;
     },
     dispatchMouseIn:function (event) {
         var location = this.getRelativeLocation(event);
         var e = new anra.event.Event(anra.EVENT.MouseIn, location);
-        this.mouseTarget = event.figure;
+        if (this.dragTarget != event.figure)
+            this.mouseOnTarget = event.figure;
         event.figure.notifyListeners(anra.EVENT.MouseIn, e);
     },
     dispatchMouseOut:function (event) {
         var loc = this.getRelativeLocation(event);
-        if (anra.Rectangle.contains(this.mouseTarget.bounds, loc[0], loc[1]))
+        if (anra.Rectangle.contains(this.focusTarget.bounds, loc[0], loc[1]))
             return;
         var e = new anra.event.Event(anra.EVENT.MouseOut, loc);
         event.figure.notifyListeners(anra.EVENT.MouseOut, e);
@@ -791,45 +790,45 @@ anra.svg.EventDispatcher = Base.extend({
     dispatchDoubleClick:function (event) {
         var location = this.getRelativeLocation(event);
         var e = new anra.event.Event(anra.EVENT.MouseDoubleClick, location);
-        this.mouseTarget.notifyListeners(anra.EVENT.MouseDoubleClick, e);
+        this.focusTarget.notifyListeners(anra.EVENT.MouseDoubleClick, e);
     },
     dispatchKeyDown:function (event) {
         var e = new anra.event.KeyEvent(anra.EVENT.KeyDown, this.getRelativeLocation(event), event);
         //TODO 此处需要优化，考虑到底是目标还是画布来触发事件
-//        var f = this.mouseTarget == null ? this.display : this.mouseTarget;
+//        var f = this.focusTarget == null ? this.display : this.focusTarget;
         var f = this.display;
         f.notifyListeners(e.type, e);
     },
     dispatchKeyUp:function (event) {
         var e = new anra.event.KeyEvent(anra.EVENT.KeyUp, this.getRelativeLocation(event), event);
-//        var f = this.mouseTarget == null ? this.display : this.mouseTarget;
+//        var f = this.focusTarget == null ? this.display : this.focusTarget;
         var f = this.display;
         f.notifyListeners(e.type, event);
     },
     dispatchTouchStart:function (event) {
         var location = this.getRelativeLocation(event.touches[0]);
         var e = new anra.event.TouchEvent(anra.EVENT.TouchStart, location, event);
-        this.mouseTarget.notifyListeners(anra.EVENT.TouchStart, e);
+        this.focusTarget.notifyListeners(anra.EVENT.TouchStart, e);
     },
     dispatchTouchMove:function (event) {
         var location = this.getRelativeLocation(event.touches[0]);
         if (location[0] == null)
             return;
         var e = new anra.event.TouchEvent(anra.EVENT.TouchMove, location, event);
-        this.mouseTarget.notifyListeners(anra.EVENT.TouchMove, e);
+        this.focusTarget.notifyListeners(anra.EVENT.TouchMove, e);
     },
     dispatchTouchEnd:function (event) {
         var location = this.getRelativeLocation(event.touches[0]);
         if (location[0] == null)
             return;
         var e = new anra.event.TouchEvent(anra.EVENT.TouchEnd, location, event);
-        this.mouseTarget.notifyListeners(anra.EVENT.TouchEnd, e);
+        this.focusTarget.notifyListeners(anra.EVENT.TouchEnd, e);
     },
     setMouseTarget:function (o) {
-        if (this.mouseTarget != null) {
-            this.mouseTarget.enableEvent();
+        if (this.focusTarget != null) {
+            this.focusTarget.enableEvent();
         }
-        this.mouseTarget = o;
+        this.focusTarget = o;
     },
     getRelativeLocation:function (event) {
         return this.display.getRelativeLocation(event);

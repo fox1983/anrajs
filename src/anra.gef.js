@@ -14,6 +14,80 @@ anra.gef.Figure = anra.svg.Composite.extend({
     repaintListeners:null,
     init:function () {
     },
+    cal:function (id) {
+        if (this.anchorMap == null)return null;
+        var a = this.anchorMap.get(id);
+        if (a != null) {
+            a = this.calAnchor(a.dir, a.offset);
+            a.id = id;
+            return a;
+        }
+        return null;
+    },
+    registAnchor:function (anchor) {
+        if (this.anchorMap == null)
+            this.anchorMap = new Map();
+        this.anchorMap.put(anchor.id, anchor);
+        return this;
+    },
+    registAnchors:function (anchors) {
+        if (anchors instanceof Array) {
+            for (var i = 0; i < anchors.length; i++) {
+                this.registAnchor(anchors[i]);
+            }
+        }
+    },
+    getSourceAnchorByTerminal:function (id) {
+        return  this.cal(id);
+    },
+    getTargetAnchorByTerminal:function (id) {
+        return  this.cal(id);
+    },
+    getAnchors:function () {
+        var anchors = [];
+        this.anchorMap.forEach(function (v, k) {
+            anchors.push(this.cal(k));
+        }, this);
+        return anchors;
+    },
+    getSourceAnchor:function (req) {
+        //TODO 现在每次都计算anchor，考虑优化为figure bounds改变后再计算
+        var x = req.event.x;
+        var y = req.event.y;
+        return  this.findClosestAnchor(x, y);
+    },
+    getTargetAnchor:function (req) {
+        var x = req.event.x;
+        var y = req.event.y;
+        return  this.findClosestAnchor(x, y);
+    },
+    findClosestAnchor:function (x, y) {
+        var anchors = this.getAnchors();
+        var closest , min, b;
+        for (var i = 0; i < anchors.length; i++) {
+            b = Math.abs(anchors[i].x - x) + Math.abs(anchors[i].y - y);
+            if (closest == null || min > b) {
+                closest = anchors[i];
+                min = b;
+            }
+        }
+        return closest;
+    },
+    calAnchor:function (dir, offset) {
+        if (offset == null)offset = 0;
+        switch (dir) {
+            case anra.EAST:
+                return {x:this.fattr('x') + this.fattr('width'), y:this.fattr('y') + this.fattr('height') / 2 + offset};
+            case anra.SOUTH:
+                return {x:this.fattr('x') + this.fattr('width') / 2 + offset, y:this.fattr('y') + this.fattr('height')};
+            case anra.WEST:
+                return {x:this.fattr('x'), y:this.fattr('y') + this.fattr('height') / 2 + offset};
+            case anra.NORTH:
+                return {x:this.fattr('x') + this.fattr('width') / 2 + offset, y:this.fattr('y') };
+            case anra.CENTER:
+                return  {x:this.fattr('x') + this.fattr('width') / 2, y:this.fattr('y') + this.fattr('height') / 2};
+        }
+    },
     propertyChanged:function (key, ov, nv) {
     },
     selectionChanged:function (value) {
@@ -117,7 +191,6 @@ anra.gef.EditPart = Base.extend({
         if (this.children != null) {
             var map = new Map();
             //增量修改当前children
-
             for (i = 0; i < this.children.length; i++)
                 map.set(this.children[i].model, this.children[i]);
             var model, editPart;
@@ -126,7 +199,6 @@ anra.gef.EditPart = Base.extend({
                 model = modelChildren[i];
                 if (i < this.children.length
                     && this.children[i].model.equals(model)) {
-//                    this.children[i].refresh();
                     continue;
                 }
                 editPart = map.get(model);
@@ -217,7 +289,6 @@ anra.gef.EditPart = Base.extend({
         for (i = 0; i < this.children.length; i++) {
             this.children[i].deactivate();
         }
-        this.deactivePolicies();
         for (i = 0; i < this.sConns.length; i++) {
             this.sConns[i].deactivate();
         }
@@ -239,6 +310,7 @@ anra.gef.EditPart = Base.extend({
         }
     },
     doActive:function () {
+        this._initFigureListeners();
     },
     fireActivated:function () {
         var listeners = this.eventTable.getListeners(anra.gef.EditPartListener.prototype.class);
@@ -249,7 +321,6 @@ anra.gef.EditPart = Base.extend({
         if (this.figure == null) {
             this.figure = this.createFigure(this.model);
             this.figure.setModel(this.model);
-            this._initFigureListeners();
         }
         return this.figure;
     },
@@ -553,6 +624,21 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
     getTargetAnchor:function (req) {
         return this.figure.getTargetAnchor(req);
     },
+    getAnchors:function () {
+        return this.figure.getAnchors();
+    },
+    getTargetTermianl:function (id) {
+        return this.figure.getTargetTermianl(id);
+    },
+    getSourceTermianl:function (id) {
+        return this.figure.getSourceTermianl(id);
+    },
+    getSourceAnchorByTerminal:function (id) {
+        return this.figure.getSourceAnchorByTerminal(id);
+    },
+    getTargetAnchorByTerminal:function (id) {
+        return this.figure.getTargetAnchorByTerminal(id);
+    },
     constructor:function () {
         anra.gef.EditPart.prototype.constructor.call(this);
         this.sConns = [];
@@ -584,24 +670,23 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
             }
         }
         var modelObjects = this.getModelSourceLines();
-        if (modelObjects != null)
-            for (i = 0; i < modelObjects.length; i++) {
-                model = modelObjects[i];
-                if (i < this.sConns.length && this.sConns[i].model == model) {
-                    this.sConns[i].refresh();
-                    continue;
-                }
-                editPart = map.get(model);
-                if (editPart != null)
-                    this.reorderSourceConnection(editPart, i);
-                else {
-                    editPart = this.createOrFindConnection(model);
-                    this.addSourceConnection(editPart, i);
-                }
+        for (i = 0; i < modelObjects.length; i++) {
+            model = modelObjects[i];
+            if (i < this.sConns.length && this.sConns[i].model == model) {
+                this.sConns[i].refresh();
+                continue;
             }
+            editPart = map.get(model);
+            if (editPart != null)
+                this.reorderSourceConnection(editPart, i);
+            else {
+                editPart = this.createOrFindConnection(model);
+                this.addSourceConnection(editPart, i);
+            }
+        }
 
         // Remove the remaining EditParts
-        size = this.sConns.length;
+        var size = this.sConns.length;
         if (i < size) {
             var trash = [];
             for (; i < size; i++)
@@ -707,7 +792,10 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
         return linepart;
     },
     unregisterVisuals:function () {
-        this.figure.dispose();
+        if (this.figure.parent != null)
+            this.figure.parent.removeChild(this.figure);
+        else
+            this.figure.dispose();
     },
     fireSourceConnectionAdded:function (line, i) {
         //TODO 增加连线事件类型
@@ -820,11 +908,11 @@ anra.gef.RootEditPart.LineLayer = "lineLayer";
 anra.gef.LineEditPart = anra.gef.EditPart.extend({
     target:null,
     source:null,
-    doActive:function () {
-    },
     setTarget:function (t) {
         if (this.target == t)
             return;
+        if (this.target != null)
+            this.dettachTarget();
         this.target = t;
         if (t != null)
             this.setParent(t.getRoot());
@@ -852,6 +940,8 @@ anra.gef.LineEditPart = anra.gef.EditPart.extend({
     setSource:function (t) {
         if (this.source == t)
             return;
+        if (this.source != null)
+            this.dettachSource();
         this.source = t;
         if (t != null)
             this.setParent(t.getRoot());
@@ -912,13 +1002,33 @@ anra.gef.LineEditPart = anra.gef.EditPart.extend({
     },
     getSourceAnchor:function () {
         if (this.source != null)
-            return this.source.getSourceAnchor(this);
+            return this.source.getSourceAnchorByTerminal(this.model.sourceTerminal);
         return {x:0, y:0};
     },
     getTargetAnchor:function () {
         if (this.target != null)
-            return this.target.getTargetAnchor(this);
+            return this.target.getTargetAnchorByTerminal(this.model.targetTerminal);
         return {x:100, y:100};
+    },
+    attachSource:function () {
+        this.source.model.addSourceLine(this.model);
+        this.source.refresh();
+    },
+    attachTarget:function () {
+        this.target.model.addTargetLine(this.model);
+        this.target.refresh();
+    },
+    dettachSource:function (refresh) {
+        if (this.source == null)return;
+        this.source.model.removeSourceLine(this.model);
+        if (refresh)
+            this.source.refresh();
+    },
+    dettachTarget:function (refresh) {
+        if (this.target == null)return;
+        this.target.model.removeTargetLine(this.model);
+        if (refresh)
+            this.target.refresh();
     }
 });
 
@@ -948,6 +1058,7 @@ anra.gef.Tool = Base.extend({
 anra.gef.SelectionTool = anra.gef.Tool.extend({
     id:'selection tool',
     mouseDown:function (e, p) {
+        if (p.getRoot == null)return;
         p.getRoot().setSelection(p);
     },
     dragStart:function (e, p) {
@@ -1086,6 +1197,19 @@ anra.gef.LinkLineTool = anra.gef.Tool.extend({
         this.model = m;
         this.type = REQ_CONNECTION_START;
     },
+    activate:function () {
+        //根控制器激活连线模式，展示UI
+        var policy = this.editor.rootEditPart.getConnectionPolicy();
+        if (policy != null)
+            policy.showSourceFeedback({type:REQ_CONNECTION_MOD});
+    },
+    deactivate:function () {
+        //清除连线模式的UI
+        var policy = this.editor.rootEditPart.getConnectionPolicy();
+        if (policy != null)
+            policy.eraseSourceFeedback({type:REQ_CONNECTION_MOD});
+        this.reset();
+    },
     mouseOut:function (e, p) {
         if (p instanceof anra.gef.NodeEditPart) {
             var policy = p.getConnectionPolicy();
@@ -1110,68 +1234,89 @@ anra.gef.LinkLineTool = anra.gef.Tool.extend({
             event:e,
             type:v.type
         };
-        if (this.type == REQ_CONNECTION_START && p instanceof anra.gef.NodeEditPart) {
-            var policy = p.getConnectionPolicy();
-            if (policy != null) {
-                policy.showSourceFeedback(req);
-            }
-        } else if (this.type == REQ_RECONNECT_TARGET) {
-            if (p instanceof anra.gef.NodeEditPart) {
-                policy = p.getConnectionPolicy();
-                if (policy != null) {
-                    this.targetEditPart = p;
-                    this.targetAnchor = p.getTargetAnchor(req);
-                    policy.showTargetFeedback(req);
-                }
-                this.refreshGuideLine(req);
-            } else if (p instanceof anra.gef.RootEditPart) {
-                this.targetEditPart = null;
-                this.targetAnchor = null;
-                this.refreshGuideLine(req);
-            }
+        var policy;
+        if (this.type == REQ_CONNECTION_END || this.type == REQ_RECONNECT_TARGET) {
+            policy = p.getConnectionPolicy && p.getConnectionPolicy();
+            policy && policy.showTargetFeedback(req);
+            this.refreshGuideLine(req, p);
+        } else if (this.type == REQ_RECONNECT_SOURCE || this.type == REQ_CONNECTION_START) {
+            policy = p.getConnectionPolicy && p.getConnectionPolicy();
+            policy && policy.showSourceFeedback(req);
+            this.refreshGuideLine(req, p);
         }
         return true;
     },
-    createGuideLine:function (req) {
-        return this.sourceEditPart.createLineEditPart().createFigure();
+    createGuideLine:function (editPart) {
+        return editPart.createLineEditPart().createFigure();
     },
     removeGuideLine:function () {
-        if (this.sourceEditPart != null && this.guideLine != null)
-            this.sourceEditPart.getConnectionPolicy().removeFeedback(this.guideLine);
-    },
-    refreshGuideLine:function (req) {
-        if (this.guideLine == null) {
-            this.guideLine = this.createGuideLine(req);
-            this.sourceEditPart.getConnectionPolicy().addFeedback(this.guideLine);
-            this.guideLine.setSourceAnchor(this.sourceAnchor);
-            this.guideLine.disableEvent();
+        if (this.type == REQ_RECONNECT_SOURCE || this.type == REQ_RECONNECT_TARGET) {
+            this.linePart.figure.enableEvent();
+            this.linePart.refresh();
         }
-        if (this.targetAnchor != null)
-            this.guideLine.setTargetAnchor(this.targetAnchor);
-        else
-            this.guideLine.setTargetAnchor({x:req.event.x, y:req.event.y});
+        else if (this.type == REQ_CONNECTION_END)
+            this.editor.rootEditPart.getFeedbackLayer().removeChild(this.guideLine);
+    },
+    refreshGuideLine:function (req, p) {
+        if (this.type == REQ_CONNECTION_START) {
+            return;
+        }
+        var anchor = {x:req.event.x, y:req.event.y};
+        if (this.type == REQ_CONNECTION_END) {
+            if (this.guideLine == null) {
+                this.guideLine = this.createGuideLine(this.sourceEditPart);
+                this.editor.rootEditPart.getFeedbackLayer().addChild(this.guideLine);
+                anchor = p.getSourceAnchor(req);
+                this.guideLine.setSourceAnchor(anchor);
+                this.guideLine.disableEvent();
+            }
+            if (p instanceof anra.gef.NodeEditPart)
+                anchor = p.getTargetAnchor(req);
+            this.guideLine.setTargetAnchor(anchor);
+        } else if (this.type == REQ_RECONNECT_SOURCE) {
+            if (this.guideLine == null) {
+                this.guideLine = this.linePart.figure;
+                this.guideLine.disableEvent();
+            }
+            if (p instanceof anra.gef.NodeEditPart)
+                anchor = p.getSourceAnchor(req);
+            this.guideLine.setSourceAnchor(anchor);
+        } else if (this.type == REQ_RECONNECT_TARGET) {
+            if (this.guideLine == null) {
+                this.guideLine = this.linePart.figure;
+                this.guideLine.disableEvent();
+            }
+            if (p instanceof anra.gef.NodeEditPart)
+                anchor = p.getTargetAnchor(req);
+            this.guideLine.setTargetAnchor(anchor);
+        }
         this.guideLine.paint();
     },
     mouseDown:function (e, p) {
-        if (p instanceof anra.gef.NodeEditPart) {
-            if (this.type == REQ_CONNECTION_START) {
-                this.type = REQ_RECONNECT_TARGET;
-                this.sourceEditPart = p;
-                this.sourceAnchor = p.getSourceAnchor({x:e.x, y:e.y, source:p});
-            }
+        if (p instanceof anra.gef.LineEditPart) {
+            p.getRoot().setSelection(p);
+        } else if (p instanceof anra.gef.NodeEditPart) {
             var policy = p.getConnectionPolicy();
             var v = this;
             var req = {
                 editPart:p,
                 target:v,
                 event:e,
-                type:v.type
+                type:v.type,
+                anchor:p.getSourceAnchor({event:e})
             };
             if (policy != null) {
-                this.command = policy.getCreateConnectionCommand(req);
+                this.command = policy.getCommand(req);
                 policy.eraseSourceFeedback(req);
                 policy.eraseTargetFeedback(req);
             }
+
+            if (this.type == REQ_CONNECTION_START) {
+                this.type = REQ_CONNECTION_END;
+                this.sourceEditPart = p;
+                this.sourceAnchor = p.getSourceAnchor({event:{x:e.x, y:e.y, source:p}});
+            }
+
         }
     },
     mouseDrag:function (e, p) {
@@ -1183,21 +1328,24 @@ anra.gef.LinkLineTool = anra.gef.Tool.extend({
         return true;
     },
     mouseUp:function (e, p) {
-        if (p instanceof anra.gef.NodeEditPart && this.type == REQ_RECONNECT_TARGET) {
-            this.type = REQ_CONNECTION_END;
-            this.targetEditPart = p;
-            this.targetAnchor = p.getTargetAnchor({x:e.x, y:e.y, source:p});
+        if (p instanceof anra.gef.NodeEditPart &&
+            (this.type == REQ_CONNECTION_END || this.type == REQ_RECONNECT_TARGET || this.type == REQ_RECONNECT_SOURCE)) {
+//            this.targetAnchor = p.getTargetAnchor({event:{x:e.x, y:e.y, source:p}});
             var policy = p.getConnectionPolicy();
             var v = this;
+
+            var anchor = this.type == REQ_RECONNECT_TARGET ? this.guideLine.targetAnchor : (this.type == REQ_RECONNECT_SOURCE ? this.guideLine.sourceAnchor : 0);
             var req = {
                 editPart:p,
                 target:v,
                 event:e,
                 type:v.type,
-                command:v.command
+                anchor:anchor,
+                command:v.command,
+                line:v.linePart
             };
             if (policy != null) {
-                this.command = policy.getConnectionCompleteCommand(req);
+                this.command = policy.getCommand(req);
                 policy.eraseSourceFeedback(req);
                 policy.eraseTargetFeedback(req);
             }
@@ -1240,7 +1388,7 @@ anra.gef.TopDragTracker = Base.extend({
     },
     invokeLoop:function (me, editPart, method) {
         var p = editPart;
-        while (!this.invoke(me, p, p.getDragTracker(), method) && p.parent != null) {
+        while (p != null && ( p.getDragTracker == null || !this.invoke(me, p, p.getDragTracker(), method) && p.parent != null)) {
             p = p.parent;
         }
     },
@@ -1254,6 +1402,10 @@ anra.gef.TopDragTracker = Base.extend({
     mouseDown:function (me, editPart) {
         if (!this.invoke(me, editPart, this.getActiveTool(), 'mouseDown'))
             this.invokeLoop(me, editPart, 'mouseDown');
+    },
+    dragDropped:function (me, editPart) {
+        if (!this.invoke(me, editPart, this.getActiveTool(), 'dragDropped'))
+            this.invokeLoop(me, editPart, 'dragDropped');
     },
     mouseClick:function (me, editPart) {
         if (!this.invoke(me, editPart, this.getActiveTool(), 'mouseClick'))
@@ -1395,7 +1547,85 @@ anra.gef.RelocalCommand = anra.Command.extend({
         this.editPart.model.getBounds()[1] = this.sp.y;
         this.editPart.refresh();
     }
+
 });
+
+anra.gef.DeleteNodeAndLineCommand = anra.ChainedCompoundCommand.extend({
+    constructor:function (root, node) {
+        this.commandList = [];
+        var targetLines = node.tConns;
+        var sourceLines = node.sConns;
+        if (targetLines != null) {
+            for (var i = 0; i < targetLines.length; i++)
+                this.add(new anra.gef.DeleteLineCommand(root, targetLines[i]));
+        }
+        if (sourceLines != null) {
+            for (i = 0; i < sourceLines.length; i++)
+                this.add(new anra.gef.DeleteLineCommand(root, sourceLines[i]));
+        }
+
+        this.add(new anra.gef.DeleteNodeCommand(root, node))
+    }
+});
+
+/**
+ * 删除节点的command
+ * @type {*}
+ */
+anra.gef.DeleteNodeCommand = anra.Command.extend({
+    constructor:function (root, selection) {
+        this.root = root;
+        this.node = selection;
+    },
+    canExecute:function () {
+        return this.root != null && this.node != null;
+    },
+    execute:function () {
+        this.root.model.removeChild(this.node.model);
+        this.root.refresh();
+    },
+    undo:function () {
+        this.root.model.addChild(this.node.model);
+        this.root.addChild(this.node);
+        this.root.refresh();
+    }
+});
+
+/**
+ * 删除连线的command
+ * @type {*}
+ */
+anra.gef.DeleteLineCommand = anra.Command.extend({
+    constructor:function (root, line) {
+        this.root = root;
+        this.line = line;
+    },
+    canExecute:function () {
+        return this.root != null && this.line != null;
+    },
+    execute:function () {
+        if (this.snode == null)
+            this.snode = this.line.source;
+        if (this.tnode == null)
+            this.tnode = this.line.target;
+
+        this.line.dettachSource(true);
+        this.line.dettachTarget(true);
+
+        this.line.unregister();
+    },
+    undo:function () {
+        this.line.setSource(this.snode);
+        this.line.setTarget(this.tnode);
+
+        //如果不在attach前注册，node会创建一个新的lineEditPart
+        this.line.register();
+
+        this.line.attachSource(true);
+        this.line.attachTarget(true);
+    }
+});
+
 /**
  * 创建节点Command
  * @param rootEditPart 根EditPart
@@ -1418,6 +1648,49 @@ anra.gef.CreateNodeCommand = anra.Command.extend({
         this.rootEditPart.refresh();
     }
 });
+
+
+anra.gef.ReconnectSourceCommand = anra.Command.extend({
+    execute:function () {
+        this.oldSource = this.line.source;
+        if (this.oldSource != this.source) {
+            this.line.setSource(this.source);
+            this.line.attachSource();
+        }
+        this.oldTerminal = this.line.model.sourceTerminal;
+        this.line.model.sourceTerminal = this.terminal;
+        this.line.refresh();
+    },
+    undo:function () {
+        if (this.oldSource != this.source) {
+            this.line.setSource(this.oldSource);
+            this.line.attachSource();
+        }
+        this.line.model.sourceTerminal = this.oldTerminal;
+        this.line.refresh();
+    }
+});
+
+anra.gef.ReconnectTargetCommand = anra.Command.extend({
+    execute:function () {
+        this.oldTarget = this.line.target;
+        if (this.oldTarget != this.target) {
+            this.line.setTarget(this.target);
+            this.line.attachTarget();
+        }
+        this.oldTerminal = this.line.model.targetTerminal;
+        this.line.model.targetTerminal = this.terminal;
+        this.line.refresh();
+    },
+    undo:function () {
+        if (this.oldTarget != this.target) {
+            this.line.setTarget(this.oldTarget);
+            this.line.attachTarget();
+        }
+        this.line.model.targetTerminal = this.oldTerminal;
+        this.line.refresh();
+    }
+});
 /**
  * 创建连线command
  *
@@ -1433,7 +1706,6 @@ anra.gef.CreateLineCommand = anra.Command.extend({
         this.line = line;
         this.targetId = targetId;
         this.sourceId = sourceId;
-
     },
     canExecute:function () {
         return this.rootEditPart != null && this.line != null && this.sourceId != null && this.targetId != null
@@ -1449,6 +1721,7 @@ anra.gef.CreateLineCommand = anra.Command.extend({
         if (!flag)return;
         flag &= this.target.addTargetLine(this.line);
         if (!flag)return;
+
         var sourcePart = this.sourcePart = this.rootEditPart.getEditPart(this.source);
         if (sourcePart != null)
             sourcePart.refresh();
@@ -1466,7 +1739,8 @@ anra.gef.CreateLineCommand = anra.Command.extend({
             this.targetPart.refresh();
 
     }
-});
+})
+;
 
 
 anra.gef.ConstraintCommand = anra.Command.extend({
@@ -1535,6 +1809,12 @@ anra.gef.Policy = Base.extend({
     },
     getCommand:function (request) {
     },
+    removeHandle:function (figure) {
+        this.getHandleLayer().removeChild(figure);
+    },
+    addHandle:function (figure) {
+        this.getHandleLayer().addChild(figure);
+    },
     removeFeedback:function (figure) {
         this.getFeedbackLayer().removeChild(figure);
     },
@@ -1584,7 +1864,7 @@ anra.gef.Editor = Base.extend({
         this.rootEditPart.editor = this;
         this.initRootEditPart(this.rootEditPart);
         this.rootEditPart.setModel(this.rootModel);
-        this.rootEditPart._initFigureListeners();
+//        this.rootEditPart._initFigureListeners();
         this.rootEditPart.activate();
         this.cmdStack = new anra.CommandStack();
         this.rootEditPart.refresh();
@@ -1743,6 +2023,7 @@ anra.gef.Line = anra.gef.Figure.extend(anra.svg.Polyline).extend({
             this.setAttribute({
                 d:f.compute()
             });
+        this.fireRepaintListener();
     },
     setSourceAnchor:function (anchor) {
         this.sourceAnchor = anchor;
@@ -1778,6 +2059,14 @@ anra.gef.Line = anra.gef.Figure.extend(anra.svg.Polyline).extend({
                 x:anchor.x,
                 y:anchor.y
             });
+    },
+    getStartPoint:function () {
+        return this.sourceAnchor;
+//        return this.points == null || this.points.length == 0 ? null : this.points[0];
+    },
+    getEndPoint:function () {
+        return this.targetAnchor;
+//        return this.points == null || this.points.length == 0 ? null : this.points[this.points.length - 1];
     }
 });
 var setPoint = function (o, t) {
@@ -1959,6 +2248,8 @@ anra.gef.ContentModel = anra.gef.NodeModel.extend({});
 anra.gef.LineModel = anra.gef.BaseModel.extend({
     sourceNode:null,
     targetNode:null,
+    sourceTerminal:0,
+    targetTerminal:0,
     equals:function (o) {
         return this == o || this.id == o.id;
     }
@@ -1997,6 +2288,7 @@ REQ_CONNECTION_START = "connection start";
 REQ_CONNECTION_END = "connection end";
 
 REQ_RECONNECT_SOURCE = "Reconnection source";
+REQ_CONNECTION_MOD = "connection mod";
 
 REQ_RECONNECT_TARGET = "Reconnection target";
 REQ_MOVE_BENDPOINT = "move bendpoint";

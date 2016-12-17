@@ -16,16 +16,16 @@
                 'name':'测试编辑器',
                 'nodes':[
                     {id:1, name:'CAPP', type:0, lines:[
-                        {id:0, target:2, sTML:0, tTML:2 },
-                        {id:1, target:3, sTML:0, tTML:2 }
+                        {id:0, target:2, sTML:0, tTML:7 },
+                        {id:1, target:3, sTML:5, tTML:2 }
                     ], bounds:[100, 150, 40, 40]},
                     {id:2, name:'MNPP', type:1, desc:'发起中转请求', lines:[
-                        {id:0, target:4, sTML:0, tTML:2 },
-                        {id:1, target:5, sTML:1, tTML:2 }
+                        {id:0, target:4, sTML:1, tTML:2 },
+                        {id:1, target:5, sTML:3, tTML:2 }
                     ], bounds:[250, 100, 40, 40]},
                     {id:3, name:'TMKS', type:1, desc:'处理异常', lines:[
-                        {id:0, target:6, sTML:0, tTML:2 },
-                        {id:1, target:7, sTML:1, tTML:2 }
+                        {id:0, target:6, sTML:4, tTML:2 },
+                        {id:1, target:7, sTML:1, tTML:3 }
                     ], bounds:[250, 200, 40, 40]},
                     {id:4, name:'CIVR', type:1, bounds:[430, 80, 30, 30]},
                     {id:5, name:'CSRS', type:2, bounds:[430, 120, 40, 40]},
@@ -38,6 +38,27 @@
             editor.createContent("my");
 
 
+            input = {
+                'name':'测试编辑器',
+                'nodes':[
+                    {id:1, name:'CAPP', type:0, lines:[
+                        {id:0, target:2, sTML:0, tTML:3 },
+                        {id:1, target:3, sTML:0, tTML:3 }
+                    ], bounds:[100, 150, 40, 40]},
+                    {id:2, name:'MNPP', type:1, desc:'发起中转请求', lines:[
+                        {id:3, target:4, sTML:1, tTML:3 },
+                        {id:2, target:5, sTML:1, tTML:3 }
+                    ], bounds:[250, 100, 40, 40]},
+                    {id:3, name:'TMKS', type:1, desc:'处理异常', lines:[
+                        {id:4, target:6, sTML:1, tTML:3 },
+                        {id:5, target:7, sTML:1, tTML:3 }
+                    ], bounds:[250, 200, 40, 40]},
+                    {id:4, name:'CIVR', type:1, bounds:[430, 60, 40, 40]},
+                    {id:5, name:'CSRS', type:2, bounds:[430, 140, 40, 40]},
+                    {id:6, name:'CIVR', type:2, bounds:[430, 180, 40, 40]},
+                    {id:7, name:'CSRS', type:2, bounds:[430, 260, 40, 40]}
+                ]
+            };
             var e2 = new FlowEditor();
             e2.setInput(input);
             e2.createContent('m2');
@@ -54,19 +75,18 @@
                 return false;
             }
             var linking = true;
+
+            var json = {id:3, target:5, sTML:7, tTML:6 };
+            var line = new anra.gef.LineModel();
+            line.setProperties(json);
+            line.id = 3;
+
+            var lineTool = new anra.gef.LinkLineTool(line);
             link = function () {
-                linking = !linking;
-                if (linking) {
-
+                if (editor.getActiveTool() == lineTool) {
                     editor.setActiveTool(editor.getDefaultTool());
-                    return;
-                }
-                var json = {id:3, target:5, sTML:1, tTML:2 };
-                var line = new anra.gef.LineModel();
-                line.setProperties(json);
-                line.id = 3;
-
-                editor.setActiveTool(new anra.gef.LinkLineTool(line));
+                } else
+                    editor.setActiveTool(lineTool);
                 return false;
             }
         }

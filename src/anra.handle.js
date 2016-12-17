@@ -11,23 +11,108 @@ anra.Handle = Control.extend({
     constructor:function (editPart) {
         this.editPart = editPart;
     },
+
     createContent:function (s) {
-        var t=this;
-        this.listener=function(f){
+        var t = this;
+        this.listener = function (f) {
             t.refreshLocation(f);
         };
         this.editPart.getFigure().addRepaintListener(this.listener);
         this.refreshLocation(this.editPart.getFigure());
+
+        this.initListeners();
     },
     dispose:function () {
         this.editPart.getFigure().removeRepaintListener(this.listener);
         Control.prototype.dispose.call(this);
+    },
+    getDragTracker:function () {
+        return this;
+    },
+    initListeners:function () {
+        var _dt = this.editPart.getRoot().editor.getTopDragTracker();
+        var _ep = this;
+        this.addListener(anra.EVENT.MouseDown, function (e) {
+            _dt.mouseDown(e, _ep);
+        });
+        this.addListener(anra.EVENT.MouseIn, function (e) {
+            _dt.mouseIn(e, _ep);
+        });
+        this.addListener(anra.EVENT.MouseOut, function (e) {
+            _dt.mouseOut(e, _ep);
+        });
+        this.addListener(anra.EVENT.MouseClick, function (e) {
+            _dt.mouseClick(e, _ep);
+        });
+        this.addListener(anra.EVENT.DragStart, function (e) {
+            _dt.dragStart(e, _ep);
+        });
+        this.addListener(anra.EVENT.DragEnd, function (e) {
+            _dt.dragEnd(e, _ep);
+        });
+        this.addListener(anra.EVENT.MouseDrag, function (e) {
+            _dt.mouseDrag(e, _ep);
+        });
+        this.addListener(anra.EVENT.MouseMove, function (e) {
+            _dt.mouseMove(e, _ep);
+        });
+        this.addListener(anra.EVENT.MouseUp, function (e) {
+            _dt.mouseUp(e, _ep);
+        });
+        this.addListener(anra.EVENT.Dropped, function (e) {
+            _dt.dragDropped(e, _ep);
+        });
     },
     refreshLocation:function (figure) {
 
     }
 });
 
+
+anra.gef.LineHandle = anra.Handle.extend({
+    constructor:function (editPart, style) {
+        Control.prototype.constructor.call(this);
+        this.editPart = editPart;
+        this.style = style;
+    },
+    _init:function () {
+        this.bounds = {'x':0, 'y':0, 'width':100, 'height':100};
+        if (this.init != null)this.init();
+    },
+    dragStart:function (e, p) {
+        var tool = new anra.gef.LinkLineTool();
+        tool.linePart = this.editPart;
+        tool.type = this.style;
+        tool.oldAnchor = this.style == REQ_RECONNECT_SOURCE ? this.editPart.figure.sourceAnchor : this.editPart.figure.targetAnchor;
+        this.editPart.getRoot().editor.setActiveTool(tool);
+        return true;
+    },
+    dragDropped:function (e, p) {
+//        var editor = this.editPart.getRoot().editor;
+//        editor.setActiveTool(editor.getDefaultTool());
+//        return true;
+    },
+    refreshLocation:function (figure) {
+        var points = figure.points;
+        var p;
+        if (this.style == REQ_RECONNECT_SOURCE) {
+            p = points[0];
+        } else if (this.style == REQ_RECONNECT_TARGET) {
+            p = points[points.length - 1];
+        }
+        var w = 6;
+        var hf = w / 2;
+
+        this.setBounds({x:p.x, y:p.y - hf, width:w, height:w});
+    },
+    initProp:function () {
+        this.setAttribute({
+            fill:'white',
+            stroke:'blue'
+        });
+        this.setStyle({'cursor':'move'});
+    }
+});
 
 anra.ResizeHandle = Control.extend({
     //const
@@ -132,7 +217,7 @@ anra.gef.ResizeTracker = Base.extend({
         this.status = me.type;
     },
     dragStart:function (me, editPart) {
-        this.ondrag=true;
+        this.ondrag = true;
         this.status = me.type;
         this.xStart = me.x;
         this.yStart = me.y;
@@ -145,7 +230,7 @@ anra.gef.ResizeTracker = Base.extend({
 
     },
     dragEnd:function (me, editPart) {
-        if(!this.ondrag)return;
+        if (!this.ondrag)return;
         this.status = me.type;
         editPart.editor.execute(new anra.gef.RelocalCommand(editPart, this.oldConstraint, {
             x:editPart.model.getBounds()[0],
@@ -153,8 +238,8 @@ anra.gef.ResizeTracker = Base.extend({
             width:editPart.model.getBounds()[2],
             height:editPart.model.getBounds()[3]
         }));
-        anra.gef.DragTracker.prototype.dragEnd.call({host:editPart},me,editPart);
-        this.ondrag=false;
+        anra.gef.DragTracker.prototype.dragEnd.call({host:editPart}, me, editPart);
+        this.ondrag = false;
     },
     mouseUp:function (me, editPart) {
         this.status = me.type;

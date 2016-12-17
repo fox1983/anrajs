@@ -16,27 +16,51 @@ FlowEditor = anra.gef.Editor.extend({
     background:'#FFFFFF',
 
     registActions:function () {
-        var editor=this;
+        var editor = this;
         this.actionRegistry.regist({
             id:1,
             type:ACTION_SELECTION,
             key:'ctrl+z',
-            run:function(){
+            run:function () {
                 editor.cmdStack.undo();
             }
         }).regist({
                 id:2,
                 type:ACTION_SELECTION,
                 key:'delete',
-                run:function(){
-
+                run:function () {
+                    var selection = editor.rootEditPart.selection;
+                    var cmd;
+                    if (selection instanceof Array) {
+                        for (var i = 0; i < selection.length; i++) {
+                            cmd = this.createDeleteCommand(selection).chain(cmd)
+                        }
+                    } else {
+                        cmd = this.createDeleteCommand(selection);
+                    }
+                    if (cmd != null)
+                        editor.execute(cmd);
+                },
+                createDeleteCommand:function (node) {
+                    if (node instanceof anra.gef.NodeEditPart)
+                        return editor.execute(new anra.gef.DeleteNodeAndLineCommand(editor.rootEditPart, node));
+                    else if (node instanceof anra.gef.LineEditPart)
+                        return editor.execute(new anra.gef.DeleteLineCommand(editor.rootEditPart, node));
                 }
             }).regist({
                 id:3,
                 type:ACTION_SELECTION,
                 key:'ctrl+y',
-                run:function(){
+                run:function () {
                     editor.cmdStack.redo();
+                }
+            }).regist({
+                id:4,
+                type:ACTION_SELECTION,
+                key:'escape',
+                run:function () {
+                    editor.setActiveTool(editor.getDefaultTool());
+//                    editor.cmdStack.redo();
                 }
             });
     },
@@ -116,12 +140,16 @@ FlowEditor = anra.gef.Editor.extend({
         var lineModel = new anra.gef.LineModel();
         lineModel.setProperties(json);
         lineModel.id = json.id;
+        lineModel.sourceTerminal = json.sTML;
+        lineModel.targetTerminal = json.tTML;
         return lineModel;
     },
     getCustomPolicies:function () {
         this.put(anra.gef.LAYOUT_POLICY, new FlowLayoutPolicy());
+        this.put(anra.gef.CONNECTION_POLICY, new anra.gef.LinkModPolicy());
     }
-});
+})
+;
 
 
 FlowLayoutPolicy = anra.gef.LayoutPolicy.extend({
@@ -246,20 +274,39 @@ TextHandle = anra.Handle.extend(anra.svg.Text).extend({
  * @type {*}
  */
 CommonFigure = anra.gef.Figure.extend(anra.svg.Image).extend({
-    getTargetAnchor:function (line) {
-        return {x:this.fattr('x'), y:this.fattr('y') + this.fattr('height') / 2};
-    },
-    getSourceAnchor:function (line) {
-        return {x:this.fattr('x') + this.fattr('width'), y:this.fattr('y') + this.fattr('height') / 2};
+    init:function () {
+        var off = 8;
+        //注册anchor布局策略
+        this.registAnchors([
+            {id:0, dir:anra.EAST, offset:-off},
+            {id:1, dir:anra.EAST, offset:off},
+            {id:2, dir:anra.WEST, offset:-off},
+            {id:3, dir:anra.WEST, offset:off},
+            {id:4, dir:anra.NORTH, offset:-off},
+            {id:5, dir:anra.NORTH, offset:off},
+            {id:6, dir:anra.SOUTH, offset:-off},
+            {id:7, dir:anra.SOUTH, offset:off}
+        ]);
+
+//        this.registAnchor({id:0, dir:anra.EAST, offset:-off});
+//        this.registAnchor({id:1, dir:anra.EAST, offset:off});
+//
+//        this.registAnchor({id:2, dir:anra.WEST, offset:-off});
+//        this.registAnchor({id:3, dir:anra.WEST, offset:off});
+//
+//        this.registAnchor({id:4, dir:anra.NORTH, offset:-off});
+//        this.registAnchor({id:5, dir:anra.NORTH, offset:off});
+//
+//        this.registAnchor({id:6, dir:anra.SOUTH, offset:-off});
+//        this.registAnchor({id:7, dir:anra.SOUTH, offset:off});
     }
-});
+})
+;
 
 
 /*-------连线定义------*/
 
 CommonLineEditPart = anra.gef.LineEditPart.extend({
-    doActive:function () {
-    },
     refreshVisual:function () {
 
         var color = this.model.getValue('color') == null ? 'green' : this.model.getValue('color');
@@ -277,8 +324,10 @@ CommonLineEditPart = anra.gef.LineEditPart.extend({
             f.model.setValue('color', 'green');
             e.refresh();
         });
-
         return f;
+    },
+    createEditPolicies:function () {
+        this.installEditPolicy("selection", new anra.gef.LineSelectionPolicy());
     }
 });
 
@@ -299,6 +348,16 @@ Line = anra.gef.Line.extend({
                 x:mid,
                 y:ep.y
             };
+//            var mid = (sp.y + ep.y) / 2;
+//            var p1 = {
+//                y:mid,
+//                x:sp.x
+//            };
+//
+//            var p2 = {
+//                y:mid,
+//                x:ep.x
+//            };
             return  [sp, p1, p2, ep];
         },
         init:function (model) {
