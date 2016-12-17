@@ -1332,11 +1332,13 @@ anra.gef.LinkLineTool = anra.gef.Tool.extend({
     mouseUp:function (e, p) {
         if (p instanceof anra.gef.NodeEditPart &&
             (this.type == REQ_CONNECTION_END || this.type == REQ_RECONNECT_TARGET || this.type == REQ_RECONNECT_SOURCE)) {
-//            this.targetAnchor = p.getTargetAnchor({event:{x:e.x, y:e.y, source:p}});
             var policy = p.getConnectionPolicy();
             var v = this;
 
-            var anchor = this.type == REQ_RECONNECT_TARGET ? this.guideLine.targetAnchor : (this.type == REQ_RECONNECT_SOURCE ? this.guideLine.sourceAnchor : 0);
+            var anchor = this.type == REQ_RECONNECT_TARGET ? this.guideLine.targetAnchor :
+                (this.type == REQ_RECONNECT_SOURCE ? this.guideLine.sourceAnchor :
+                    p.getTargetAnchor({event:e}));
+
             var req = {
                 editPart:p,
                 target:v,
@@ -1567,7 +1569,7 @@ anra.gef.DeleteNodeAndLineCommand = anra.ChainedCompoundCommand.extend({
         }
 
         this.lines.forEach(function (v) {
-            this.add(new anra.gef.DeleteLineCommand(root,v));
+            this.add(new anra.gef.DeleteLineCommand(root, v));
         }, this);
 
         for (i = 0; i < this.nodes.length; i++) {

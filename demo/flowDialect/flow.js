@@ -332,7 +332,9 @@ Line = anra.gef.Line.extend({
         router:function (line) {
             if (line.points == null || line.points.length < 2)
                 return null;
+
             var sp = line.getStartPoint(), ep = line.getEndPoint();
+
 
             var mid = (sp.x + ep.x) / 2;
             var p1 = {
