@@ -30,22 +30,18 @@ FlowEditor = anra.gef.Editor.extend({
                 key:'delete',
                 run:function () {
                     var selection = editor.rootEditPart.selection;
-                    var cmd;
-                    if (selection instanceof Array) {
-                        for (var i = 0; i < selection.length; i++) {
-                            cmd = this.createDeleteCommand(selection).chain(cmd)
-                        }
-                    } else {
-                        cmd = this.createDeleteCommand(selection);
-                    }
+                    var cmd = this.createDeleteCommand(selection);
                     if (cmd != null)
                         editor.execute(cmd);
+                    editor.rootEditPart.setSelection(null);
                 },
                 createDeleteCommand:function (node) {
                     if (node instanceof anra.gef.NodeEditPart)
-                        return editor.execute(new anra.gef.DeleteNodeAndLineCommand(editor.rootEditPart, node));
+                        return new anra.gef.DeleteNodeAndLineCommand(editor.rootEditPart, node);
                     else if (node instanceof anra.gef.LineEditPart)
-                        return editor.execute(new anra.gef.DeleteLineCommand(editor.rootEditPart, node));
+                        return new anra.gef.DeleteLineCommand(editor.rootEditPart, node);
+                    else if (node instanceof Array)
+                        return new anra.gef.DeleteNodeAndLineCommand(editor.rootEditPart, node);
                 }
             }).regist({
                 id:3,

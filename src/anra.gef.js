@@ -293,6 +293,7 @@ anra.gef.EditPart = Base.extend({
             this.sConns[i].deactivate();
         }
         this.deactivePolicies();
+        this.setFlag(FLAG_ACTIVE, false);
     },
     activate:function () {
         this.setFlag(FLAG_ACTIVE, true);
@@ -446,7 +447,7 @@ anra.gef.EditPart = Base.extend({
     unregister:function () {
         this.unregisterAccessable();
         this.unregisterVisuals();
-        this.deactivate();
+//        this.deactivate();
     },
     register:function () {
         this.registerAccessable();
@@ -712,7 +713,7 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
     addSourceConnection:function (line, index) {
         this.sConns.insert(line, index);
         var source = line.source;
-        if (source != null)
+        if (source != null && source != this)
             source.sConns.removeObject(line);
         line.setSource(this);
         if (this.isActive())
@@ -760,7 +761,7 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
     addTargetConnection:function (line, index) {
         this.tConns.insert(line, index);
         var target = line.source;
-        if (target != null)
+        if (target != null && target != this)
             target.tConns.removeObject(line);
         line.setTarget(this);
         this.fireTargetConnectionAdded(line, index);
@@ -936,6 +937,7 @@ anra.gef.LineEditPart = anra.gef.EditPart.extend({
             this.model.sourceNode.removeSourceLine(this.model);
             this.model.sourceNode = null;
         }
+        this.setFlag(FLAG_FOCUS, false);
     },
     setSource:function (t) {
         if (this.source == t)
@@ -1553,18 +1555,40 @@ anra.gef.RelocalCommand = anra.Command.extend({
 anra.gef.DeleteNodeAndLineCommand = anra.ChainedCompoundCommand.extend({
     constructor:function (root, node) {
         this.commandList = [];
+
+        this.nodes = [];
+        this.lines = new Map();
+        if (node instanceof Array) {
+            for (var i = 0; i < node.length; i++) {
+                this.collectCommands(node[i]);
+            }
+        } else {
+            this.collectCommands(node);
+        }
+
+        this.lines.forEach(function (v) {
+            this.add(new anra.gef.DeleteLineCommand(root,v));
+        }, this);
+
+        for (i = 0; i < this.nodes.length; i++) {
+            this.add(new anra.gef.DeleteNodeCommand(root, node[i]));
+        }
+
+    },
+    collectCommands:function (node) {
         var targetLines = node.tConns;
         var sourceLines = node.sConns;
         if (targetLines != null) {
-            for (var i = 0; i < targetLines.length; i++)
-                this.add(new anra.gef.DeleteLineCommand(root, targetLines[i]));
+            for (var i = 0; i < targetLines.length; i++) {
+                this.lines.put(targetLines[i].model, targetLines[i]);
+            }
         }
         if (sourceLines != null) {
-            for (i = 0; i < sourceLines.length; i++)
-                this.add(new anra.gef.DeleteLineCommand(root, sourceLines[i]));
+            for (i = 0; i < sourceLines.length; i++) {
+                this.lines.put(sourceLines[i].model, sourceLines[i]);
+            }
         }
-
-        this.add(new anra.gef.DeleteNodeCommand(root, node))
+        this.nodes.push(node)
     }
 });
 
@@ -1605,24 +1629,37 @@ anra.gef.DeleteLineCommand = anra.Command.extend({
     },
     execute:function () {
         if (this.snode == null)
-            this.snode = this.line.source;
+            this.snode = this.line.source.model;
         if (this.tnode == null)
-            this.tnode = this.line.target;
+            this.tnode = this.line.target.model;
 
-        this.line.dettachSource(true);
-        this.line.dettachTarget(true);
+
+        this.sid = this.line.model.sourceTerminal;
+        this.tid = this.line.model.targetTerminal;
+
+        this.line.dettachSource();
+        this.line.dettachTarget();
+
 
         this.line.unregister();
+        this.line.deactivate();
     },
     undo:function () {
-        this.line.setSource(this.snode);
-        this.line.setTarget(this.tnode);
+        var s = this.root.getEditPart(this.snode);
+        var t = this.root.getEditPart(this.tnode);
+
+        this.line.setSource(s);
+        this.line.setTarget(t);
+
+        this.line.figure.setSourceAnchor(s.getSourceAnchorByTerminal(this.sid));
+        this.line.figure.setTargetAnchor(t.getTargetAnchorByTerminal(this.tid));
 
         //如果不在attach前注册，node会创建一个新的lineEditPart
         this.line.register();
 
         this.line.attachSource(true);
         this.line.attachTarget(true);
+        this.line.activate();
     }
 });
 
