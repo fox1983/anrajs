@@ -169,6 +169,10 @@ Control.prototype.create = function () {
             dispatcher.setMouseTarget(o);
 //            dispatcher.dispatchMouseDown(event);
         };
+
+        e.oncontextmenu = function (event) {
+            dispatcher.setMouseTarget(o);
+        };
         e.ondragstart = function (event) {
             return false;
         };
@@ -227,9 +231,8 @@ Control.prototype.setBounds = function (b) {
             this.bounds[k] = b[k];
         }
     }
-    if (this.ready) {
+    if (this.ready)
         this.applyBounds();
-    }
 };
 Control.prototype.locArea = function () {
     var xo = 0, yo = 0;
@@ -266,7 +269,7 @@ var _Composite = {
                 this.domContainer().removeChild(c.owner);
             c.parent = null;
         } else {
-            anra.Platform.error('can not remove ' + c.toString() + ' from Composite');
+            anra.Platform.error('can not remove ' + (c == null ? null : c.toString() ) + ' from Composite');
         }
     },
     addChild:function (c) {
@@ -517,6 +520,12 @@ anra.SVG = Composite.extend(anra._Display).extend(anra._EventTable).extend({
         var div = this.element;
         d.setMouseTarget(t);
 //TODO
+        this.element.oncontextmenu = function (event) {
+            anra.Platform.focus = t;
+            d.setMouseTarget(t);
+            d.dispatchContextMenu(event);
+            return false;
+        };
         this.element.onmousedown = function (event) {
             anra.Platform.focus = t;
             if (t.owner == event.target)
@@ -637,7 +646,12 @@ anra.svg.Text = {
 //                dispatcher.dispatchMouseUp(event);
             };
             this.setAttribute({});
-            this.setStyle({});
+            this.setStyle({
+                '-webkit-user-select':'none',
+                '-moz-user-select':'none',
+                '-ms-user-select':'none',
+                'user-select':'none'
+            });
             this.initProp();
         }
     }
@@ -824,6 +838,9 @@ anra.svg.EventDispatcher = Base.extend({
         var e = new anra.event.TouchEvent(anra.EVENT.TouchEnd, location, event);
         this.focusTarget.notifyListeners(anra.EVENT.TouchEnd, e);
     },
+    dispatchContextMenu:function (event) {
+        this.focusTarget.notifyListeners(anra.EVENT.ContextMenu);
+    },
     setMouseTarget:function (o) {
         if (this.focusTarget != null) {
             this.focusTarget.enableEvent();
@@ -833,4 +850,8 @@ anra.svg.EventDispatcher = Base.extend({
     getRelativeLocation:function (event) {
         return this.display.getRelativeLocation(event);
     }
+});
+
+anra.svg.Menu = Composite.extend({
+
 });

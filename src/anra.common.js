@@ -1,3 +1,7 @@
+window.requestAnimationFrame=window.requestAnimationFrame
+    ||window.webkitRequestAnimationFrame
+    ||window.mozRequestAnimationFrame
+    ||window.msRequestAnimationFrame;
 Array.prototype.indexOf = function (val) {
     for (var i = 0; i < this.length; i++) {
         if (this[i] == val) return i;
@@ -146,6 +150,12 @@ anra.Platform = {
                 d.dispatcher.dispatchKeyDown(event);
         });
 
+        //禁用部分快捷键，比如ctrl+s[83]，ctrl+a[65]
+        document.onkeydown = function (event) {
+//            console.log(event.keyCode)
+            if (event.ctrlKey && (event.keyCode == 83 || event.keyCode == 65 || event.keyCode == 112 ))
+                return false;
+        }
         window.addEventListener('keyUp', function (event) {
             var d = p.focus;
             if (d != null && d.dispatcher != null)
@@ -392,6 +402,23 @@ anra.Action = Base.extend({
     }
 });
 
+anra.Menu = Base.extend({
+    show:function () {
+        if (this.widget == null) {
+            this.widget = this.create();
+        }
+    },
+    create:function () {
+
+    },
+    update:function () {
+
+    },
+    hide:function () {
+
+    }
+});
+
 /**
  *事件定义
  */
@@ -414,7 +441,8 @@ anra.EVENT = {
     TouchEnd:13,
     DragStart:14,
     DragEnd:15,
-    Dropped:16
+    Dropped:16,
+    ContextMenu:17
 };
 var E = anra.EVENT;
 /**
@@ -640,7 +668,7 @@ PRE_UNDO = 4;
 POST_EXECUTE = 3;
 
 ACTION_SELECTION = 0;
-ACTION_COMMAND_STACK = 1;
+ACTION_STACK = 1;
 ACTION_PROPERTY = 0;
 /**
  * 动作注册器
@@ -654,8 +682,6 @@ anra.ActionRegistry = Base.extend({
         this.handles = new Map();
     },
     keyHandle:function (e) {
-//        console.log(e.ctrlKey, e.altKey, e.shiftKey, e.code, String.fromCharCode(e.keyCode));
-//        var key = (e.altKey ? 'alt+' : '') + (e.altKey ? 'al  t+' : '') + (e.altKey ? 'alt+' : '');
         var keys = [];
         if (e.altKey)
             keys.push('alt');
@@ -663,18 +689,11 @@ anra.ActionRegistry = Base.extend({
             keys.push('ctrl');
         if (e.shiftKey)
             keys.push('shift');
-        keys.push(this.getKeyString(e.keyCode, e.code));
+//        keys.push(this.getKeyString(e.keyCode, e.code));
+        keys.push(e.key.toLowerCase());
 
         var action = this.handles.get(keys.sort().join('+'));
         if (action != null)action.run();
-    },
-    getKeyString:function (keycode, code) {
-        if ((keycode > 64 && keycode < 91) ||
-            (keycode > 47 && keycode < 58) ||
-            (keycode > 95 && keycode < 106)) {
-            return String.fromCharCode(keycode).toLowerCase();
-        }
-        return code.toLowerCase();
     },
     regist:function (action) {
         if (action instanceof Array) {
@@ -695,14 +714,13 @@ anra.ActionRegistry = Base.extend({
             case ACTION_SELECTION:
                 this.selectionActions.put(action.id, action);
                 break;
-            case ACTION_COMMAND_STACK:
+            case ACTION_STACK:
                 this.cmdStackActions.put(action.id, action);
                 break;
             case ACTION_PROPERTY:
                 this.propertyActions.put(action.id, action);
                 break;
         }
-
         this.registKeyHandler(action);
     },
     registKeyHandler:function (action) {

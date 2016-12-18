@@ -75,17 +75,31 @@ anra.gef.Figure = anra.svg.Composite.extend({
     },
     calAnchor:function (dir, offset) {
         if (offset == null)offset = 0;
+//        switch (dir) {
+//            case anra.EAST:
+//                return {x:this.fattr('x') + this.fattr('width'), y:this.fattr('y') + this.fattr('height') / 2 + offset};
+//            case anra.SOUTH:
+//                return {x:this.fattr('x') + this.fattr('width') / 2 + offset, y:this.fattr('y') + this.fattr('height')};
+//            case anra.WEST:
+//                return {x:this.fattr('x'), y:this.fattr('y') + this.fattr('height') / 2 + offset};
+//            case anra.NORTH:
+//                return {x:this.fattr('x') + this.fattr('width') / 2 + offset, y:this.fattr('y') };
+//            case anra.CENTER:
+//                return  {x:this.fattr('x') + this.fattr('width') / 2, y:this.fattr('y') + this.fattr('height') / 2};
+//        }
+
+        var b = this.bounds;
         switch (dir) {
             case anra.EAST:
-                return {x:this.fattr('x') + this.fattr('width'), y:this.fattr('y') + this.fattr('height') / 2 + offset};
+                return {x:b['x'] + b['width'], y:b['y'] + b['height'] / 2 + offset};
             case anra.SOUTH:
-                return {x:this.fattr('x') + this.fattr('width') / 2 + offset, y:this.fattr('y') + this.fattr('height')};
+                return {x:b['x'] + b['width'] / 2 + offset, y:b['y'] + b['height']};
             case anra.WEST:
-                return {x:this.fattr('x'), y:this.fattr('y') + this.fattr('height') / 2 + offset};
+                return {x:b['x'], y:b['y'] + b['height'] / 2 + offset};
             case anra.NORTH:
-                return {x:this.fattr('x') + this.fattr('width') / 2 + offset, y:this.fattr('y') };
+                return {x:b['x'] + b['width'] / 2 + offset, y:b['y'] };
             case anra.CENTER:
-                return  {x:this.fattr('x') + this.fattr('width') / 2, y:this.fattr('y') + this.fattr('height') / 2};
+                return  {x:b['x'] + b['width'] / 2, y:b['y'] + b['height'] / 2};
         }
     },
     propertyChanged:function (key, ov, nv) {
@@ -671,6 +685,7 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
             }
         }
         var modelObjects = this.getModelSourceLines();
+//        console.log('before: ',this.model.getValue('name'), this.sConns.length, modelObjects.length);
         for (i = 0; i < modelObjects.length; i++) {
             model = modelObjects[i];
             if (i < this.sConns.length && this.sConns[i].model == model) {
@@ -692,13 +707,16 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
             var trash = [];
             for (; i < size; i++)
                 trash.push(this.sConns[i]);
-            for (i = 0; i < trash.length; i++)
+            for (i = 0; i < trash.length; i++) {
                 this.removeSourceConnection(trash[i]);
+            }
         }
+//        console.log('after: ',this.model.getValue('name'), this.sConns.length, modelObjects.length);
+
     },
     reorderSourceConnection:function (line, index) {
-        this.sConns.remove(index);
-        this.sConns.insert(line, index);
+        var o = this.sConns.remove(index);
+        this.sConns.insert(o, index + 1);
         line.refresh();
     },
     removeSourceConnection:function (line) {
@@ -768,8 +786,8 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
         line.refresh();
     },
     reorderTargetConnection:function (line, index) {
-        this.tConns.remove(index);
-        this.tConns.insert(line, index);
+        var o = this.tConns.remove(index);
+        this.tConns.insert(o, index + 1);
         line.refresh();
     },
     removeTargetConnection:function (line, index) {
@@ -831,6 +849,7 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
         } else if (o instanceof anra.gef.EditPart) {
             o.setSelected(SELECTED_PRIMARY);
         }
+        this.editor.selectionChanged(o);
     },
     clearSelection:function () {
         if (this.selection != null) {
@@ -897,6 +916,13 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
     },
     getEditPart:function (model) {
         return this.editPartMap.get(model);
+    },
+    _initFigureListeners:function () {
+        anra.gef.EditPart.prototype._initFigureListeners.call(this);
+        var root = this;
+        this.figure.addListener(anra.EVENT.ContextMenu, function (e) {
+            root.editor.showContextMenu(root.selection);
+        });
     }
 });
 anra.gef.RootEditPart.PrimaryLayer = "Primary_Layer";
@@ -1122,7 +1148,7 @@ anra.gef.MultiSelectionTool = anra.gef.Tool.extend({
             y:mY,
             width:Math.abs(f.x - nx),
             height:Math.abs(f.y - ny)
-        });
+        }, true);
     }
 });
 
@@ -1256,7 +1282,7 @@ anra.gef.LinkLineTool = anra.gef.Tool.extend({
             this.linePart.figure.enableEvent();
             this.linePart.refresh();
         }
-        else if (this.type == REQ_CONNECTION_END)
+        else if (this.type == REQ_CONNECTION_END && this.guideLine != null)
             this.editor.rootEditPart.getFeedbackLayer().removeChild(this.guideLine);
     },
     refreshGuideLine:function (req, p) {
@@ -1573,7 +1599,7 @@ anra.gef.DeleteNodeAndLineCommand = anra.ChainedCompoundCommand.extend({
         }, this);
 
         for (i = 0; i < this.nodes.length; i++) {
-            this.add(new anra.gef.DeleteNodeCommand(root, node[i]));
+            this.add(new anra.gef.DeleteNodeCommand(root, this.nodes[i]));
         }
 
     },
@@ -1625,11 +1651,17 @@ anra.gef.DeleteLineCommand = anra.Command.extend({
     constructor:function (root, line) {
         this.root = root;
         this.line = line;
+//        console.log('--------init---------')
+//        console.log(this.line.figure.owner)
+//        console.log(this.line.source,this.line.target)
+//        console.log('-----------------')
     },
     canExecute:function () {
         return this.root != null && this.line != null;
     },
     execute:function () {
+//        console.log('removeline:',this.line.model.id)
+//        console.log(this.line.source,this.line.target)
         if (this.snode == null)
             this.snode = this.line.source.model;
         if (this.tnode == null)
@@ -1639,9 +1671,8 @@ anra.gef.DeleteLineCommand = anra.Command.extend({
         this.sid = this.line.model.sourceTerminal;
         this.tid = this.line.model.targetTerminal;
 
-        this.line.dettachSource();
-        this.line.dettachTarget();
-
+        this.line.dettachSource(true);
+        this.line.dettachTarget(true);
 
         this.line.unregister();
         this.line.deactivate();
@@ -1770,16 +1801,18 @@ anra.gef.CreateLineCommand = anra.Command.extend({
             targetPart.refresh();
     },
     undo:function () {
+        var linePart = this.sourcePart.getRoot().getEditPart(this.line);
+
         this.source.removeSourceLine(this.line);
         this.target.removeTargetLine(this.line);
-        if (this.sourcePart != nul)
+        if (this.sourcePart != null)
             this.sourcePart.refresh();
         if (this.targetPart != null)
             this.targetPart.refresh();
 
+        linePart.unregister();
     }
-})
-;
+});
 
 
 anra.gef.ConstraintCommand = anra.Command.extend({
@@ -1883,6 +1916,23 @@ anra.gef.Editor = Base.extend({
     input2model:function (input) {
         return input;
     },
+    showContextMenu:function (selection, e) {
+        if (this.menu == null) {
+            this.menu = this.createContextMenu();
+        }
+
+    },
+    createContextMenu:function () {
+        var menu = new anra.svg.Menu();
+        return menu;
+    },
+    selectionChanged:function (selection) {
+        if (this.menu != null) {
+//            this.menu.fillAction(this,selection);
+        }
+    },
+    hideContextMenu:function () {
+    },
     createContent:function (parentId) {
 
         this.setActiveTool(this.getDefaultTool());
@@ -1944,6 +1994,7 @@ anra.gef.Editor = Base.extend({
     },
     doSave:function () {
         //执行保存
+        console.log('please override a doSave function')
     },
     isDirty:function () {
         return this.cmdStack.isDirty();

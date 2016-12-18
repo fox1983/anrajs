@@ -19,7 +19,8 @@ FlowEditor = anra.gef.Editor.extend({
         var editor = this;
         this.actionRegistry.regist({
             id:1,
-            type:ACTION_SELECTION,
+            name:'undo',
+            type:ACTION_STACK,
             key:'ctrl+z',
             run:function () {
                 editor.cmdStack.undo();
@@ -28,6 +29,7 @@ FlowEditor = anra.gef.Editor.extend({
                 id:2,
                 type:ACTION_SELECTION,
                 key:'delete',
+                name:'删除',
                 run:function () {
                     var selection = editor.rootEditPart.selection;
                     var cmd = this.createDeleteCommand(selection);
@@ -58,7 +60,24 @@ FlowEditor = anra.gef.Editor.extend({
                     editor.setActiveTool(editor.getDefaultTool());
 //                    editor.cmdStack.redo();
                 }
+            }).regist({
+                id:'saveAction',
+                name:'保存',
+                type:ACTION_STACK,
+                key:'ctrl+s',
+                run:function () {
+                    editor.doSave();
+                }
+            }).regist({
+                id:'selectAll',
+                name:'全选',
+                type:ACTION_PROPERTY,
+                key:'ctrl+a',
+                run:function () {
+                    editor.rootEditPart.setSelection(editor.rootEditPart.children);
+                }
             });
+        ;
     },
     /**
      *第一步，把json输入解析为model
@@ -173,6 +192,7 @@ var c = anra.Command.extend({
         alert('不能移动到此处');
     }
 });
+
 /**
  * 节点EditPart父类，Editpart决定节点的图形、连线的控制器等
  * @type {*}
@@ -184,7 +204,24 @@ var CommonNodeEditPart = anra.gef.NodeEditPart.extend({
     refreshVisual:function () {
         if (this.model != null && this.figure != null) {
             var b = this.model.getValue('bounds');
-            this.figure.setBounds({x:b[0], y:b[1], width:b[2], height:b[3] });
+
+            var oldB = this.figure.bounds;
+            var finalB = {x:b[0], y:b[1], width:b[2], height:b[3] };
+
+            this.figure.setBounds(finalB);
+//            var sX = (finalB.x - oldB.x) / 50;
+//            var sY = ( finalB.y - oldB.y) / 50;
+//            var figure = this.figure;
+//            var process = 0;
+//
+//            function step() {
+//                if (process++ > 50)return;
+//                figure.bounds.x += sX;
+//                figure.bounds.y += sY;
+//                figure.paint();
+//                requestAnimationFrame(step);
+//            }
+//            step();
         }
         this.figure.paint();
     },
@@ -255,10 +292,7 @@ TextInfoPolicy = anra.gef.AbstractEditPolicy.extend({
 
 TextHandle = anra.Handle.extend(anra.svg.Text).extend({
     refreshLocation:function (figure) {
-        if (this.owner == null || figure == null)
-            return;
-        this.owner.setAttribute('x', figure.fattr('x'));
-        this.owner.setAttribute('y', figure.fattr('y') + figure.fattr('height') + 10);
+        this.setBounds({x:figure.bounds.x,y:figure.bounds.y+figure.bounds.height+10},true);
     }
 
 });

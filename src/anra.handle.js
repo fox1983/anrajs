@@ -9,7 +9,9 @@ anra.Handle = Control.extend({
     editPart:null,
     listener:null,
     constructor:function (editPart) {
+        Control.prototype.constructor.call(this);
         this.editPart = editPart;
+        this.ready=true;
     },
 
     createContent:function (s) {
@@ -103,7 +105,8 @@ anra.gef.LineHandle = anra.Handle.extend({
         var w = 6;
         var hf = w / 2;
 
-        this.setBounds({x:p.x, y:p.y - hf, width:w, height:w});
+        this.setBounds({x:p.x, y:p.y - hf, width:w, height:w}, true);
+//        this.paint();
     },
     initProp:function () {
         this.setAttribute({
@@ -186,13 +189,13 @@ anra.ResizeHandle = Control.extend({
             y:y,
             width:this.defaultWidth,
             height:this.defaultHeight
-        });
+        },true);
         this.setStyle({
             'cursor':cursorStyle
         });
     },
     refreshLocation:function () {
-        this.setLocator(this.editPart.model.getBounds());
+        this.setLocator(this.editPart.model.getBounds(),true);
     },
     getResizeTracker:function (direction) {
         return  anra.gef.ResizeTracker.getInstance(direction);

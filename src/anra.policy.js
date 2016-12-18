@@ -340,13 +340,13 @@ anra.gef.ConnectionPolicy = anra.gef.AbstractEditPolicy.extend({
     },
     createAttarchHandle:function (anchor) {
         if (anchor == null)return null;
-        var handle = anra.svg.Control.extend(anra.svg.Circle);
-        handle = new handle();
+        var handle = anra.Handle.extend(anra.svg.Circle);
+        handle = new handle(this.getHost());
         handle.setBounds({
             x:anchor.x,
             y:anchor.y,
             width:5
-        });
+        }, true);
         handle.setAttribute({
             fill:'blue'
         });

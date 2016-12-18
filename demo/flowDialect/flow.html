@@ -17,7 +17,8 @@
                 'nodes':[
                     {id:1, name:'CAPP', type:0, lines:[
                         {id:0, target:2, sTML:0, tTML:7 },
-                        {id:1, target:3, sTML:5, tTML:2 }
+                        {id:1, target:3, sTML:5, tTML:2 },
+                        {id:3, target:8, sTML:7, tTML:2 }
                     ], bounds:[100, 150, 40, 40]},
                     {id:2, name:'MNPP', type:1, desc:'发起中转请求', lines:[
                         {id:0, target:4, sTML:1, tTML:2 },
@@ -30,7 +31,9 @@
                     {id:4, name:'CIVR', type:1, bounds:[430, 80, 30, 30]},
                     {id:5, name:'CSRS', type:2, bounds:[430, 120, 40, 40]},
                     {id:6, name:'CIVR', type:2, bounds:[430, 180, 30, 30]},
-                    {id:7, name:'CSRS', type:2, bounds:[430, 220, 40, 40]}
+                    {id:7, name:'CSRS', type:2, bounds:[430, 220, 40, 40]},
+                    {id:8, name:'测试', type:1, desc:'处理异常', bounds:[250, 250, 40, 40]
+                    }
                 ]
             };
 
@@ -93,16 +96,10 @@
 
     </script>
     <style>
-        svg text {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
 
-        svg text::selection {
-            background: none;
-        }
+        /*svg text::selection {*/
+            /*background: none;*/
+        /*}*/
     </style>
 </head>
 <body>
