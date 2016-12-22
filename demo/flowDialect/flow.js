@@ -24,6 +24,9 @@ FlowEditor = anra.gef.Editor.extend({
             key:'ctrl+z',
             run:function () {
                 editor.cmdStack.undo();
+            },
+            calculateEnable:function (node) {
+                return  editor.cmdStack.canUndo();
             }
         }).regist({
                 id:2,
@@ -44,13 +47,20 @@ FlowEditor = anra.gef.Editor.extend({
                         return new anra.gef.DeleteLineCommand(editor.rootEditPart, node);
                     else if (node instanceof Array)
                         return new anra.gef.DeleteNodeAndLineCommand(editor.rootEditPart, node);
+                },
+                calculateEnable:function (node) {
+                    return node instanceof anra.gef.NodeEditPart || node instanceof anra.gef.LineEditPart || node instanceof Array;
                 }
             }).regist({
                 id:3,
                 type:ACTION_SELECTION,
+                name:'redo',
                 key:'ctrl+y',
                 run:function () {
                     editor.cmdStack.redo();
+                },
+                calculateEnable:function (node) {
+                    return  editor.cmdStack.canRedo();
                 }
             }).regist({
                 id:4,
@@ -67,14 +77,20 @@ FlowEditor = anra.gef.Editor.extend({
                 key:'ctrl+s',
                 run:function () {
                     editor.doSave();
+                },
+                calculateEnable:function (node) {
+                    return  editor.isDirty();
                 }
             }).regist({
                 id:'selectAll',
                 name:'全选',
-                type:ACTION_PROPERTY,
+                type:ACTION_SELECTION,
                 key:'ctrl+a',
                 run:function () {
                     editor.rootEditPart.setSelection(editor.rootEditPart.children);
+                },
+                calculateEnable:function (node) {
+                    return  true;
                 }
             });
         ;
@@ -292,7 +308,7 @@ TextInfoPolicy = anra.gef.AbstractEditPolicy.extend({
 
 TextHandle = anra.Handle.extend(anra.svg.Text).extend({
     refreshLocation:function (figure) {
-        this.setBounds({x:figure.bounds.x,y:figure.bounds.y+figure.bounds.height+10},true);
+        this.setBounds({x:figure.bounds.x, y:figure.bounds.y + figure.bounds.height + 10}, true);
     }
 
 });

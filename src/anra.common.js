@@ -150,7 +150,7 @@ anra.Platform = {
                 d.dispatcher.dispatchKeyDown(event);
         });
 
-        //禁用部分快捷键，比如ctrl+s[83]，ctrl+a[65]
+        //拦截部分快捷键，比如ctrl+s[83]，ctrl+a[65]
         document.onkeydown = function (event) {
 //            console.log(event.keyCode)
             if (event.ctrlKey && (event.keyCode == 83 || event.keyCode == 65 || event.keyCode == 112 ))

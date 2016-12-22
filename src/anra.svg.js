@@ -272,7 +272,7 @@ var _Composite = {
             anra.Platform.error('can not remove ' + (c == null ? null : c.toString() ) + ' from Composite');
         }
     },
-    addChild:function (c) {
+    addChild:function (c, norefresh) {
         if (this.children == null) {
             this.children = [];
         }
@@ -281,7 +281,8 @@ var _Composite = {
                 this.children.push(c);
                 c.create();
                 c.setParent(this);
-                this.paint();
+                if (!norefresh)
+                    this.paint();
             }
         } else {
             anra.Platform.error('can not add [' + c + '] to ' + this.tagName);
@@ -307,14 +308,18 @@ var _Composite = {
     layout:function () {
         this.layoutManager.layout(this);
     },
-    dispose:function () {
+    removeAllChildren:function () {
         if (this.children != null) {
-            for (var i = 0; i < this.children.length; i++) {
-                this.children[i].dispose();
+            var c = this.children.slice(0);
+            for (var i = 0; i < c.length; i++) {
+                this.removeChild(c[i]);
             }
-            this.children = null;
-            this.layoutManager = null;
         }
+    },
+    dispose:function () {
+        this.removeAllChildren();
+        this.children = null;
+        this.layoutManager = null;
         Control.prototype.dispose.call(this);
     }
 };
@@ -521,9 +526,13 @@ anra.SVG = Composite.extend(anra._Display).extend(anra._EventTable).extend({
         d.setMouseTarget(t);
 //TODO
         this.element.oncontextmenu = function (event) {
-            anra.Platform.focus = t;
-            d.setMouseTarget(t);
-            d.dispatchContextMenu(event);
+            try {
+                anra.Platform.focus = t;
+                d.setMouseTarget(t);
+                d.dispatchContextMenu(event);
+            } catch (e) {
+                console.log(e)
+            }
             return false;
         };
         this.element.onmousedown = function (event) {
@@ -739,7 +748,7 @@ anra.svg.EventDispatcher = Base.extend({
                 e = new anra.event.Event(anra.EVENT.DragStart, location);
                 e.prop = {drag:this.dragTarget, target:this.mouseOnTarget};
                 this.dragTarget.notifyListeners(anra.EVENT.DragStart, e);
-                if (this.dragTarget != this.mouseOnTarget&&this.mouseOnTarget.notifyListeners)
+                if (this.dragTarget != this.mouseOnTarget && this.mouseOnTarget.notifyListeners)
                     this.mouseOnTarget.notifyListeners(anra.EVENT.DragStart, e);
             }
             if (this.dragTarget.enable)
@@ -756,8 +765,8 @@ anra.svg.EventDispatcher = Base.extend({
             e.x = location[0];
             e.y = location[1];
             e.prop = {drag:this.dragTarget, target:this.mouseOnTarget};
-            this.dragTarget.notifyListeners&&this.dragTarget.notifyListeners(anra.EVENT.MouseDrag, e);
-            if (this.dragTarget != this.mouseOnTarget&&this.mouseOnTarget.notifyListeners)
+            this.dragTarget.notifyListeners && this.dragTarget.notifyListeners(anra.EVENT.MouseDrag, e);
+            if (this.dragTarget != this.mouseOnTarget && this.mouseOnTarget.notifyListeners)
                 this.mouseOnTarget.notifyListeners(anra.EVENT.MouseDrag, e);
         }
     },
@@ -841,7 +850,12 @@ anra.svg.EventDispatcher = Base.extend({
         this.focusTarget.notifyListeners(anra.EVENT.TouchEnd, e);
     },
     dispatchContextMenu:function (event) {
-        this.focusTarget.notifyListeners(anra.EVENT.ContextMenu);
+        var e = new anra.event.Event();
+        var location = this.getRelativeLocation(event);
+        e.x = location[0];
+        e.y = location[1];
+        e.target = this.mouseOnTarget;
+        this.focusTarget.notifyListeners(anra.EVENT.ContextMenu, e);
     },
     setMouseTarget:function (o) {
         if (this.focusTarget != null) {
@@ -854,6 +868,96 @@ anra.svg.EventDispatcher = Base.extend({
     }
 });
 
-anra.svg.Menu = Composite.extend({
+anra.svg.MenuItem = Composite.extend({
+    constructor:function (action) {
+        Composite.prototype.constructor.call(this)
+        this.action = action;
+    },
+    createContent:function () {
+        var text = anra.svg.Control.extend(anra.svg.Text);
+        text = new text();
+        text.setText(this.action.name);
+        this.addChild(text);
+        text.setBounds({x:30, y:20});
 
+        var item = this;
+        this.addListener(anra.EVENT.MouseIn, function () {
+            item.setAttribute({
+                fill:'green'
+            });
+        });
+        this.addListener(anra.EVENT.MouseOut, function () {
+            item.setAttribute({
+                fill:'none'
+            });
+        });
+        this.addListener(anra.EVENT.MouseDown, function () {
+            item.action.run();
+            item.menu.hide();
+        });
+    },
+    initProp:function () {
+        this.setAttribute({
+            fill:'none',
+            stroke:'none'
+        });
+    }
+});
+
+anra.svg.DefMenu = Composite.extend({
+    constructor:function (editor) {
+        Composite.prototype.constructor.call(this);
+        this.editor = editor;
+    },
+    createContent:function () {
+        this.layoutManager = new anra.svg.FillLayout();
+    },
+    initProp:function () {
+        this.setAttribute({
+            fill:'white',
+            stroke:'black'
+        });
+    },
+    addMenuItem:function (action) {
+        var item = new anra.svg.MenuItem(action);
+        item.menu = this;
+        this.addChild(item);
+    },
+    clearMenuItems:function () {
+        this.removeAllChildren();
+    },
+    hide:function () {
+        this.clearMenuItems();
+        this.setStyle('visibility', 'hidden');
+    },
+    show:function (selection, e) {
+        if (this.selection == selection) {
+            return;
+        }
+        this.clearMenuItems();
+        this.setBounds({x:e.x, y:e.y});
+        this.setStyle('visibility', 'visible');
+
+        var count = this.addActions(this.editor.actionRegistry.selectionActions, selection);
+        count += this.addActions(this.editor.actionRegistry.cmdStackActions, selection);
+
+
+        this.setBounds({width:100, height:30 * count});
+        this.paint();
+    },
+    addActions:function (actions, selection) {
+        var count = 0;
+        if (actions != null) {
+            actions = actions.values();
+            for (var i = 0; i < actions.length; i++) {
+                if (actions[i].calculateEnable && actions[i].calculateEnable(selection)) {
+                    actions[i].enable = true;
+                    count++;
+                    this.addMenuItem(actions[i]);
+                } else
+                    actions[i].enable = false;
+            }
+        }
+        return count;
+    }
 });

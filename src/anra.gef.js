@@ -872,17 +872,23 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
             var lineLayer = new anra.svg.Group();
             var handleLayer = new anra.svg.Group();
             var feedbackLayer = new anra.svg.Group();
+            var menuLayer = new anra.svg.Group();
             this.figure.addChild(painterLayer);
             this.figure.addChild(primaryLayer);
             this.figure.addChild(lineLayer);
             this.figure.addChild(handleLayer);
             this.figure.addChild(feedbackLayer);
+            this.figure.addChild(menuLayer);
             this.layers.set(anra.gef.RootEditPart.PainterLayer, painterLayer);
             this.layers.set(anra.gef.RootEditPart.PrimaryLayer, primaryLayer);
             this.layers.set(anra.gef.RootEditPart.LineLayer, lineLayer);
             this.layers.set(anra.gef.RootEditPart.HandleLayer, handleLayer);
             this.layers.set(anra.gef.RootEditPart.FeedbackLayer, feedbackLayer);
+            this.layers.set(anra.gef.RootEditPart.MenuLayer, menuLayer);
         }
+    },
+    getMenuLayer:function () {
+        return this.getLayer(anra.gef.RootEditPart.MenuLayer);
     },
     getLineLayer:function () {
         return this.getLayer(anra.gef.RootEditPart.LineLayer);
@@ -921,7 +927,7 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
         anra.gef.EditPart.prototype._initFigureListeners.call(this);
         var root = this;
         this.figure.addListener(anra.EVENT.ContextMenu, function (e) {
-            root.editor.showContextMenu(root.selection);
+            root.editor.showContextMenu(root.selection, e);
         });
     }
 });
@@ -931,6 +937,7 @@ anra.gef.RootEditPart.FeedbackLayer = "Feedback_Layer";
 anra.gef.RootEditPart.DefineLayer = "defineLayer";
 anra.gef.RootEditPart.PainterLayer = "painterLayer";
 anra.gef.RootEditPart.LineLayer = "lineLayer";
+anra.gef.RootEditPart.MenuLayer = "MenuLayer";
 
 anra.gef.LineEditPart = anra.gef.EditPart.extend({
     target:null,
@@ -1919,19 +1926,20 @@ anra.gef.Editor = Base.extend({
     showContextMenu:function (selection, e) {
         if (this.menu == null) {
             this.menu = this.createContextMenu();
+            this.rootEditPart.getMenuLayer().addChild(this.menu);
         }
-
+        this.menu.show(selection, e);
     },
     createContextMenu:function () {
-        var menu = new anra.svg.Menu();
+        var menu = new anra.svg.DefMenu(this);
         return menu;
     },
     selectionChanged:function (selection) {
-        if (this.menu != null) {
-//            this.menu.fillAction(this,selection);
-        }
+        this.hideContextMenu();
     },
     hideContextMenu:function () {
+        if (this.menu != null)
+            this.menu.hide();
     },
     createContent:function (parentId) {
 
