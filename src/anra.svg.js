@@ -726,6 +726,8 @@ anra.svg.EventDispatcher = Base.extend({
                 count = 0;
             return;
         }
+
+        //这玩意儿错误超多，后面考虑个完善方式，主要是拖拽物和鼠标所在容器的矛盾
         if (this.mouseOnTarget == null)this.mouseOnTarget = this.focusTarget;
         //模拟拖拽
         var e;
@@ -736,7 +738,9 @@ anra.svg.EventDispatcher = Base.extend({
                 this.dragTarget = this.focusTarget;
                 e = new anra.event.Event(anra.EVENT.DragStart, location);
                 e.prop = {drag:this.dragTarget, target:this.mouseOnTarget};
-                this.mouseOnTarget.notifyListeners(anra.EVENT.DragStart, e);
+                this.dragTarget.notifyListeners(anra.EVENT.DragStart, e);
+                if (this.dragTarget != this.mouseOnTarget&&this.mouseOnTarget.notifyListeners)
+                    this.mouseOnTarget.notifyListeners(anra.EVENT.DragStart, e);
             }
             if (this.dragTarget.enable)
                 this.dragTarget.disableEvent();
@@ -752,7 +756,9 @@ anra.svg.EventDispatcher = Base.extend({
             e.x = location[0];
             e.y = location[1];
             e.prop = {drag:this.dragTarget, target:this.mouseOnTarget};
-            this.mouseOnTarget.notifyListeners(anra.EVENT.MouseDrag, e);
+            this.dragTarget.notifyListeners&&this.dragTarget.notifyListeners(anra.EVENT.MouseDrag, e);
+            if (this.dragTarget != this.mouseOnTarget&&this.mouseOnTarget.notifyListeners)
+                this.mouseOnTarget.notifyListeners(anra.EVENT.MouseDrag, e);
         }
     },
     dispatchMouseUp:function (event, global) {
@@ -768,10 +774,6 @@ anra.svg.EventDispatcher = Base.extend({
                 notified = true;
             }
             widget.notifyListeners(anra.EVENT.DragEnd, e);
-            //下面代码是为了保证svg能接收到结束事件，目前由于提供了DragTracker总控，不再需要了
-//            if (widget != widget.svg){
-//                widget.svg.notifyListeners(anra.EVENT.DragEnd, e);
-//            }
         }
         this.mouseState = anra.EVENT.MouseUp;
         if (!notified) {
