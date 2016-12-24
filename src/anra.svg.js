@@ -984,6 +984,8 @@ anra.svg.DefMenu = Composite.extend({
         var count = this.addActions(this.editor.actionRegistry.selectionActions, selection);
         count += this.addActions(this.editor.actionRegistry.cmdStackActions, selection);
 
+        if (count == null)
+            return;
 
         this.setBounds({width:100, height:30 * count});
         this.paint();
