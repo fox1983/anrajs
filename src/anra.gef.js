@@ -840,6 +840,8 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
         return new anra.gef.RootDragTracker();
     },
     setSelection:function (o) {
+        if (this.editor != null)
+            this.editor.hideContextMenu(o);
         if (this.selection == o || (this.selection != null && this.selection instanceof Array && this.selection.contains(o)))return;
         this.clearSelection();
         this.selection = o;
@@ -849,7 +851,6 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
         } else if (o instanceof anra.gef.EditPart) {
             o.setSelected(SELECTED_PRIMARY);
         }
-        this.editor.selectionChanged(o);
     },
     clearSelection:function () {
         if (this.selection != null) {
@@ -1167,6 +1168,16 @@ anra.gef.CreationTool = anra.gef.Tool.extend({
         this.getEventDispatcher().mouseState = anra.EVENT.MouseDrag;
         this.getEventDispatcher().dragTarget = {model:this.model};
     },
+    deactivate:function () {
+        if (this.policy != null) {
+            var v = this;
+            var req = {
+                target:v,
+                type:REQ_CREATE
+            };
+            this.policy.eraseTargetFeedback(req);
+        }
+    },
     mouseDown:function () {
         this.getEventDispatcher().mouseState = anra.EVENT.MouseDrag;
         return true;
@@ -1177,6 +1188,9 @@ anra.gef.CreationTool = anra.gef.Tool.extend({
     },
     mouseDrag:function (e, p) {
         var policy = this.getLayoutPolicy(e, p);
+        if (this.policy == null) {
+            this.policy = policy;
+        }
         if (policy == null)return false;
         var v = this;
         var req = {
@@ -1185,7 +1199,16 @@ anra.gef.CreationTool = anra.gef.Tool.extend({
             event:e,
             type:REQ_CREATE
         };
+        if (this.policy != policy) {
+            this.policy.eraseTargetFeedback(req);
+            this.policy = policy;
+        }
         policy.showTargetFeedback(req);
+
+//        var c = policy.getCommand(req);
+//        if (c != null && !c.canExecute()) {
+//            return false;
+//        }
         return true;
     },
     getLayoutPolicy:function (e, p) {
@@ -1709,20 +1732,20 @@ anra.gef.DeleteLineCommand = anra.Command.extend({
  * @param node 节点模型
  */
 anra.gef.CreateNodeCommand = anra.Command.extend({
-    constructor:function (rootEditPart, node) {
-        this.rootEditPart = rootEditPart;
+    constructor:function (parentPart, node) {
+        this.parentPart = parentPart;
         this.node = node;
     },
     canExecute:function () {
-        return this.rootEditPart != null && this.node != null;
+        return this.parentPart != null && this.node != null;
     },
     execute:function () {
-        this.rootEditPart.model.addChild(this.node);
-        this.rootEditPart.refresh();
+        this.parentPart.model.addChild(this.node);
+        this.parentPart.refresh();
     },
     undo:function () {
-        this.rootEditPart.model.removeChild(this.node);
-        this.rootEditPart.refresh();
+        this.parentPart.model.removeChild(this.node);
+        this.parentPart.refresh();
     }
 });
 
@@ -1934,9 +1957,6 @@ anra.gef.Editor = Base.extend({
         var menu = new anra.svg.DefMenu(this);
         return menu;
     },
-    selectionChanged:function (selection) {
-        this.hideContextMenu();
-    },
     hideContextMenu:function () {
         if (this.menu != null)
             this.menu.hide();
@@ -2002,7 +2022,8 @@ anra.gef.Editor = Base.extend({
     },
     doSave:function () {
         //执行保存
-        console.log('please override a doSave function')
+        console.log('please override a doSave function', this.isDirty())
+        this.cmdStack.markSaveLocation();
     },
     isDirty:function () {
         return this.cmdStack.isDirty();

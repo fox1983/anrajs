@@ -58,8 +58,13 @@ anra.svg.Control = anra.Control.extend({
             this.disableEvent();
 
     },
-    setOpacity:function (opa) {
+    setOpacity:function (opa, all) {
         this.setStyle('opacity', opa);
+        if (all && this.children) {
+            for (var i = 0; i < this.children.length; i++) {
+                this.children[i].setOpacity(opa, all);
+            }
+        }
     },
     afterAddListener:function () {
         if (this.eventTable.size() > 0)
@@ -293,7 +298,7 @@ var _Composite = {
      * @return {*}
      */
     domContainer:function () {
-        return this.svg.owner;
+        return this.parent == null ? this.svg.owner : this.parent.domContainer();
     },
     paint:function () {
         this.applyBounds();
@@ -446,6 +451,25 @@ anra.svg.Path = anra.svg.Control.extend({
     }
 });
 
+anra.svg.Line = {
+    tagName:'line',
+    initProp:function () {
+        this.setAttribute({
+            stroke:'black',
+            'stroke-width':1
+        });
+    },
+    getClientArea:function () {
+        return [this.fattr('x1') - this.fattr('x2'), this.fattr('y1') - this.fattr('y2')];
+    },
+    applyBounds:function () {
+        var l = this.locArea();
+        this.setAttribute('x1', this.bounds.x);
+        this.setAttribute('x2', this.bounds.width);
+        this.setAttribute('y1', this.bounds.y);
+        this.setAttribute('y2', this.bounds.height);
+    }
+}
 
 anra.svg.Polyline = {
     points:null,
@@ -711,6 +735,7 @@ anra.svg.EventDispatcher = Base.extend({
         var location = this.getRelativeLocation(event);
         e.x = location[0];
         e.y = location[1];
+        e.button = event.button;
         e.prop = {drag:this.dragTarget, target:this.focusTarget};
         var widget = this.focusTarget;
         widget.notifyListeners(anra.EVENT.MouseDown, e);
@@ -777,6 +802,7 @@ anra.svg.EventDispatcher = Base.extend({
         if (this.mouseState == anra.EVENT.MouseDrag) {
             var e = new anra.event.Event(anra.EVENT.DragEnd, location);
             e.prop = {drag:this.dragTarget, target:widget};
+            e.button = event.button;
             if (this.dragTarget instanceof anra.svg.Control) {
                 this.dragTarget.notifyListeners(anra.EVENT.Dropped, e);
                 this.dragTarget.enableEvent();
@@ -787,6 +813,7 @@ anra.svg.EventDispatcher = Base.extend({
         this.mouseState = anra.EVENT.MouseUp;
         if (!notified) {
             e = new anra.event.Event(anra.EVENT.MouseUp, location);
+            e.button = event.button;
             if (this.mouseOnTarget != null)
                 this.mouseOnTarget.notifyListeners(anra.EVENT.MouseUp, e);
             else
@@ -797,6 +824,7 @@ anra.svg.EventDispatcher = Base.extend({
     dispatchMouseIn:function (event) {
         var location = this.getRelativeLocation(event);
         var e = new anra.event.Event(anra.EVENT.MouseIn, location);
+        e.button = event.button;
         if (this.dragTarget != event.figure)
             this.mouseOnTarget = event.figure;
         event.figure.notifyListeners(anra.EVENT.MouseIn, e);
@@ -874,6 +902,14 @@ anra.svg.MenuItem = Composite.extend({
         this.action = action;
     },
     createContent:function () {
+        if (this.action.image != null) {
+            var image = anra.svg.Control.extend(anra.svg.Image);
+            image = new image();
+            image.setUrl(this.action.image);
+            this.addChild(image);
+            image.setBounds({x:5, y:5, width:20, height:20});
+        }
+
         var text = anra.svg.Control.extend(anra.svg.Text);
         text = new text();
         text.setText(this.action.name);
@@ -891,7 +927,8 @@ anra.svg.MenuItem = Composite.extend({
                 fill:'none'
             });
         });
-        this.addListener(anra.EVENT.MouseDown, function () {
+        this.addListener(anra.EVENT.MouseDown, function (e) {
+            if (e.button != 0)return;
             item.action.run();
             item.menu.hide();
         });
@@ -908,6 +945,9 @@ anra.svg.DefMenu = Composite.extend({
     constructor:function (editor) {
         Composite.prototype.constructor.call(this);
         this.editor = editor;
+    },
+    domContainer:function (action) {
+        return this.owner.parentNode;
     },
     createContent:function () {
         this.layoutManager = new anra.svg.FillLayout();
@@ -930,6 +970,9 @@ anra.svg.DefMenu = Composite.extend({
         this.clearMenuItems();
         this.setStyle('visibility', 'hidden');
     },
+    setOpacity:function (opa) {
+        this.parent.setOpacity(opa);
+    },
     show:function (selection, e) {
         if (this.selection == selection) {
             return;
@@ -944,6 +987,15 @@ anra.svg.DefMenu = Composite.extend({
 
         this.setBounds({width:100, height:30 * count});
         this.paint();
+        this.play(0, 0.05);
+    },
+    play:function (s, intval) {
+        this.setOpacity(s, true);
+        if (s >= 1)return;
+        var p = this;
+        requestAnimationFrame(function () {
+            p.play(s + intval, intval);
+        });
     },
     addActions:function (actions, selection) {
         var count = 0;

@@ -1,7 +1,7 @@
-window.requestAnimationFrame=window.requestAnimationFrame
-    ||window.webkitRequestAnimationFrame
-    ||window.mozRequestAnimationFrame
-    ||window.msRequestAnimationFrame;
+window.requestAnimationFrame = window.requestAnimationFrame
+    || window.webkitRequestAnimationFrame
+    || window.mozRequestAnimationFrame
+    || window.msRequestAnimationFrame;
 Array.prototype.indexOf = function (val) {
     for (var i = 0; i < this.length; i++) {
         if (this[i] == val) return i;
@@ -898,4 +898,4 @@ anra.genUUID = function () {
         }
     }
     return uuid.join('');
-}
+};

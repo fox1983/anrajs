@@ -32,7 +32,7 @@
                     {id:4, name:'CIVR', type:1, bounds:[430, 80, 30, 30]},
                     {id:5, name:'CSRS', type:2, bounds:[430, 120, 40, 40]},
                     {id:6, name:'CIVR', type:2, bounds:[430, 180, 30, 30]},
-                    {id:7, name:'CSRS', type:2, bounds:[430, 220, 40, 40]},
+                    {id:7, name:'CONTAINER', type:3, bounds:[430, 220, 100, 100]},
                     {id:8, name:'测试', type:1, desc:'处理异常', bounds:[250, 250, 40, 40]
                     }
                 ]
@@ -86,31 +86,45 @@
             line.id = 3;
 
             var lineTool = new anra.gef.LinkLineTool(line);
-            link = function () {
+            linkTool = function () {
                 if (editor.getActiveTool() == lineTool) {
                     editor.setActiveTool(editor.getDefaultTool());
                 } else
                     editor.setActiveTool(lineTool);
                 return false;
             }
+            selectTool=function(){
+                editor.setActiveTool(editor.getDefaultTool());
+            }
         }
 
     </script>
     <style>
-
-        /*svg text::selection {*/
-            /*background: none;*/
-        /*}*/
+        .pltItem{
+            width:30px;
+            height:30px;
+        }
     </style>
 </head>
 <body>
 <div id="my"
      style="position: absolute;left:0px;top: 0px;width: 50%;height: 100%;background-color: rgb(13,13,13);float: left;">
     <div id="palatte" style="position: relative;top: 0;width: 10%;height: 100%;background-color: #d3d3d3;float:left">
-        <image src="balance.png" onmousedown='paint(2)' ondragstart='return false'></image>
-        <image src="system.png" onmousedown='paint(0)' ondragstart='return false'></image>
-        <image src="segment.png" onmousedown='paint(1)' ondragstart='return false'></image>
-        <button onmousedown='link()'>link</button>
+        <p></p>
+        <button class='pltItem' onmousedown='selectTool()'><image src="select.gif"></image></image></button>
+        <button class='pltItem' onmousedown='linkTool()'><image src="link.gif"></image></image></button>
+        ____________
+        <p> </p>
+        <image class='pltItem' src="balance.png" onmousedown='paint(2)' ondragstart='return false'></image>
+        <image class='pltItem' src="system.png" onmousedown='paint(0)' ondragstart='return false'></image>
+        <image class='pltItem' src="segment.png" onmousedown='paint(1)' ondragstart='return false'></image>
+        <image class='pltItem' src="question.png" onmousedown='paint(3)' ondragstart='return false'></image>
+        ____________
+        <p> </p>
+
+        <image class='containerItem' src="run.gif" onmousedown='paint(4)' ondragstart='return false'></image>
+        <image class='containerItem' src="stop.gif" onmousedown='paint(5)' ondragstart='return false'></image>
+
     </div>
 </div>
 

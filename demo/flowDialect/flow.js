@@ -9,6 +9,7 @@
 SYSTEM = 0;
 SEGMENT = 1;
 BALANCE = 2;
+CONTAINTER = 3;
 
 
 FlowEditor = anra.gef.Editor.extend({
@@ -33,6 +34,7 @@ FlowEditor = anra.gef.Editor.extend({
                 type:ACTION_SELECTION,
                 key:'delete',
                 name:'删除',
+                image:'delete.gif',
                 run:function () {
                     var selection = editor.rootEditPart.selection;
                     var cmd = this.createDeleteCommand(selection);
@@ -185,27 +187,30 @@ FlowEditor = anra.gef.Editor.extend({
 
 FlowLayoutPolicy = anra.gef.LayoutPolicy.extend({
 
-    createChildEditPolicy:function (child) {
-//        return new ChildPolicy();
-    }
 });
 
-ChildPolicy = anra.gef.AbstractEditPolicy.extend({
-    class:'ShadowPolicy',
-    showTargetFeedback:function (request) {
+
+ContainerLayoutPolicy = anra.gef.LayoutPolicy.extend({
+    createFeedback:function (ep) {
+        var f = anra.FigureUtil.createGhostFigure(ep);
+        var b = f.bounds;
+        f.setBounds({width:b.width / 2, height:b.height / 2})
+        return f;
     },
-    eraseTargetFeedback:function (request) {
-    },
-    getCommand:function (request) {
-        return new c();
-    },
-    getLayoutEditParts:function (request) {
-        return null;
+    getCreateCommand:function (request) {
+        console.log(request);
+        var model = request.event.prop.drag.model;
+        var b = model.getBounds();
+        model.setValue('bounds', [request.event.x - b[2] / 2, request.event.y - b[3] / 2, b[2], b[3]]);
+        return new anra.gef.CreateNodeCommand(this.getHost(), model);
     }
 });
 var c = anra.Command.extend({
     execute:function () {
         alert('不能移动到此处');
+    },
+    canExecute:function () {
+        return false;
     }
 });
 
@@ -225,19 +230,6 @@ var CommonNodeEditPart = anra.gef.NodeEditPart.extend({
             var finalB = {x:b[0], y:b[1], width:b[2], height:b[3] };
 
             this.figure.setBounds(finalB);
-//            var sX = (finalB.x - oldB.x) / 50;
-//            var sY = ( finalB.y - oldB.y) / 50;
-//            var figure = this.figure;
-//            var process = 0;
-//
-//            function step() {
-//                if (process++ > 50)return;
-//                figure.bounds.x += sX;
-//                figure.bounds.y += sY;
-//                figure.paint();
-//                requestAnimationFrame(step);
-//            }
-//            step();
         }
         this.figure.paint();
     },
@@ -251,6 +243,16 @@ var CommonNodeEditPart = anra.gef.NodeEditPart.extend({
         var f = new CommonFigure();
         f.setUrl(this.getImage());
         return f;
+    }
+});
+
+var ContainerEditPart = CommonNodeEditPart.extend({
+    createEditPolicies:function () {
+        this.installEditPolicy('text', new TextInfoPolicy());
+        this.installEditPolicy(anra.gef.LAYOUT_POLICY, new ContainerLayoutPolicy());
+    },
+    createFigure:function () {
+        return new ContainerFigure();
     }
 });
 
@@ -288,7 +290,8 @@ var BalanceEditPart = CommonNodeEditPart.extend({
 EditPartRegistry = {
     0:SystemEditPart,
     1:SegmentEditPart,
-    2:BalanceEditPart
+    2:BalanceEditPart,
+    3:ContainerEditPart
 };
 
 /*-------详细节点控制器定义结束-------*/
@@ -346,8 +349,27 @@ CommonFigure = anra.gef.Figure.extend(anra.svg.Image).extend({
 //        this.registAnchor({id:6, dir:anra.SOUTH, offset:-off});
 //        this.registAnchor({id:7, dir:anra.SOUTH, offset:off});
     }
-})
-;
+});
+
+ContainerFigure = anra.gef.Figure.extend({
+    init:function () {
+        var off = 8;
+        //注册anchor布局策略
+        this.registAnchors([
+            {id:0, dir:anra.EAST, offset:-off},
+            {id:1, dir:anra.EAST, offset:off},
+            {id:2, dir:anra.WEST, offset:-off},
+            {id:3, dir:anra.WEST, offset:off},
+        ]);
+    },
+    initProp:function () {
+        this.setAttribute({
+            'stroke':'black',
+            'fill':'#CCFFFF'
+        });
+        this.setOpacity(0.5);
+    }
+});
 
 
 /*-------连线定义------*/
