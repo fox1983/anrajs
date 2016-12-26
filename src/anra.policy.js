@@ -63,8 +63,8 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
     refreshFeedback:function (feedback, request, offsetX, offsetY) {
         if (feedback != null) {
             feedback.setBounds({
-                x:request.event.x - feedback.bounds.width / 2 + (offsetX == null ? 0 : offsetX),
-                y:request.event.y - feedback.bounds.height / 2 + (offsetY == null ? 0 : offsetY)
+                x:request.event.x + (offsetX == null ? 0 : offsetX),
+                y:request.event.y + (offsetY == null ? 0 : offsetY)
             });
         }
     },
@@ -193,8 +193,8 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
                 y:target.getFigure().getBounds().y
             },
             {
-                x:request.event.x - target.getFigure().getBounds().width / 2 + (offx ? offx : 0),
-                y:request.event.y - target.getFigure().getBounds().height / 2 + (offy ? offy : 0)
+                x:request.event.x  + (offx ? offx : 0),
+                y:request.event.y  + (offy ? offy : 0)
             });
     },
     getCreateCommand:function (request) {

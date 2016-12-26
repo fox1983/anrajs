@@ -286,12 +286,24 @@ var BalanceEditPart = CommonNodeEditPart.extend({
     }
 });
 
+var StartEditPart = CommonNodeEditPart.extend({
+    getImage:function () {
+        return 'run.gif'
+    }
+});
+var EndEditPart = CommonNodeEditPart.extend({
+    getImage:function () {
+        return 'stop.gif'
+    }
+});
 
 EditPartRegistry = {
     0:SystemEditPart,
     1:SegmentEditPart,
     2:BalanceEditPart,
-    3:ContainerEditPart
+    3:ContainerEditPart,
+    4:StartEditPart,
+    5:EndEditPart
 };
 
 /*-------详细节点控制器定义结束-------*/
