@@ -495,15 +495,9 @@ anra.svg.Polyline = {
         var result = '';
 
         for (var i = 0; i < this.points.length; i++) {
-            result += this.computePoint(i, l);
+            result += (i == 0 ? 'M' : 'L') + (this.points[i].x + l[0]) + ',' + (this.points[i].y + l[1]) + ' ';
         }
         return result;
-    },
-//    computePoint:function(i){
-//        return (i == 0 ? 'M' : 'L') + (this.points[i].x + l[0]) + ',' + (this.points[i].y + l[1]) + ' ';
-//    },
-    computePoint:function (i, l) {
-        return (i == 0 ? 'M' : i == 1 ? 'C' : '') + (this.points[i].x + l[0]) + ',' + (this.points[i].y + l[1]) + ' ';
     },
     getStartPoint:function () {
         return this.points == null || this.points.length == 0 ? null : this.points[0];
