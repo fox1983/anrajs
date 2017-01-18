@@ -2,20 +2,20 @@
 
 <head>
     <meta charset="utf-8">
-    <script src="../../src/Base.js"></script>
-    <script src="../../src/anra.common.js"></script>
-    <script src="../../src/anra.svg.js"></script>
-    <script src="../../src/anra.gef.js"></script>
-    <script src="../../src/anra.policy.js"></script>
-    <script src="../../src/anra.handle.js"></script>
+    <script src="../anrajs/src/Base.js"></script>
+    <script src="../anrajs/src/anra.common.js"></script>
+    <script src="../anrajs/src/anra.svg.js"></script>
+    <script src="../anrajs/src/anra.gef.js"></script>
+    <script src="../anrajs/src/anra.policy.js"></script>
+    <script src="../anrajs/src/anra.handle.js"></script>
     <script src="DynamicMap.js"></script>
     <script>
         window.onload = function() {
             var Dy = new DynamicMapEditor();
             Dy.setInput({
-                width: 25,
-                hnum: 100,
-                vnum: 100
+                width: 50,
+                hnum: 20,
+                vnum: 20
             });
             Dy.createContent("Dy");
         }
