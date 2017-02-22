@@ -1159,7 +1159,10 @@ anra.gef.MultiSelectionTool = anra.gef.Tool.extend({
         }, true);
     }
 });
-
+/**
+ * this doesnot work unless target area has registed a anra.gef.LAYOUT_POLICY（which extends anra.gef.LayoutPolicy）
+ * @type {*}
+ */
 anra.gef.CreationTool = anra.gef.Tool.extend({
     constructor:function (model) {
         this.model = model;

@@ -1,0 +1,79 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <script src="../../src/Base.js"></script>
+    <script src="../../src/anra.common.js"></script>
+    <script src="../../src/anra.svg.js"></script>
+    <script src="../../src/anra.gef.js"></script>
+    <script src="../../src/anra.layout.js"></script>
+    <script src="../../src/anra.policy.js"></script>
+    <script src="../../src/anra.handle.js"></script>
+    <script src="PolygonCentroid.js"></script>
+    <script>
+        window.onload = function () {
+            var Dy = new PolygonCentroid();
+            var x = 300;
+            var y = 200;
+//            Dy.setInput(
+//                    [
+//                        {x:x, y:y},
+//                        {x:x + 100, y:y },
+//                        {x:x + 100, y:y + 100},
+//                        {x:x, y:y + 100},
+//                        {x:x, y:y + 100},
+//                        {x:x, y:y + 100},
+//                        {x:x, y:y + 100},
+//                        {x:x, y:y}
+//                    ]
+//            );
+
+//            Dy.setInput(
+//                    [
+//                        {x:100, y:100},
+//                        {x:100, y:400},
+//                        {x:400, y:400},
+//                        {x:100, y:250},
+//                        {x:400, y:100},
+//                        {x:100, y:100}
+//                    ]
+//            );
+
+            Dy.setInput(
+                    [
+
+                        {x:150, y:200},
+                        {x:0, y:100},
+                        {x:1000, y:100},
+                        {x:150, y:200},
+                        {x:500, y:300},
+                        {x:50, y:450},
+                        {x:150, y:200}
+                    ]
+            );
+
+
+//            Dy.setInput(
+//                    [
+//                        {x:150, y:200},
+//                        {x:500, y:0},
+//                        {x:500, y:70},
+//                        {x:700, y:50},
+//                        {x:1000, y:100},
+//                        {x:600, y:200},
+//                        {x:1000, y:400},
+//                        {x:150, y:200}
+//                    ]
+//            );
+            Dy.createContent("Dy");
+        }
+
+    </script>
+</head>
+
+<body>
+<div id="Dy"
+     style="position: absolute;top: 0;margin-left: -10px;width: 100%;height: 100%;background-color: rgb(13,13,13);"></div>
+</body>
+
+</html>

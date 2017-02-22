@@ -43,12 +43,10 @@ FlowEditor = anra.gef.Editor.extend({
                     editor.rootEditPart.setSelection(null);
                 },
                 createDeleteCommand:function (node) {
-                    if (node instanceof anra.gef.NodeEditPart)
+                    if (node instanceof anra.gef.NodeEditPart||node instanceof Array)
                         return new anra.gef.DeleteNodeAndLineCommand(editor.rootEditPart, node);
                     else if (node instanceof anra.gef.LineEditPart)
                         return new anra.gef.DeleteLineCommand(editor.rootEditPart, node);
-                    else if (node instanceof Array)
-                        return new anra.gef.DeleteNodeAndLineCommand(editor.rootEditPart, node);
                 },
                 calculateEnable:function (node) {
                     return node instanceof anra.gef.NodeEditPart || node instanceof anra.gef.LineEditPart || node instanceof Array;
