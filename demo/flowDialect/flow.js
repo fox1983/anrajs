@@ -13,89 +13,86 @@ CONTAINTER = 3;
 
 
 FlowEditor = anra.gef.Editor.extend({
-    editParts:null,
-    background:'#FFFFFF',
+    editParts: null,
+    background: '#FFFFFF',
 
-    registActions:function () {
+    registActions: function () {
         var editor = this;
-        this.actionRegistry.regist({
-            id:1,
-            name:'undo',
-            type:ACTION_STACK,
-            key:'ctrl+z',
-            run:function () {
+        this.actionRegistry.regist([{
+            id: 1,
+            name: 'undo',
+            type: ACTION_STACK,
+            key: 'ctrl+z',
+            run: function () {
                 editor.cmdStack.undo();
             },
-            calculateEnable:function (node) {
-                return  editor.cmdStack.canUndo();
+            calculateEnable: function (node) {
+                return editor.cmdStack.canUndo();
             }
-        }).regist({
-                id:2,
-                type:ACTION_SELECTION,
-                key:'delete',
-                name:'删除',
-                image:'delete.gif',
-                run:function () {
-                    var selection = editor.rootEditPart.selection;
-                    var cmd = this.createDeleteCommand(selection);
-                    if (cmd != null)
-                        editor.execute(cmd);
-                    editor.rootEditPart.setSelection(null);
-                },
-                createDeleteCommand:function (node) {
-                    if (node instanceof anra.gef.NodeEditPart)
-                        return new anra.gef.DeleteNodeAndLineCommand(editor.rootEditPart, node);
-                    else if (node instanceof anra.gef.LineEditPart)
-                        return new anra.gef.DeleteLineCommand(editor.rootEditPart, node);
-                    else if (node instanceof Array)
-                        return new anra.gef.DeleteNodeAndLineCommand(editor.rootEditPart, node);
-                },
-                calculateEnable:function (node) {
-                    return node instanceof anra.gef.NodeEditPart || node instanceof anra.gef.LineEditPart || node instanceof Array;
-                }
-            }).regist({
-                id:3,
-                type:ACTION_SELECTION,
-                name:'redo',
-                key:'ctrl+y',
-                run:function () {
-                    editor.cmdStack.redo();
-                },
-                calculateEnable:function (node) {
-                    return  editor.cmdStack.canRedo();
-                }
-            }).regist({
-                id:4,
-                type:ACTION_SELECTION,
-                key:'escape',
-                run:function () {
-                    editor.setActiveTool(editor.getDefaultTool());
+        },{
+            id: 2,
+            type: ACTION_SELECTION,
+            key: 'delete',
+            name: '删除',
+            image: 'delete.gif',
+            run: function () {
+                var selection = editor.rootEditPart.selection;
+                var cmd = this.createDeleteCommand(selection);
+                if (cmd != null)
+                    editor.execute(cmd);
+                editor.rootEditPart.setSelection(null);
+            },
+            createDeleteCommand: function (node) {
+                if (node instanceof anra.gef.NodeEditPart || node instanceof Array)
+                    return new anra.gef.DeleteNodeAndLineCommand(editor.rootEditPart, node);
+                else if (node instanceof anra.gef.LineEditPart)
+                    return new anra.gef.DeleteLineCommand(editor.rootEditPart, node);
+            },
+            calculateEnable: function (node) {
+                return node instanceof anra.gef.NodeEditPart || node instanceof anra.gef.LineEditPart || node instanceof Array;
+            }
+        },{
+            id: 3,
+            type: ACTION_SELECTION,
+            name: 'redo',
+            key: 'ctrl+y',
+            run: function () {
+                editor.cmdStack.redo();
+            },
+            calculateEnable: function (node) {
+                return editor.cmdStack.canRedo();
+            }
+        },{
+            id: 4,
+            type: ACTION_SELECTION,
+            key: 'escape',
+            run: function () {
+                editor.setActiveTool(editor.getDefaultTool());
 //                    editor.cmdStack.redo();
-                }
-            }).regist({
-                id:'saveAction',
-                name:'保存',
-                type:ACTION_STACK,
-                key:'ctrl+s',
-                run:function () {
-                    editor.doSave();
-                },
-                calculateEnable:function (node) {
-                    return  editor.isDirty();
-                }
-            }).regist({
-                id:'selectAll',
-                name:'全选',
-                type:ACTION_SELECTION,
-                key:'ctrl+a',
-                run:function () {
-                    editor.rootEditPart.setSelection(editor.rootEditPart.children);
-                },
-                calculateEnable:function (node) {
-                    return  true;
-                }
-            });
-        ;
+            }
+        },{
+            id: 'saveAction',
+            name: '保存',
+            type: ACTION_STACK,
+            key: 'ctrl+s',
+            run: function () {
+                editor.doSave();
+            },
+            calculateEnable: function (node) {
+                return editor.isDirty();
+            }
+        },{
+            id: 'selectAll',
+            name: '全选',
+            type: ACTION_SELECTION,
+            key: 'ctrl+a',
+            run: function () {
+                editor.rootEditPart.setSelection(editor.rootEditPart.children);
+            },
+            calculateEnable: function (node) {
+                return true;
+            }
+        }]);
     },
     /**
      *第一步，把json输入解析为model
@@ -103,7 +100,7 @@ FlowEditor = anra.gef.Editor.extend({
      * @param input
      * @return {*}
      */
-    input2model:function (input, rootModel) {
+    input2model: function (input, rootModel) {
         var nodes = input['nodes'];
         var lines, nm, list, line, target;
         var targetCache = new Map();
@@ -114,7 +111,8 @@ FlowEditor = anra.gef.Editor.extend({
             //定义EditPart
             nm.editPartClass = EditPartRegistry[nodes[i].type];
             //设置属性
-            nm.setProperties(nodes[i]);
+            // nm.setProperties(nodes[i]);
+            nm.props = nodes[i];
             lines = nodes[i]['lines'];
 
             /*--------开始添加连线---------*/
@@ -148,7 +146,7 @@ FlowEditor = anra.gef.Editor.extend({
         //释放缓存
         targetCache = null;
     },
-    addNode:function (json) {
+    addNode: function (json) {
         var node = new anra.gef.NodeModel();
         node.setProperties(json);
         node.id = json.id;
@@ -167,9 +165,9 @@ FlowEditor = anra.gef.Editor.extend({
 
         this.cmdStack.execute(cmd);
     },
-    initRootEditPart:function (editPart) {
+    initRootEditPart: function (editPart) {
     },
-    createLine:function (json) {
+    createLine: function (json) {
         var lineModel = new anra.gef.LineModel();
         lineModel.setProperties(json);
         lineModel.id = json.id;
@@ -177,7 +175,7 @@ FlowEditor = anra.gef.Editor.extend({
         lineModel.targetTerminal = json.tTML;
         return lineModel;
     },
-    getCustomPolicies:function () {
+    getCustomPolicies: function () {
         this.put(anra.gef.LAYOUT_POLICY, new FlowLayoutPolicy());
         this.put(anra.gef.CONNECTION_POLICY, new anra.gef.LinkModPolicy());
     }
@@ -185,31 +183,30 @@ FlowEditor = anra.gef.Editor.extend({
 ;
 
 
-FlowLayoutPolicy = anra.gef.LayoutPolicy.extend({
-
-});
+FlowLayoutPolicy = anra.gef.LayoutPolicy.extend({});
 
 
 ContainerLayoutPolicy = anra.gef.LayoutPolicy.extend({
-    createFeedback:function (ep) {
+    createFeedback: function (ep) {
         var f = anra.FigureUtil.createGhostFigure(ep);
         var b = f.bounds;
-        f.setBounds({width:b.width / 2, height:b.height / 2})
+        f.bounds = {width: b.width / 2, height: b.height / 2};
         return f;
     },
-    getCreateCommand:function (request) {
+    getCreateCommand: function (request) {
         console.log(request);
         var model = request.event.prop.drag.model;
-        var b = model.getBounds();
-        model.setValue('bounds', [request.event.x - b[2] / 2, request.event.y - b[3] / 2, b[2], b[3]]);
+        var b = model.bounds;
+        // model.setValue('bounds', [request.event.x - b[2] / 2, request.event.y - b[3] / 2, b[2], b[3]]);
+        model.bounds = [request.event.x - b[2] / 2, request.event.y - b[3] / 2, b[2], b[3]];
         return new anra.gef.CreateNodeCommand(this.getHost(), model);
     }
 });
 var c = anra.Command.extend({
-    execute:function () {
+    execute: function () {
         alert('不能移动到此处');
     },
-    canExecute:function () {
+    canExecute: function () {
         return false;
     }
 });
@@ -222,24 +219,21 @@ var CommonNodeEditPart = anra.gef.NodeEditPart.extend({
     /**
      * 用于同步model和figure。
      */
-    refreshVisual:function () {
+    refreshVisual: function () {
         if (this.model != null && this.figure != null) {
-            var b = this.model.getValue('bounds');
+            var b = this.model.bounds;
+            this.figure.bounds = {x: b[0], y: b[1], width: b[2], height: b[3]};
 
-            var oldB = this.figure.bounds;
-            var finalB = {x:b[0], y:b[1], width:b[2], height:b[3] };
-
-            this.figure.setBounds(finalB);
         }
         this.figure.paint();
     },
-    createLineEditPart:function () {
+    createLineEditPart: function () {
         return new CommonLineEditPart();
     },
-    createDragTracker:function (request) {
+    createDragTracker: function (request) {
         return new anra.gef.DragTracker();
     },
-    createFigure:function () {
+    createFigure: function () {
         var f = new CommonFigure();
         f.setUrl(this.getImage());
         return f;
@@ -247,83 +241,83 @@ var CommonNodeEditPart = anra.gef.NodeEditPart.extend({
 });
 
 var ContainerEditPart = CommonNodeEditPart.extend({
-    createEditPolicies:function () {
+    createEditPolicies: function () {
         this.installEditPolicy('text', new TextInfoPolicy());
         this.installEditPolicy(anra.gef.LAYOUT_POLICY, new ContainerLayoutPolicy());
     },
-    createFigure:function () {
+    createFigure: function () {
         return new ContainerFigure();
     }
 });
 
 /*--------详细节点控制器定义--------*/
 var SystemEditPart = CommonNodeEditPart.extend({
-    getImage:function () {
+    getImage: function () {
         return "system.png";
     },
-    createEditPolicies:function () {
+    createEditPolicies: function () {
         this.installEditPolicy('text', new TextInfoPolicy());
         this.installEditPolicy(anra.gef.CONNECTION_POLICY, new anra.gef.ConnectionPolicy());
         this.installEditPolicy("selection", new anra.gef.ResizableEditPolicy());
     }
 });
 var SegmentEditPart = CommonNodeEditPart.extend({
-    getImage:function () {
+    getImage: function () {
         return "segment.png";
     },
-    createEditPolicies:function () {
+    createEditPolicies: function () {
         this.installEditPolicy('text', new TextInfoPolicy());
         this.installEditPolicy(anra.gef.CONNECTION_POLICY, new anra.gef.ConnectionPolicy());
         this.installEditPolicy("selection", new anra.gef.ResizableEditPolicy());
     }
 });
 var BalanceEditPart = CommonNodeEditPart.extend({
-    getImage:function () {
+    getImage: function () {
         return "balance.png";
     },
-    createEditPolicies:function () {
+    createEditPolicies: function () {
         this.installEditPolicy("selection", new anra.gef.ResizableEditPolicy());
     }
 });
 
 var StartEditPart = CommonNodeEditPart.extend({
-    getImage:function () {
+    getImage: function () {
         return 'run.gif'
     }
 });
 var EndEditPart = CommonNodeEditPart.extend({
-    getImage:function () {
+    getImage: function () {
         return 'stop.gif'
     }
 });
 
 EditPartRegistry = {
-    0:SystemEditPart,
-    1:SegmentEditPart,
-    2:BalanceEditPart,
-    3:ContainerEditPart,
-    4:StartEditPart,
-    5:EndEditPart
+    0: SystemEditPart,
+    1: SegmentEditPart,
+    2: BalanceEditPart,
+    3: ContainerEditPart,
+    4: StartEditPart,
+    5: EndEditPart
 };
 
 /*-------详细节点控制器定义结束-------*/
 /*-------策略------*/
 TextInfoPolicy = anra.gef.AbstractEditPolicy.extend({
-    handle:null,
-    class:'TextInfoPolicy',
-    activate:function () {
+    handle: null,
+    class: 'TextInfoPolicy',
+    activate: function () {
         this.handle = new TextHandle(this.getHost());
         this.handle.setText(this.getHost().model.getValue('name'));
         this.getHandleLayer().addChild(this.handle);
     },
-    deactivate:function () {
+    deactivate: function () {
         this.getHandleLayer().removeChild(this.handle);
     }
 });
 
 TextHandle = anra.Handle.extend(anra.svg.Text).extend({
-    refreshLocation:function (figure) {
-        this.setBounds({x:figure.bounds.x, y:figure.bounds.y + figure.bounds.height + 10}, true);
+    refreshLocation: function (figure) {
+        this.bounds = {x: figure.bounds.x, y: figure.bounds.y + figure.bounds.height + 10};
     }
 
 });
@@ -335,18 +329,18 @@ TextHandle = anra.Handle.extend(anra.svg.Text).extend({
  * @type {*}
  */
 CommonFigure = anra.gef.Figure.extend(anra.svg.Image).extend({
-    init:function () {
+    init: function () {
         var off = 8;
         //注册anchor布局策略
         this.registAnchors([
-            {id:0, dir:anra.EAST, offset:-off},
-            {id:1, dir:anra.EAST, offset:off},
-            {id:2, dir:anra.WEST, offset:-off},
-            {id:3, dir:anra.WEST, offset:off},
-            {id:4, dir:anra.NORTH, offset:-off},
-            {id:5, dir:anra.NORTH, offset:off},
-            {id:6, dir:anra.SOUTH, offset:-off},
-            {id:7, dir:anra.SOUTH, offset:off}
+            {id: 0, dir: anra.EAST, offset: -off},
+            {id: 1, dir: anra.EAST, offset: off},
+            {id: 2, dir: anra.WEST, offset: -off},
+            {id: 3, dir: anra.WEST, offset: off},
+            {id: 4, dir: anra.NORTH, offset: -off},
+            {id: 5, dir: anra.NORTH, offset: off},
+            {id: 6, dir: anra.SOUTH, offset: -off},
+            {id: 7, dir: anra.SOUTH, offset: off}
         ]);
 
 //        this.registAnchor({id:0, dir:anra.EAST, offset:-off});
@@ -364,22 +358,25 @@ CommonFigure = anra.gef.Figure.extend(anra.svg.Image).extend({
 });
 
 ContainerFigure = anra.gef.Figure.extend({
-    init:function () {
+    init: function () {
         var off = 8;
         //注册anchor布局策略
         this.registAnchors([
-            {id:0, dir:anra.EAST, offset:-off},
-            {id:1, dir:anra.EAST, offset:off},
-            {id:2, dir:anra.WEST, offset:-off},
-            {id:3, dir:anra.WEST, offset:off},
+            {id: 0, dir: anra.EAST, offset: -off},
+            {id: 1, dir: anra.EAST, offset: off},
+            {id: 2, dir: anra.WEST, offset: -off},
+            {id: 3, dir: anra.WEST, offset: off},
         ]);
     },
-    initProp:function () {
-        this.setAttribute({
-            'stroke':'black',
-            'fill':'#CCFFFF'
-        });
-        this.setOpacity(0.5);
+    initProp: function () {
+        // this.setAttribute({
+        //     'stroke':'black',
+        //     'fill':'#CCFFFF'
+        // });
+        this.attr.stroke = 'black';
+        this.attr.fill = '#CCFFFF';
+        this.style.opacity = 0.5;
+        // this.setOpacity(0.5);
     }
 });
 
@@ -387,33 +384,33 @@ ContainerFigure = anra.gef.Figure.extend({
 /*-------连线定义------*/
 
 CommonLineEditPart = anra.gef.LineEditPart.extend({
-    refreshVisual:function () {
+    refreshVisual: function () {
 
         var color = this.model.getValue('color') == null ? 'green' : this.model.getValue('color');
         this.figure.setAttribute('stroke', color);
         this.figure.paint();
     },
-    createFigure:function (model) {
+    createFigure: function (model) {
         var f = new Line(this.model);
         var e = this;
         f.addListener(anra.EVENT.MouseIn, function () {
-            f.model.setValue('color', 'red');
+            f.model.prop.color = 'red';
             e.refresh();
         });
         f.addListener(anra.EVENT.MouseOut, function () {
-            f.model.setValue('color', 'green');
+            f.model.prop.color = 'green';
             e.refresh();
         });
         return f;
     },
-    createEditPolicies:function () {
+    createEditPolicies: function () {
         this.installEditPolicy("selection", new anra.gef.LineSelectionPolicy());
     }
 });
 
 
 Line = anra.gef.Line.extend({
-        router:function (line) {
+        router: function (line) {
             if (line.points == null || line.points.length < 2)
                 return null;
 
@@ -422,13 +419,13 @@ Line = anra.gef.Line.extend({
 
             var mid = (sp.x + ep.x) / 2;
             var p1 = {
-                x:mid,
-                y:sp.y
+                x: mid,
+                y: sp.y
             };
 
             var p2 = {
-                x:mid,
-                y:ep.y
+                x: mid,
+                y: ep.y
             };
 //            var mid = (sp.y + ep.y) / 2;
 //            var p1 = {
@@ -440,31 +437,32 @@ Line = anra.gef.Line.extend({
 //                y:mid,
 //                x:ep.x
 //            };
-            return  [sp, p1, p2, ep];
+            return [sp, p1, p2, ep];
         },
-        init:function (model) {
+        init: function (model) {
             anra.gef.Line.prototype.init.call(this, model);
         },
-        createContent:function () {
+        createContent: function () {
             var marker = new anra.svg.TriangleMarker();
 //            marker.setId(this.model.hashCode());
             marker.propKey = 'color';
             marker.setFigureAttribute({
-                    fill:'white',
-                    stroke:'black'}
+                    fill: 'white',
+                    stroke: 'black'
+                }
             );
             this.setEndMarker(marker);
 
         },
-        mouseIn:function () {
+        mouseIn: function () {
         },
-        mouseOut:function () {
+        mouseOut: function () {
         },
-        initProp:function () {
+        initProp: function () {
             this.setAttribute({
-                stroke:'rgb(30,146,94)',
-                fill:'none',
-                'stroke-width':'2'
+                stroke: 'rgb(30,146,94)',
+                fill: 'none',
+                'stroke-width': '2'
             });
         }
     }

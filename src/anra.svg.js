@@ -5,10 +5,10 @@
 anra.svg = anra.svg || {};
 
 anra.svg.Util = {
-    createElement:function (tagName) {
+    createElement: function (tagName) {
         return document.createElementNS("http://www.w3.org/2000/svg", tagName);
     },
-    apply:function (container, a, v) {
+    apply: function (container, a, v) {
         if (a != null && typeof(a) == 'object')
             for (var k in a) {
                 container[k] = a[k];
@@ -17,7 +17,7 @@ anra.svg.Util = {
             container[a] = v;
         }
     },
-    applyAttr:function (container, a, v) {
+    applyAttr: function (container, a, v) {
         if (a != null && typeof(a) == 'object')
             for (var k in a) {
                 if (!(container.getAttribute(k) == a[k]))
@@ -37,28 +37,56 @@ var Util = anra.svg.Util;
  * @type {*}
  */
 anra.svg.Control = anra.Control.extend({
-    svg:null,
-    owner:null,
-    layoutData:null,
-    tagName:'rect',
-    bounds:null,
-    parent:null,
-    _attr:null,
-    _style:null,
-    ready:false,
-    enable:true,
-    defaultEvent:{'pointer-events':'visible'},
-    _init:function () {
-        this.bounds = {'x':0, 'y':0, 'width':100, 'height':100};
-        this._style = {'pointer-events':'none'};
-        if (this.init != null)this.init();
+    svg: null,
+    owner: null,
+    layoutData: null,
+    tagName: 'rect',
+    bounds: null,
+    parent: null,
+    _attr: null,
+    _style: null,
+    attr: null,
+    style: null,
+    ready: false,
+    enable: true,
+    bds: null,
+    defaultEvent: {'pointer-events': 'visible'},
+    _init: function () {
+        this.bds = {'x': 0, 'y': 0, 'width': 100, 'height': 100};
+        this._style = {'pointer-events': 'none'};
+        var t = this;
+        this.attr = new Proxy({}, {
+            get: function (target, key, receiver) {
+                return t.getAttr(key);
+            },
+            set: function (target, key, value, receiver) {
+                return t.setAttribute(key, value);
+            }
+        });
+        this.style = new Proxy({}, {
+            get: function (target, key, receiver) {
+                return t.owner.getStyle(key);
+            },
+            set: function (target, key, value, receiver) {
+                return t.setStyle(key, value);
+            }
+        });
+        Object.defineProperty(this, 'bounds', {
+            get: function () {
+                return t.bds;
+            },
+            set: function (key) {
+                t.setBounds(key);
+            }
+        });
+        if (this.init != null) this.init();
     },
-    afterRemoveListener:function () {
+    afterRemoveListener: function () {
         if (this.eventTable.size())
             this.disableEvent();
 
     },
-    setOpacity:function (opa, all) {
+    setOpacity: function (opa, all) {
         this.setStyle('opacity', opa);
         if (all && this.children) {
             for (var i = 0; i < this.children.length; i++) {
@@ -66,19 +94,19 @@ anra.svg.Control = anra.Control.extend({
             }
         }
     },
-    afterAddListener:function () {
+    afterAddListener: function () {
         if (this.eventTable.size() > 0)
             this.enableEvent();
     },
-    disableEvent:function () {
+    disableEvent: function () {
         this.enable = true;
         this.setStyle('pointer-events', 'none');
     },
-    enableEvent:function () {
+    enableEvent: function () {
         this.enable = false;
         this.setStyle(this.defaultEvent);
     },
-    applyBounds:function () {
+    applyBounds: function () {
         if (this.bounds == null)
             return;
         var l = this.locArea();
@@ -87,39 +115,39 @@ anra.svg.Control = anra.Control.extend({
         this.setAttribute('width', this.bounds.width);
         this.setAttribute('height', this.bounds.height);
     },
-    setVisible:function (visible) {
+    setVisible: function (visible) {
         this.visible = visible;
         this.setStyle({
-            visibility:visible ? 'visible' : 'hidden'
+            visibility: visible ? 'visible' : 'hidden'
         });
     },
-    createContent:function () {
+    createContent: function () {
     },
     /**
      * 绝对位置
      * @return {[x,y,width,height]}
      */
-    getClientArea:function () {
+    getClientArea: function () {
         if (this.owner == null)
             return [0, 0, 0, 0];
         return [this.fattr('x'), this.fattr('y'), this.fattr('width'), this.fattr('height')];
     },
-    attr:function (k, h) {
+    getAttr: function (k, h) {
         if (h == null || typeof(h) != 'function')
             return this.owner.getAttribute(k);
         var a = this.owner.getAttribute(k);
         return a == null ? null : h(a);
     },
-    fattr:function (k) {
-        return this.attr(k, parseFloat);
+    fattr: function (k) {
+        return this.getAttr(k, parseFloat);
     },
-    getBounds:function () {
+    getBounds: function () {
         return this.bounds;
     },
-    removeAttribute:function (k) {
+    removeAttribute: function (k) {
         this.owner.removeAttribute(k);
     },
-    setAttribute:function (a, v) {
+    setAttribute: function (a, v) {
         if (this.owner == null) {
             if (this._attr == null)
                 this._attr = {};
@@ -133,7 +161,7 @@ anra.svg.Control = anra.Control.extend({
         Util.applyAttr(this.owner, a, v);
         return this;
     },
-    setStyle:function (a, v) {
+    setStyle: function (a, v) {
         if (this.owner == null) {
             if (this._style == null)
                 this._style = {};
@@ -150,14 +178,14 @@ anra.svg.Control = anra.Control.extend({
     /**
      * 初始化属性，在构建完成后调用。
      */
-    initProp:function () {
+    initProp: function () {
 //        this.setAttribute({'fill':'white', 'stroke':'black'});
     },
-    paint:function () {
+    paint: function () {
         this.applyBounds();
         //this.repaint();
     },
-    dispose:function () {
+    dispose: function () {
         anra.Widget.prototype.dispose.call(this);
     }
 });
@@ -233,7 +261,7 @@ Control.prototype.setParent = function (s) {
 Control.prototype.setBounds = function (b) {
     if (typeof(b) == 'object') {
         for (var k in b) {
-            this.bounds[k] = b[k];
+            this.bds[k] = b[k];
         }
     }
     if (this.ready)
@@ -256,16 +284,16 @@ Control.prototype.locArea = function () {
  */
 
 var _Composite = {
-    children:null,
-    layoutManager:null,
-    selection:null,
-    setSelection:function (o) {
+    children: null,
+    layoutManager: null,
+    selection: null,
+    setSelection: function (o) {
         if (this.selection != null)
             this.selection.setSelected(false);
         this.selection = o;
         this.selection.setSelected(true);
     },
-    removeChild:function (c) {
+    removeChild: function (c) {
         if (c instanceof anra.svg.Control) {
             c.dispose();
             if (this.children != null)
@@ -277,11 +305,11 @@ var _Composite = {
             anra.Platform.error('can not remove ' + (c == null ? null : c.toString() ) + ' from Composite');
         }
     },
-    addChild:function (c, norefresh) {
+    addChild: function (c, norefresh) {
         if (this.children == null) {
             this.children = [];
         }
-        if (c instanceof  anra.svg.Control) {
+        if (c instanceof anra.svg.Control) {
             if (!this.children.contains(c)) {
                 this.children.push(c);
                 c.create();
@@ -297,10 +325,10 @@ var _Composite = {
      * DOM容器
      * @return {*}
      */
-    domContainer:function () {
+    domContainer: function () {
         return this.parent == null ? this.svg.owner : this.parent.domContainer();
     },
-    paint:function () {
+    paint: function () {
         this.applyBounds();
         if (this.layoutManager != null)
             this.layout();
@@ -310,10 +338,10 @@ var _Composite = {
                 this.children[i].paint();
             }
     },
-    layout:function () {
+    layout: function () {
         this.layoutManager.layout(this);
     },
-    removeAllChildren:function () {
+    removeAllChildren: function () {
         if (this.children != null) {
             var c = this.children.slice(0);
             for (var i = 0; i < c.length; i++) {
@@ -321,7 +349,7 @@ var _Composite = {
             }
         }
     },
-    dispose:function () {
+    dispose: function () {
         this.removeAllChildren();
         this.children = null;
         this.layoutManager = null;
@@ -336,19 +364,19 @@ var Composite = anra.svg.Composite;
  * @type {*|void}
  */
 anra.svg.Group = Composite.extend({
-    animations:null,
-    tagName:'g',
-    domContainer:function () {
+    animations: null,
+    tagName: 'g',
+    domContainer: function () {
         return this.owner;
     },
-    _init:function () {
-        if (this.init != null)this.init();
+    _init: function () {
+        if (this.init != null) this.init();
     },
-    applyBounds:function () {
+    applyBounds: function () {
     },
-    addListener:function () {
+    addListener: function () {
     },
-    create:function () {
+    create: function () {
         //重写create方法，使Group不再接收任何事件
         if (this.owner == null) {
             var o = this;
@@ -364,39 +392,39 @@ anra.svg.Group = Composite.extend({
 });
 
 anra.svg.DefineArea = Composite.extend({
-    tagName:'defs',
-    initProp:function () {
+    tagName: 'defs',
+    initProp: function () {
     },
-    domContainer:function () {
+    domContainer: function () {
         return this.owner;
     },
-    setAttribute:function () {
+    setAttribute: function () {
     },
-    setStyle:function () {
+    setStyle: function () {
     }
 });
 
 anra.svg.Marker = Composite.extend({
-    id:null,
-    figure:null,
-    tagName:'marker',
-    constructor:function () {
+    id: null,
+    figure: null,
+    tagName: 'marker',
+    constructor: function () {
         Composite.prototype.constructor.call(this);
         this.setId(anra.genUUID());
     },
-    setId:function (id) {
+    setId: function (id) {
         this.id = id;
         this.setAttribute('id', id);
     },
-    setFigureAttribute:function (attr) {
+    setFigureAttribute: function (attr) {
         this.figureAttr = attr;
         if (this.figure != null)
             this.figure.setAttribute(attr);
     },
-    domContainer:function () {
+    domContainer: function () {
         return this.owner;
     },
-    setFigure:function (figure) {
+    setFigure: function (figure) {
         if (this.figure != null)
             this.removeChild(this.figure);
         this.figure = figure;
@@ -404,65 +432,66 @@ anra.svg.Marker = Composite.extend({
         if (this.figureAttr != null)
             this.figure.setAttribute(this.figureAttr);
     },
-    propertyChanged:function (k, o, v) {
+    propertyChanged: function (k, o, v) {
         if (this.propKey != null && this.propKey == k) {
-            this.setFigureAttribute({'stroke':v});
-            this.setFigureAttribute({'fill':v});
+            this.setFigureAttribute({'stroke': v});
+            this.setFigureAttribute({'fill': v});
         }
     }
 });
 
 anra.svg.TriangleMarker = anra.svg.Marker.extend({
-    createContent:function () {
+    createContent: function () {
         var p = new anra.svg.Path();
         this.setFigure(p);
         p.setAttribute({
-            d:'M -4 0 L 5 5 L -4 10 z'
+            d: 'M -4 0 L 5 5 L -4 10 z'
         });
     },
-    _init:function () {
-        if (this.init != null)this.init();
+    _init: function () {
+        if (this.init != null) this.init();
     },
-    afterRemoveListener:function () {
+    afterRemoveListener: function () {
     },
-    afterAddListener:function () {
+    afterAddListener: function () {
     },
-    initProp:function () {
+    initProp: function () {
         this.setAttribute({
-            refX:"1",
-            refY:"5",
-            markerWidth:"6",
-            markerHeight:"6",
-            orient:"auto",
-            viewBox:"-5 0 15 15"});
+            refX: "1",
+            refY: "5",
+            markerWidth: "6",
+            markerHeight: "6",
+            orient: "auto",
+            viewBox: "-5 0 15 15"
+        });
     }
 });
 
 anra.svg.Path = anra.svg.Control.extend({
-    tagName:'path',
-    _init:function () {
-        if (this.init != null)this.init();
+    tagName: 'path',
+    _init: function () {
+        if (this.init != null) this.init();
     },
-    afterRemoveListener:function () {
+    afterRemoveListener: function () {
     },
-    afterAddListener:function () {
+    afterAddListener: function () {
     },
-    initProp:function () {
+    initProp: function () {
     }
 });
 
 anra.svg.Line = {
-    tagName:'line',
-    initProp:function () {
+    tagName: 'line',
+    initProp: function () {
         this.setAttribute({
-            stroke:'black',
-            'stroke-width':1
+            stroke: 'black',
+            'stroke-width': 1
         });
     },
-    getClientArea:function () {
+    getClientArea: function () {
         return [this.fattr('x1') - this.fattr('x2'), this.fattr('y1') - this.fattr('y2')];
     },
-    applyBounds:function () {
+    applyBounds: function () {
         var l = this.locArea();
         this.setAttribute('x1', this.bounds.x);
         this.setAttribute('x2', this.bounds.width);
@@ -473,23 +502,23 @@ anra.svg.Line = {
 
 
 anra.svg.Polyline = {
-    points:null,
-    close:false,
-    tagName:'path',
-    defaultEvent:{'pointer-events':'stroke'},
-    applyBounds:function () {
+    points: null,
+    close: false,
+    tagName: 'path',
+    defaultEvent: {'pointer-events': 'stroke'},
+    applyBounds: function () {
         var d = this.compute();
         if (d != null)
             this.setAttribute('d', d);
     },
-    initProp:function () {
+    initProp: function () {
         this.setAttribute({
-            stroke:'white',
-            fill:'none',
-            'stroke-width':1
+            stroke: 'white',
+            fill: 'none',
+            'stroke-width': 1
         });
     },
-    compute:function () {
+    compute: function () {
         if (this.points == null || this.points.length < 2)
             return null;
         var l = this.locArea();
@@ -500,10 +529,10 @@ anra.svg.Polyline = {
         
         return this.strategy(this.points, l);
     },
-    getStartPoint:function () {
+    getStartPoint: function () {
         return this.points == null || this.points.length == 0 ? null : this.points[0];
     },
-    getEndPoint:function () {
+    getEndPoint: function () {
         return this.points == null || this.points.length == 0 ? null : this.points[this.points.length - 1];
     },
     setcomputeStrategy : function(strategy) {
@@ -555,13 +584,13 @@ anra.svg.Polyline = {
  * @type {*|void}
  */
 anra.svg.Animation = Control.extend({
-    tagName:'animateTransform'
+    tagName: 'animateTransform'
 });
 
 anra.SVG = Composite.extend(anra._Display).extend(anra._EventTable).extend({
-    dispatcher:null,
-    defs:null,
-    constructor:function (id) {
+    dispatcher: null,
+    defs: null,
+    constructor: function (id) {
         this.element = document.getElementById(id);
         if (this.element != null) {
             this.create();
@@ -570,7 +599,7 @@ anra.SVG = Composite.extend(anra._Display).extend(anra._EventTable).extend({
             this.error("SVG parent can not be null");
         }
     },
-    create:function () {
+    create: function () {
         this.owner = Util.createElement('svg');
         this.owner.setAttribute('version', '1.1');
         this.owner.style.position = 'absolute';
@@ -653,24 +682,24 @@ anra.SVG = Composite.extend(anra._Display).extend(anra._EventTable).extend({
 
 anra.svg.Rect = {};
 anra.svg.Circle = {
-    tagName:'circle',
-    getClientArea:function () {
+    tagName: 'circle',
+    getClientArea: function () {
         return [this.fattr('cx'), this.fattr('cy'), this.fattr['r'] * 2];
     },
-    applyBounds:function () {
+    applyBounds: function () {
         var l = this.locArea();
         var r = this.bounds.width / 2;
         this.setAttribute({
-            r:r,
-            cx:this.bounds.x + l[0],
-            'cy':this.bounds.y + l[1]
+            r: r,
+            cx: this.bounds.x + l[0],
+            'cy': this.bounds.y + l[1]
         });
     }
 };
 anra.svg.Image = {
-    tagName:'image',
-    url:null,
-    setUrl:function (url) {
+    tagName: 'image',
+    url: null,
+    setUrl: function (url) {
         this.url = url;
         if (this.owner != null) {
             this.owner.setAttributeNS(
@@ -679,7 +708,7 @@ anra.svg.Image = {
                 url);
         }
     },
-    initProp:function () {
+    initProp: function () {
         this.owner.setAttributeNS(
             'http://www.w3.org/1999/xlink',
             'xlink:href',
@@ -691,18 +720,18 @@ anra.svg.Image = {
  * @type {*|void}
  */
 anra.svg.Text = {
-    tagName:'text',
-    text:null,
-    setText:function (text) {
+    tagName: 'text',
+    text: null,
+    setText: function (text) {
         this.text = text;
         if (this.owner != null) {
             this.owner.textContent = text;
         }
     },
-    initProp:function () {
+    initProp: function () {
         this.owner.textContent = this.text;
     },
-    create:function () {
+    create: function () {
         //此处没有注册事件分发，因为文本的事件会和anra的事件冲突
         if (this.owner == null) {
             var o = this;
@@ -716,10 +745,10 @@ anra.svg.Text = {
             };
             this.setAttribute({});
             this.setStyle({
-                '-webkit-user-select':'none',
-                '-moz-user-select':'none',
-                '-ms-user-select':'none',
-                'user-select':'none'
+                '-webkit-user-select': 'none',
+                '-moz-user-select': 'none',
+                '-ms-user-select': 'none',
+                'user-select': 'none'
             });
             this.initProp();
         }
@@ -728,11 +757,11 @@ anra.svg.Text = {
 
 
 anra.svg.Ellipse = {
-    tagName:'ellipse',
-    getClientArea:function () {
+    tagName: 'ellipse',
+    getClientArea: function () {
         return [this.fattr('cx') - this.fattr('rx'), this.fattr('cy') - this.fattr('ry')];
     },
-    applyBounds:function () {
+    applyBounds: function () {
         var l = this.locArea();
         this.setAttribute('rx', this.bounds.width / 2);
         this.setAttribute('ry', this.bounds.height / 2);
@@ -746,7 +775,7 @@ anra.svg.Ellipse = {
  * @type {*}
  */
 anra.svg.Layout = Base.extend({
-    layout:function (comp) {
+    layout: function (comp) {
     }
 });
 
@@ -759,37 +788,37 @@ count = 0;
  * @type {*}
  */
 anra.svg.EventDispatcher = Base.extend({
-    display:null,
-    constructor:function (display) {
+    display: null,
+    constructor: function (display) {
         this.display = display;
     },
-    focusTarget:null,
-    mouseState:0,
-    dispatchMouseDown:function (event) {
+    focusTarget: null,
+    mouseState: 0,
+    dispatchMouseDown: function (event) {
         this.mouseState = anra.EVENT.MouseDown;
         var e = new anra.event.Event(anra.EVENT.MouseDown);
         var location = this.getRelativeLocation(event);
         e.x = location[0];
         e.y = location[1];
         e.button = event.button;
-        e.prop = {drag:this.dragTarget, target:this.focusTarget};
+        e.prop = {drag: this.dragTarget, target: this.focusTarget};
         var widget = this.focusTarget;
         widget.notifyListeners(anra.EVENT.MouseDown, e);
 //        if (widget != widget.svg)
 //            widget.svg.notifyListeners(anra.EVENT.MouseDown, e);
 //        widget.setFocus();
     },
-    dispatchMouseClick:function (event) {
+    dispatchMouseClick: function (event) {
         this.mouseState = anra.EVENT.MouseUp;
         var e = new anra.event.Event(anra.EVENT.MouseDown);
         var location = this.getRelativeLocation(event);
         e.x = location[0];
         e.y = location[1];
-        e.prop = {drag:this.dragTarget, target:this.focusTarget};
+        e.prop = {drag: this.dragTarget, target: this.focusTarget};
         var widget = this.focusTarget;
         widget.notifyListeners(anra.EVENT.MouseClick, e);
     },
-    dispatchMouseMove:function (event) {
+    dispatchMouseMove: function (event) {
         //提高效率
         if ((++count ) % 2 != 0) {
             if (count > 101)
@@ -798,7 +827,7 @@ anra.svg.EventDispatcher = Base.extend({
         }
 
         //这玩意儿错误超多，后面考虑个完善方式，主要是拖拽物和鼠标所在容器的矛盾
-        if (this.mouseOnTarget == null)this.mouseOnTarget = this.focusTarget;
+        if (this.mouseOnTarget == null) this.mouseOnTarget = this.focusTarget;
         //模拟拖拽
         var e;
         var location = this.getRelativeLocation(event);
@@ -807,7 +836,7 @@ anra.svg.EventDispatcher = Base.extend({
             if (this.dragTarget == null) {
                 this.dragTarget = this.focusTarget;
                 e = new anra.event.Event(anra.EVENT.DragStart, location);
-                e.prop = {drag:this.dragTarget, target:this.mouseOnTarget};
+                e.prop = {drag: this.dragTarget, target: this.mouseOnTarget};
                 this.dragTarget.notifyListeners(anra.EVENT.DragStart, e);
                 if (this.dragTarget != this.mouseOnTarget && this.mouseOnTarget.notifyListeners)
                     this.mouseOnTarget.notifyListeners(anra.EVENT.DragStart, e);
@@ -825,19 +854,19 @@ anra.svg.EventDispatcher = Base.extend({
             e = new anra.event.Event(anra.EVENT.MouseDrag);
             e.x = location[0];
             e.y = location[1];
-            e.prop = {drag:this.dragTarget, target:this.mouseOnTarget};
+            e.prop = {drag: this.dragTarget, target: this.mouseOnTarget};
             this.dragTarget.notifyListeners && this.dragTarget.notifyListeners(anra.EVENT.MouseDrag, e);
             if (this.dragTarget != this.mouseOnTarget && this.mouseOnTarget.notifyListeners)
                 this.mouseOnTarget.notifyListeners(anra.EVENT.MouseDrag, e);
         }
     },
-    dispatchMouseUp:function (event, global) {
+    dispatchMouseUp: function (event, global) {
         var widget = this.mouseOnTarget;
         var location = this.getRelativeLocation(event);
         var notified = false;
         if (this.mouseState == anra.EVENT.MouseDrag) {
             var e = new anra.event.Event(anra.EVENT.DragEnd, location);
-            e.prop = {drag:this.dragTarget, target:widget};
+            e.prop = {drag: this.dragTarget, target: widget};
             e.button = event.button;
             if (this.dragTarget instanceof anra.svg.Control) {
                 this.dragTarget.notifyListeners(anra.EVENT.Dropped, e);
@@ -857,7 +886,7 @@ anra.svg.EventDispatcher = Base.extend({
         }
         this.dragTarget = null;
     },
-    dispatchMouseIn:function (event) {
+    dispatchMouseIn: function (event) {
         var location = this.getRelativeLocation(event);
         var e = new anra.event.Event(anra.EVENT.MouseIn, location);
         e.button = event.button;
@@ -865,55 +894,55 @@ anra.svg.EventDispatcher = Base.extend({
             this.mouseOnTarget = event.figure;
         event.figure.notifyListeners(anra.EVENT.MouseIn, e);
     },
-    dispatchMouseOut:function (event) {
+    dispatchMouseOut: function (event) {
         var loc = this.getRelativeLocation(event);
         if (anra.Rectangle.contains(this.focusTarget.bounds, loc[0], loc[1]))
             return;
         var e = new anra.event.Event(anra.EVENT.MouseOut, loc);
         event.figure.notifyListeners(anra.EVENT.MouseOut, e);
     },
-    dispatchMouseOutScreen:function (event) {
+    dispatchMouseOutScreen: function (event) {
 //        this.mouseState = anra.EVENT.MouseOut;
 //        this.dragTarget = null;
     },
-    dispatchDoubleClick:function (event) {
+    dispatchDoubleClick: function (event) {
         var location = this.getRelativeLocation(event);
         var e = new anra.event.Event(anra.EVENT.MouseDoubleClick, location);
         this.focusTarget.notifyListeners(anra.EVENT.MouseDoubleClick, e);
     },
-    dispatchKeyDown:function (event) {
+    dispatchKeyDown: function (event) {
         var e = new anra.event.KeyEvent(anra.EVENT.KeyDown, this.getRelativeLocation(event), event);
         //TODO 此处需要优化，考虑到底是目标还是画布来触发事件
 //        var f = this.focusTarget == null ? this.display : this.focusTarget;
         var f = this.display;
         f.notifyListeners(e.type, e);
     },
-    dispatchKeyUp:function (event) {
+    dispatchKeyUp: function (event) {
         var e = new anra.event.KeyEvent(anra.EVENT.KeyUp, this.getRelativeLocation(event), event);
 //        var f = this.focusTarget == null ? this.display : this.focusTarget;
         var f = this.display;
         f.notifyListeners(e.type, event);
     },
-    dispatchTouchStart:function (event) {
+    dispatchTouchStart: function (event) {
         var location = this.getRelativeLocation(event.touches[0]);
         var e = new anra.event.TouchEvent(anra.EVENT.TouchStart, location, event);
         this.focusTarget.notifyListeners(anra.EVENT.TouchStart, e);
     },
-    dispatchTouchMove:function (event) {
+    dispatchTouchMove: function (event) {
         var location = this.getRelativeLocation(event.touches[0]);
         if (location[0] == null)
             return;
         var e = new anra.event.TouchEvent(anra.EVENT.TouchMove, location, event);
         this.focusTarget.notifyListeners(anra.EVENT.TouchMove, e);
     },
-    dispatchTouchEnd:function (event) {
+    dispatchTouchEnd: function (event) {
         var location = this.getRelativeLocation(event.touches[0]);
         if (location[0] == null)
             return;
         var e = new anra.event.TouchEvent(anra.EVENT.TouchEnd, location, event);
         this.focusTarget.notifyListeners(anra.EVENT.TouchEnd, e);
     },
-    dispatchContextMenu:function (event) {
+    dispatchContextMenu: function (event) {
         var e = new anra.event.Event();
         var location = this.getRelativeLocation(event);
         e.x = location[0];
@@ -921,46 +950,46 @@ anra.svg.EventDispatcher = Base.extend({
         e.target = this.mouseOnTarget;
         this.focusTarget.notifyListeners(anra.EVENT.ContextMenu, e);
     },
-    setMouseTarget:function (o) {
+    setMouseTarget: function (o) {
         if (this.focusTarget != null) {
             this.focusTarget.enableEvent();
         }
         this.focusTarget = o;
     },
-    getRelativeLocation:function (event) {
+    getRelativeLocation: function (event) {
         return this.display.getRelativeLocation(event);
     }
 });
 
 anra.svg.MenuItem = Composite.extend({
-    constructor:function (action) {
+    constructor: function (action) {
         Composite.prototype.constructor.call(this)
         this.action = action;
     },
-    createContent:function () {
+    createContent: function () {
         if (this.action.image != null) {
             var image = anra.svg.Control.extend(anra.svg.Image);
             image = new image();
             image.setUrl(this.action.image);
             this.addChild(image);
-            image.setBounds({x:5, y:5, width:20, height:20});
+            image.setBounds({x: 5, y: 5, width: 20, height: 20});
         }
 
         var text = anra.svg.Control.extend(anra.svg.Text);
         text = new text();
         text.setText(this.action.name);
         this.addChild(text);
-        text.setBounds({x:30, y:20});
+        text.setBounds({x: 30, y: 20});
 
         var item = this;
         this.addListener(anra.EVENT.MouseIn, function () {
             item.setAttribute({
-                fill:'green'
+                fill: 'green'
             });
         });
         this.addListener(anra.EVENT.MouseOut, function () {
             item.setAttribute({
-                fill:'none'
+                fill: 'none'
             });
         });
         this.addListener(anra.EVENT.MouseDown, function (e) {
@@ -969,52 +998,52 @@ anra.svg.MenuItem = Composite.extend({
             item.menu.hide();
         });
     },
-    initProp:function () {
+    initProp: function () {
         this.setAttribute({
-            fill:'none',
-            stroke:'none'
+            fill: 'none',
+            stroke: 'none'
         });
     }
 });
 
 anra.svg.DefMenu = Composite.extend({
-    constructor:function (editor) {
+    constructor: function (editor) {
         Composite.prototype.constructor.call(this);
         this.editor = editor;
     },
-    domContainer:function (action) {
+    domContainer: function (action) {
         return this.owner.parentNode;
     },
-    createContent:function () {
+    createContent: function () {
         this.layoutManager = new anra.svg.FillLayout();
     },
-    initProp:function () {
+    initProp: function () {
         this.setAttribute({
-            fill:'white',
-            stroke:'black'
+            fill: 'white',
+            stroke: 'black'
         });
     },
-    addMenuItem:function (action) {
+    addMenuItem: function (action) {
         var item = new anra.svg.MenuItem(action);
         item.menu = this;
         this.addChild(item);
     },
-    clearMenuItems:function () {
+    clearMenuItems: function () {
         this.removeAllChildren();
     },
-    hide:function () {
+    hide: function () {
         this.clearMenuItems();
         this.setStyle('visibility', 'hidden');
     },
-    setOpacity:function (opa) {
+    setOpacity: function (opa) {
         this.parent.setOpacity(opa);
     },
-    show:function (selection, e) {
+    show: function (selection, e) {
         if (this.selection == selection) {
             return;
         }
         this.clearMenuItems();
-        this.setBounds({x:e.x, y:e.y});
+        this.setBounds({x: e.x, y: e.y});
         this.setStyle('visibility', 'visible');
 
         var count = this.addActions(this.editor.actionRegistry.selectionActions, selection);
@@ -1023,11 +1052,11 @@ anra.svg.DefMenu = Composite.extend({
         if (count == null)
             return;
 
-        this.setBounds({width:100, height:30 * count});
+        this.setBounds({width: 100, height: 30 * count});
         this.paint();
         this.play(0, 0.05);
     },
-    play:function (s, intval) {
+    play: function (s, intval) {
         this.setOpacity(s, true);
         if (s >= 1)return;
         var p = this;
@@ -1035,7 +1064,7 @@ anra.svg.DefMenu = Composite.extend({
             p.play(s + intval, intval);
         });
     },
-    addActions:function (actions, selection) {
+    addActions: function (actions, selection) {
         var count = 0;
         if (actions != null) {
             actions = actions.values();
