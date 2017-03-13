@@ -60,6 +60,11 @@ Array.prototype.contains = function (obj) {
     return false;
 };
 
+function isJson(obj){
+    var isjson = typeof(obj) == "object" && Object.prototype.toString.call(obj).toLowerCase() == "[object object]" && !obj.length;
+    return isjson;
+}
+
 Map = HashMap;
 Map.prototype.put = Map.prototype.set;
 

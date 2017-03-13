@@ -52,7 +52,7 @@ Base.extend = function (_instance, _static) { // subclass
 };
 
 Base.prototype = {
-    extend:function (source, value) {
+    extend: function (source, value) {
         if (arguments.length > 1) { // extending with a name/value pair
             var ancestor = this[source];
             if (ancestor && (typeof value == "function") && // overriding a method?
@@ -82,7 +82,7 @@ Base.prototype = {
             if (!Base._prototyping && typeof this != "function") {
                 extend = this.extend || extend;
             }
-            var proto = {toSource:null};
+            var proto = {toSource: null};
             // do the "toString" and other methods manually
             var hidden = ["constructor", "toString", "valueOf"];
             // if we are prototyping then include the constructor
@@ -104,14 +104,14 @@ Base.prototype = {
 
 // initialise
 Base = Base.extend({
-    constructor:function () {
+    constructor: function () {
         this.extend(arguments[0]);
     }
 }, {
-    ancestor:Object,
-    version:"1.1",
+    ancestor: Object,
+    version: "1.1",
 
-    forEach:function (object, block, context) {
+    forEach: function (object, block, context) {
         for (var key in object) {
             if (this.prototype[key] === undefined) {
                 block.call(context, object[key], key, object);
@@ -119,7 +119,7 @@ Base = Base.extend({
         }
     },
 
-    implement:function () {
+    implement: function () {
         for (var i = 0; i < arguments.length; i++) {
             if (typeof arguments[i] == "function") {
                 // if it's a function, call it
@@ -132,7 +132,7 @@ Base = Base.extend({
         return this;
     },
 
-    toString:function () {
+    toString: function () {
         return String(this.valueOf());
     }
 });
@@ -175,14 +175,14 @@ Base = Base.extend({
     }
 
     var proto = HashMap.prototype = {
-        constructor:HashMap,
+        constructor: HashMap,
 
-        get:function (key) {
+        get: function (key) {
             var data = this._data[this.hash(key)];
             return data && data[1];
         },
 
-        set:function (key, value) {
+        set: function (key, value) {
             // Store original key as well (for iteration)
             var hash = this.hash(key);
             if (!(hash in this._data)) {
@@ -191,11 +191,11 @@ Base = Base.extend({
             this._data[hash] = [key, value];
         },
 
-        multi:function () {
+        multi: function () {
             multi(this, arguments);
         },
 
-        copy:function (other) {
+        copy: function (other) {
             for (var hash in other._data) {
                 if (!(hash in this._data)) {
                     this._count++;
@@ -204,11 +204,11 @@ Base = Base.extend({
             }
         },
 
-        has:function (key) {
+        has: function (key) {
             return this.hash(key) in this._data;
         },
 
-        search:function (value) {
+        search: function (value) {
             for (var key in this._data) {
                 if (this._data[key][1] === value) {
                     return this._data[key][0];
@@ -218,7 +218,7 @@ Base = Base.extend({
             return null;
         },
 
-        remove:function (key) {
+        remove: function (key) {
             var hash = this.hash(key);
             if (hash in this._data) {
                 this._count--;
@@ -226,7 +226,7 @@ Base = Base.extend({
             }
         },
 
-        type:function (key) {
+        type: function (key) {
             var str = Object.prototype.toString.call(key);
             var type = str.slice(8, -1).toLowerCase();
             // Some browsers yield DOMWindow for null and undefined, works fine on Node
@@ -236,7 +236,7 @@ Base = Base.extend({
             return type;
         },
 
-        keys:function () {
+        keys: function () {
             var keys = [];
             this.forEach(function (_, key) {
                 keys.push(key);
@@ -244,7 +244,7 @@ Base = Base.extend({
             return keys;
         },
 
-        values:function () {
+        values: function () {
             var values = [];
             this.forEach(function (value) {
                 values.push(value);
@@ -252,21 +252,21 @@ Base = Base.extend({
             return values;
         },
 
-        count:function () {
+        count: function () {
             return this._count;
         },
 
-        clear:function () {
+        clear: function () {
             // TODO: Would Object.create(null) make any difference
             this._data = {};
             this._count = 0;
         },
 
-        clone:function () {
+        clone: function () {
             return new HashMap(this);
         },
 
-        hash:function (key) {
+        hash: function (key) {
             switch (this.type(key)) {
                 case 'undefined':
                 case 'null':
@@ -303,7 +303,7 @@ Base = Base.extend({
             }
         },
 
-        forEach:function (func, ctx) {
+        forEach: function (func, ctx) {
             for (var key in this._data) {
                 var data = this._data[key];
                 func.call(ctx || this, data[1], data[0]);
@@ -334,7 +334,7 @@ Base = Base.extend({
     function hide(obj, prop) {
         // Make non iterable if supported
         if (Object.defineProperty) {
-            Object.defineProperty(obj, prop, {enumerable:false});
+            Object.defineProperty(obj, prop, {enumerable: false});
         }
     }
 
