@@ -1,0 +1,69 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <!--Frame-->
+    <script src="../../src/Base.js"></script>
+    <script src="../../src/anra.common.js"></script>
+    <script src="../../src/anra.svg.js"></script>
+    <script src="../../src/anra.gef.js"></script>
+    <script src="../../src/anra.policy.js"></script>
+    <script src="../../src/anra.handle.js"></script>
+
+    <!--Demo-->
+    <script src="RouterDemo.EditPart.js"></script>
+    <script src="RouterDemo.js"></script>
+    <script src="RouterDemo.Model.js"></script>
+    <script src="RouterDemo.Figure.js"></script>
+    <script src="RouterDemo.Policy.js"></script>
+    <script src="RouterDemo.Point.js"></script>
+    <script src="RouterDemo.BasicRouterProcessor.js"></script>
+    <script src="RouterDemo.StrongRouterProcessor.js"></script>
+    <script src="RouterDemo.JumpRouterProcessor.js"></script>
+    <script src="RouterDemo.Util.js"></script>
+    <script src="RouterDemo.FindingTool.js"></script>
+    <script src="RouterDemo.Parameters.js"></script>
+    <!--test heap-->
+    <script src="heap.js"></script>
+    <!--dp test-->
+    <script src="ext.js"></script>
+    <script>
+        window.onload = function() {
+            var Dy = new DynamicMapEditor();
+            Dy.setInput({
+                width: 25,
+                hnum: 50,
+                vnum: 50
+            });
+            Dy.createContent("Dy");
+
+            //var s = new enter(10, 10);
+            //console.log(s._rightTable);
+            //s.toMin();
+        }
+
+    </script>
+    <style>
+        .pltItem {
+            width: 30px;
+            height: 30px;
+            margin: 3% 20%;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="Dy" style="position: absolute;top: 0px;left: 0px;width: 100%;height: 100%;background-color: rgb(13,13,13);float: left;">
+        <div id="palatte" style="position: relative;top: 0;width: 10%;height: 100%;background-color: #d3d3d3;float:left">
+            <button class='pltItem'><image src="Start.png"></image></button>
+        </div>
+        <!--<div style="width:10%;height:100%;top: 0;float:left; background:rgb(71,72,75);">-->
+        <!--<button id="" style="width:60%; height:7%; margin:3% 20%;background:rgb(91,91,91); font-size:80%; color:#F00;">按钮</button>-->
+        <!--<button id="" style="width:60%; height:7%; margin:3% 20%;background:#09C; font-size:80%; color:#F00;">按钮</button>-->
+        <!--</div>-->
+
+    </div>
+</body>
+
+</html>

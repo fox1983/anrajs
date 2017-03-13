@@ -1,0 +1,98 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="style.css" />
+    <!--Frame-->
+    <script src="../../src/Base.js"></script>
+    <script src="../../src/anra.common.js"></script>
+    <script src="../../src/anra.svg.js"></script>
+    <script src="../../src/anra.gef.js"></script>
+    <script src="../../src/anra.policy.js"></script>
+    <script src="../../src/anra.handle.js"></script>
+    <script src="../../src/anra.layout.js"></script>
+
+    <!--Demo-->
+    <script src="RouterDemo.EditPart.js"></script>
+    <script src="RouterDemo.js"></script>
+    <script src="RouterDemo.Model.js"></script>
+    <script src="RouterDemo.Figure.js"></script>
+    <script src="RouterDemo.Policy.js"></script>
+    <script src="RouterDemo.Point.js"></script>
+    <script src="RouterDemo.BasicRouterProcessor.js"></script>
+    <script src="RouterDemo.StrongRouterProcessor.js"></script>
+    <script src="RouterDemo.JumpRouterProcessor.js"></script>
+    <script src="RouterDemo.Util.js"></script>
+    <script src="RouterDemo.FindingTool.js"></script>
+    <script src="RouterDemo.Parameters.js"></script>
+    <script src="RouterDemos.Command.js"></script>
+    <!--test heap-->
+    <script src="heap.js"></script>
+    <!--dp test-->
+    <script src="ext.js"></script>
+    <script>
+        window.onload = function() {
+            var Dy = new DynamicMapEditor();
+            Dy.setInput({
+                width: 25,
+                hnum: 20,
+                vnum: 20
+            });
+            Dy.createContent("Dy");
+            largen = function() {
+                Dy.resetSize(WIDTH + 25);
+            };
+            diminish = function() {
+                Dy.resetSize(WIDTH - 25);
+            };
+            
+            clearWalls = function() {
+                Dy.clearWall();
+            };
+            
+            change = function() {
+                var objS = document.getElementById("type");
+                var i = objS.options.selectedIndex;
+                var value = objS.options[i].value;
+                ROUTER = RouterList[i];
+            };
+            
+            addWalls = function() {
+                Dy.createWalls(10);
+            };
+            
+            var obj = new testClass();
+            obj.p.xx = 4;
+            console.log(obj.p);
+        }
+    </script>
+</head>
+
+<body>
+    <div id="Dy" style="position: absolute;top: 0px;left: 0px;width: 100%;height: 100%;background-color: rgb(13,13,13);float: left;">
+        <div id="palatte" style="position: relative;top: 0;width: 10%;height: 100%;background-color: #d3d3d3;float:left">
+            <image class='pltItem' src="Start.png" onmousedown='largen()' ondragstart='return false'></image>
+            <image class='pltItem' src="Start.png" onmousedown='diminish()' ondragstart='return false'></image>
+            <image class='pltItem' src="Start.png" onmousedown='clearWalls()' ondragstart='return false'></image>
+            <image class='pltItem' src="Start.png" onmousedown='addWalls()' ondragstart='return false'></image>
+            <p> </p>
+            <select id="type" onchange="change()"> 
+                <option value="0" onfocus="change()">BFSRouter</option> 
+                <option value="1">BFS</option> 
+                <option value="2">Greed</option>
+                <option value="3">AStar</option>
+                <option value="4">DoBFS</option>
+                <option value="5">DoGreed</option>
+                <option value="6">DoAStar</option>
+                <option value="7">DoReAs</option>
+                <option value="8">Jump</option>
+                <option value="9">HeapBFS</option>
+                <option value="10">HeapGreed</option>
+                <option value="11">HeapStar</option>
+            </select>
+        </div>
+
+    </div>
+</body>
+
+</html>

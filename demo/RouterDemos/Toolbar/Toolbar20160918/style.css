@@ -1,0 +1,21 @@
+select {
+    border: solid 1px #000;
+  
+    appearance:none;
+    -moz-appearance:none;
+    -webkit-appearance:none;
+
+    padding-right: 14px;
+
+    background: url("http://ourjs.github.io/static/2015/arrow.png") no-repeat scroll right center transparent;
+
+}
+select::-ms-expand { display: none;}
+
+body{ text-align:center} 
+
+.pltItem {
+            width: 30px;
+            height: 30px;
+            margin: 3% 20%;
+        }

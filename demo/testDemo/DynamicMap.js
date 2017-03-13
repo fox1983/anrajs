@@ -380,10 +380,10 @@ CommonRouterProcessor = Base.extend({
         if (point == null)
             return;
 
-        var newPoint = [
+        var newPoint = {
             x: null,
             y: null
-        ];
+        };
         
         newPoint.x = Math.floor(point.x / MapNodeModel.width);
         newPoint.y = Math.floor(point.y / MapNodeModel.width);
@@ -395,10 +395,10 @@ CommonRouterProcessor = Base.extend({
         if (point == null)
             return;
         
-        var newPoint = [
+        var newPoint = {
             x: null,
             y: null
-        ];
+        };
         
         newPoint.x = point.x * MapNodeModel.width + MapNodeModel.width / 2;
         newPoint.y = point.y * MapNodeModel.width + MapNodeModel.width / 2;
