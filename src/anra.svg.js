@@ -533,7 +533,7 @@ anra.svg.Polyline = {
     },
     initProp: function () {
         this.setAttribute({
-            fill: 'none',
+            fill: 'none'
         });
     },
     compute: function () {

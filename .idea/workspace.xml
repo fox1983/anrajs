@@ -2,22 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="145b30c8-b58c-4ccb-a5d2-ed3de5a436c3" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/demo/flowApi/segment.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/demo/flowApi/system.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/demo/flowApi/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/taffy.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/anra.flow.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.Policy.js" afterPath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.Policy.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/astar-zoom/act.js" afterPath="$PROJECT_DIR$/demo/astar-zoom/act.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/flowDialect/flow.html" afterPath="$PROJECT_DIR$/demo/flowDialect/flow.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/flowDialect/flow.js" afterPath="$PROJECT_DIR$/demo/flowDialect/flow.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/testDemo/DynamicMap.js" afterPath="$PROJECT_DIR$/demo/testDemo/DynamicMap.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/testDemo/TestFrameWork.js" afterPath="$PROJECT_DIR$/demo/testDemo/TestFrameWork.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/anra.common.js" afterPath="$PROJECT_DIR$/src/anra.common.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/anra.gef.js" afterPath="$PROJECT_DIR$/src/anra.gef.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/anra.handle.js" afterPath="$PROJECT_DIR$/src/anra.handle.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/anra.policy.js" afterPath="$PROJECT_DIR$/src/anra.policy.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/anra.svg.js" afterPath="$PROJECT_DIR$/src/anra.svg.js" />
     </list>
     <ignored path="anrajs.iws" />
@@ -42,8 +27,11 @@
         <entry file="file://$PROJECT_DIR$/src/anra.flow.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="585">
-              <caret line="98" column="46" lean-forward="true" selection-start-line="98" selection-start-column="46" selection-end-line="98" selection-end-column="46" />
-              <folding />
+              <caret line="98" column="46" lean-forward="false" selection-start-line="98" selection-start-column="46" selection-end-line="98" selection-end-column="46" />
+              <folding>
+                <marker date="1490584913648" expanded="true" signature="4731:6378" ph="{...}" />
+                <marker date="1490584913648" expanded="true" signature="6021:6354" ph="{...}" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -52,7 +40,7 @@
         <entry file="file://$PROJECT_DIR$/demo/flowApi/index.html">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="545">
-              <caret line="122" column="0" lean-forward="true" selection-start-line="122" selection-start-column="0" selection-end-line="122" selection-end-column="0" />
+              <caret line="122" column="0" lean-forward="false" selection-start-line="122" selection-start-column="0" selection-end-line="122" selection-end-column="0" />
               <folding>
                 <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
@@ -75,18 +63,30 @@
         <entry file="file://$PROJECT_DIR$/demo/flowDialect/flow.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="225">
-              <caret line="227" column="28" lean-forward="true" selection-start-line="227" selection-start-column="28" selection-end-line="227" selection-end-column="28" />
+              <caret line="227" column="28" lean-forward="false" selection-start-line="227" selection-start-column="28" selection-end-line="227" selection-end-column="28" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="flow.html" pinned="false" current-in-tab="true">
+      <file leaf-file-name="flow.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/demo/flowDialect/flow.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="22" column="50" lean-forward="true" selection-start-line="22" selection-start-column="50" selection-end-line="22" selection-end-column="50" />
+            <state relative-caret-position="420">
+              <caret line="30" column="50" lean-forward="true" selection-start-line="30" selection-start-column="50" selection-end-line="30" selection-end-column="50" />
               <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="RouterDemo.BasicRouterProcessor.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/demo/RouterDemo/RouterDemo.BasicRouterProcessor.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding>
+                <element signature="n#!!doc" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -105,7 +105,7 @@
         <entry file="file://$PROJECT_DIR$/src/anra.policy.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="150">
-              <caret line="170" column="43" lean-forward="true" selection-start-line="170" selection-start-column="43" selection-end-line="170" selection-end-column="43" />
+              <caret line="170" column="43" lean-forward="false" selection-start-line="170" selection-start-column="43" selection-end-line="170" selection-end-column="43" />
               <folding />
             </state>
           </provider>
@@ -121,11 +121,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="anra.svg.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="anra.svg.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/anra.svg.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="16050">
-              <caret line="535" column="11" lean-forward="true" selection-start-line="535" selection-start-column="11" selection-end-line="535" selection-end-column="11" />
+            <state relative-caret-position="303">
+              <caret line="533" column="27" lean-forward="true" selection-start-line="533" selection-start-column="27" selection-end-line="533" selection-end-column="27" />
               <folding />
             </state>
           </provider>
@@ -156,7 +156,6 @@
       <find>selec</find>
       <find>addSelectionListener</find>
       <find>selection</find>
-      <find>anra.gef.SelectionPolicy</find>
       <find>anra.gef.EditPartListener</find>
       <find>editPartList</find>
       <find>addEditPart</find>
@@ -194,11 +193,11 @@
         <option value="$PROJECT_DIR$/src/anra.common.js" />
         <option value="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.Policy.js" />
         <option value="$PROJECT_DIR$/demo/flowDialect/flow.js" />
-        <option value="$PROJECT_DIR$/src/anra.svg.js" />
         <option value="$PROJECT_DIR$/src/anra.policy.js" />
         <option value="$PROJECT_DIR$/demo/flowApi/index.html" />
         <option value="$PROJECT_DIR$/src/anra.gef.js" />
         <option value="$PROJECT_DIR$/src/anra.flow.js" />
+        <option value="$PROJECT_DIR$/src/anra.svg.js" />
       </list>
     </option>
   </component>
@@ -238,70 +237,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="anrajs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="anrajs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="anrajs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="anrajs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="anrajs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="demo" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="anrajs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="anrajs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="demo" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="flowDialect" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="anrajs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="anrajs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="demo" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="flowApi" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -441,22 +376,30 @@
       <workItem from="1490144726800" duration="9338000" />
       <workItem from="1490230181976" duration="23868000" />
       <workItem from="1490317187898" duration="19626000" />
-      <workItem from="1490577065600" duration="8595000" />
+      <workItem from="1490577065600" duration="13069000" />
     </task>
+    <task id="LOCAL-00001" summary="修改API">
+      <created>1490585887951</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1490585887951</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="91943000" />
+    <option name="totallyTimeSpent" value="96417000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-9" y="-9" width="1938" height="1050" extended-state="6" />
-    <editor active="false" />
+    <frame x="-9" y="-9" width="1938" height="1050" extended-state="7" />
+    <editor active="true" />
     <layout>
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.14904863" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.14904863" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32919955" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32919955" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32919955" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -506,6 +449,10 @@
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="修改API" />
+    <option name="LAST_COMMIT_MESSAGE" value="修改API" />
+  </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <option name="time" value="2" />
@@ -513,7 +460,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/svg2gef.html" />
     <entry file="file://$PROJECT_DIR$/CustomEditor.js" />
     <entry file="file://$PROJECT_DIR$/js/anra.gef.js" />
     <entry file="file://$PROJECT_DIR$/js/anra.layout.js" />
@@ -603,14 +549,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/anra.svg.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="16050">
-          <caret line="535" column="11" lean-forward="true" selection-start-line="535" selection-start-column="11" selection-end-line="535" selection-end-column="11" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/anra.common.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="30">
@@ -622,7 +560,7 @@
     <entry file="file://$PROJECT_DIR$/src/anra.policy.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="150">
-          <caret line="170" column="43" lean-forward="true" selection-start-line="170" selection-start-column="43" selection-end-line="170" selection-end-column="43" />
+          <caret line="170" column="43" lean-forward="false" selection-start-line="170" selection-start-column="43" selection-end-line="170" selection-end-column="43" />
           <folding />
         </state>
       </provider>
@@ -638,15 +576,18 @@
     <entry file="file://$PROJECT_DIR$/src/anra.flow.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="585">
-          <caret line="98" column="46" lean-forward="true" selection-start-line="98" selection-start-column="46" selection-end-line="98" selection-end-column="46" />
-          <folding />
+          <caret line="98" column="46" lean-forward="false" selection-start-line="98" selection-start-column="46" selection-end-line="98" selection-end-column="46" />
+          <folding>
+            <marker date="1490584913648" expanded="true" signature="4731:6378" ph="{...}" />
+            <marker date="1490584913648" expanded="true" signature="6021:6354" ph="{...}" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/demo/flowApi/index.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="545">
-          <caret line="122" column="0" lean-forward="true" selection-start-line="122" selection-start-column="0" selection-end-line="122" selection-end-column="0" />
+          <caret line="122" column="0" lean-forward="false" selection-start-line="122" selection-start-column="0" selection-end-line="122" selection-end-column="0" />
           <folding>
             <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
@@ -657,15 +598,33 @@
     <entry file="file://$PROJECT_DIR$/demo/flowDialect/flow.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="225">
-          <caret line="227" column="28" lean-forward="true" selection-start-line="227" selection-start-column="28" selection-end-line="227" selection-end-column="28" />
+          <caret line="227" column="28" lean-forward="false" selection-start-line="227" selection-start-column="28" selection-end-line="227" selection-end-column="28" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/demo/flowDialect/flow.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="22" column="50" lean-forward="true" selection-start-line="22" selection-start-column="50" selection-end-line="22" selection-end-column="50" />
+        <state relative-caret-position="420">
+          <caret line="30" column="50" lean-forward="true" selection-start-line="30" selection-start-column="50" selection-end-line="30" selection-end-column="50" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/demo/RouterDemo/RouterDemo.BasicRouterProcessor.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/anra.svg.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="303">
+          <caret line="533" column="27" lean-forward="true" selection-start-line="533" selection-start-column="27" selection-end-line="533" selection-end-column="27" />
           <folding />
         </state>
       </provider>
