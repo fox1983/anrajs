@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="../../src/Base.js"></script>
+    <script src="../../src/anra.common.js"></script>
+    <script src="../../src/anra.svg.js"></script>
+    <script src="../../src/anra.gef.js"></script>
+    <script src="../../src/anra.layout.js"></script>
+    <script src="../../src/anra.policy.js"></script>
+    <script src="../../src/anra.handle.js"></script>
+    <script src="../../src/anra.flow.js"></script>
+    <script>
+
+
+        window.onload = function () {
+            off = 10;
+            var NodeConfig = {
+                canDrag: true,
+                selectable: true,
+                selected: function () {
+//                    console.log('selected')
+                },
+                unselected: function () {
+//                    console.log('unselected')
+                },
+                on: {
+                    'mousemove': function (e) {
+//                        console.log('mousemove', e.x, e.y);
+                    }
+                },
+                children: {},
+                refresh: function () {
+                    if (this.model != null && this.figure != null) {
+                        var b = this.model.bounds;
+                        this.figure.bounds = {x: b[0], y: b[1], width: b[2], height: b[3]};
+                    }
+                    this.figure.paint();
+                },
+                type: $AGEF.figure.IMAGE,
+                url: 'system.png',
+                anchor: [
+                    {id: 0, dir: anra.EAST, offset: -off},
+                    {id: 1, dir: anra.EAST, offset: off},
+                    {id: 2, dir: anra.WEST, offset: -off},
+                    {id: 3, dir: anra.WEST, offset: off},
+                    {id: 4, dir: anra.NORTH, offset: -off},
+                    {id: 5, dir: anra.NORTH, offset: off},
+                    {id: 6, dir: anra.SOUTH, offset: -off},
+                    {id: 7, dir: anra.SOUTH, offset: off}
+                ],
+                line: {
+                    router:function (line) {
+                        if (line.points == null || line.points.length < 2)
+                            return null;
+                        var sp = line.getStartPoint(), ep = line.getEndPoint();
+                        var mid = (sp.x + ep.x) / 2;
+                        var p1 = {
+                            x: mid,
+                            y: sp.y
+                        };
+
+                        var p2 = {
+                            x: mid,
+                            y: ep.y
+                        };
+                        return [sp, p1, p2, ep];
+                    },
+                    attr: {
+                        stroke: 'red',
+                        'stroke-width': 1
+                    },
+                    style: {},
+                    createFigure: function (model) {
+                        return new anra.gef.Line();
+                    },
+                    policies: {}
+                },
+                policies: {}
+            };
+            var SegConfig = {
+                refresh: function () {
+                    if (this.model != null && this.figure != null) {
+                        var b = this.model.bounds;
+                        this.figure.bounds = {x: b[0], y: b[1], width: b[2], height: b[3]};
+                    }
+                    this.figure.paint();
+                },
+                type: $AGEF.figure.IMAGE,
+                url: 'segment.png',
+                anchor: [
+                    {id: 0, dir: anra.EAST, offset: -off},
+                    {id: 1, dir: anra.EAST, offset: off},
+                    {id: 2, dir: anra.WEST, offset: -off},
+                    {id: 3, dir: anra.WEST, offset: off},
+                    {id: 4, dir: anra.NORTH, offset: -off},
+                    {id: 5, dir: anra.NORTH, offset: off},
+                    {id: 6, dir: anra.SOUTH, offset: -off},
+                    {id: 7, dir: anra.SOUTH, offset: off}
+                ]
+            };
+
+            var data = [
+                {id: 1, name: 'CAPP', type: 0, bounds: [100, 150, 40, 40]},
+                {id: 2, name: 'MNPP', type: 1, desc: 'transaction', bounds: [250, 100, 40, 40]},
+                {id: 3, name: 'TMKS', type: 1, desc: 'handle exception', bounds: [250, 200, 40, 40]},
+                {id: 4, name: 'CIVR', type: 1, bounds: [430, 60, 40, 40]},
+                {id: 5, name: 'CSRS', type: 2, bounds: [430, 140, 40, 40]},
+                {id: 6, name: 'CIVR', type: 2, bounds: [430, 180, 40, 40]},
+                {id: 7, name: 'CSRS', type: 2, bounds: [430, 260, 40, 40]}];
+
+            var line = [
+                {id: 'line1', source: 1, target: 2, exit: 0, entr: 1},
+                {id: 'line2', source: 2, target: 3, exit: 2, entr: 1},
+                {id: 'line3', source: 4, target: 2, exit: 1, entr: 2}
+            ];
+
+            editor = new $AGEF.Editor({
+                children: {
+                    0: SegConfig
+                }
+            });
+
+            editor = new $AGEF.Editor({
+                data: data,
+                line: line,
+                id: 'my',
+                name: 'EditorName',
+                key: 'id',
+                children: {
+                    0: NodeConfig,
+                    1: NodeConfig,
+                    2: SegConfig
+                },
+                commands: [{
+                    id: 0,
+                    name: 'undo',
+                    type: ACTION_STACK,
+                    key: 'ctrl+z',
+                    run: function () {
+                        this.host.undo();
+                    },
+                    check: function (node) {
+                        return this.host.canUndo();
+                    }
+                }],
+                policies: {
+                    'test': {
+                        activate: function () {
+                        }
+                    }
+                },
+                paint: function () {
+                }
+            });
+            editor.createContent('my');
+        };
+
+        function addNode() {
+            editor.addNode({id: 10, name: 'CAPP', type: 0, bounds: [120, 150, 40, 40]});
+        }
+        function removeNode() {
+            editor.removeNode(10);
+        }
+    </script>
+    <style>
+    </style>
+</head>
+<body>
+
+<div id="my"
+     style="position: absolute;left:0px;top: 0px;width: 100%;height: 100%;background-color: rgb(13,13,13);float: left;">
+    <div id="palatte" style="position: relative;top: 0;width: 10%;height: 100%;background-color: #d3d3d3;float:left">
+        <button onclick="addNode()"> add</button>
+        <button onclick="removeNode()"> remove</button>
+    </div>
+</div>
+</body>
+
+</html>

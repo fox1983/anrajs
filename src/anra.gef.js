@@ -75,19 +75,6 @@ anra.gef.Figure = anra.svg.Composite.extend({
     },
     calAnchor: function (dir, offset) {
         if (offset == null) offset = 0;
-//        switch (dir) {
-//            case anra.EAST:
-//                return {x:this.fattr('x') + this.fattr('width'), y:this.fattr('y') + this.fattr('height') / 2 + offset};
-//            case anra.SOUTH:
-//                return {x:this.fattr('x') + this.fattr('width') / 2 + offset, y:this.fattr('y') + this.fattr('height')};
-//            case anra.WEST:
-//                return {x:this.fattr('x'), y:this.fattr('y') + this.fattr('height') / 2 + offset};
-//            case anra.NORTH:
-//                return {x:this.fattr('x') + this.fattr('width') / 2 + offset, y:this.fattr('y') };
-//            case anra.CENTER:
-//                return  {x:this.fattr('x') + this.fattr('width') / 2, y:this.fattr('y') + this.fattr('height') / 2};
-//        }
-
         var b = this.bounds;
         switch (dir) {
             case anra.EAST:
@@ -163,9 +150,15 @@ anra.gef.Figure = anra.svg.Composite.extend({
             this.repaintListeners = null;
         }
     }
-})
-;
-
+});
+anra.gef.Figure.init = function (config) {
+    if (config.type == null)
+        throw 'figure config need a type like anra.svg.Circle';
+    var f = anra.gef.Figure.extend(config.type);
+    f = new f();
+    f.applyConfig(config);
+    return f;
+};
 var FLAG_ACTIVE = 1;
 var FLAG_FOCUS = 2;
 var MAX_FLAG = FLAG_FOCUS;
@@ -336,6 +329,7 @@ anra.gef.EditPart = Base.extend({
         if (this.figure == null) {
             this.figure = this.createFigure(this.model);
             this.figure.setModel(this.model);
+            this.onCreateFigure && this.onCreateFigure(this.figure);
         }
         return this.figure;
     },
@@ -343,37 +337,51 @@ anra.gef.EditPart = Base.extend({
         if (this.figure != null) {
             var _dt = this.getRoot().editor.getTopDragTracker();
             var _ep = this;
-            this.figure.addListener(anra.EVENT.MouseDown, function (e) {
+            this.figure.on(anra.EVENT.MouseDown, function (e) {
                 _dt.mouseDown(e, _ep);
             });
-            this.figure.addListener(anra.EVENT.MouseIn, function (e) {
+            this.figure.on(anra.EVENT.MouseIn, function (e) {
                 _dt.mouseIn(e, _ep);
             });
-            this.figure.addListener(anra.EVENT.MouseOut, function (e) {
+            this.figure.on(anra.EVENT.MouseOut, function (e) {
                 _dt.mouseOut(e, _ep);
             });
-            this.figure.addListener(anra.EVENT.MouseClick, function (e) {
+            this.figure.on(anra.EVENT.MouseClick, function (e) {
                 _dt.mouseClick(e, _ep);
             });
-            this.figure.addListener(anra.EVENT.DragStart, function (e) {
+            this.figure.on(anra.EVENT.DragStart, function (e) {
                 _dt.dragStart(e, _ep);
             });
-            this.figure.addListener(anra.EVENT.DragEnd, function (e) {
+            this.figure.on(anra.EVENT.DragEnd, function (e) {
                 _dt.dragEnd(e, _ep);
             });
-            this.figure.addListener(anra.EVENT.MouseDrag, function (e) {
+            this.figure.on(anra.EVENT.MouseDrag, function (e) {
                 _dt.mouseDrag(e, _ep);
             });
-            this.figure.addListener(anra.EVENT.MouseMove, function (e) {
+            this.figure.on(anra.EVENT.MouseMove, function (e) {
                 _dt.mouseMove(e, _ep);
             });
-            this.figure.addListener(anra.EVENT.MouseUp, function (e) {
+            this.figure.on(anra.EVENT.MouseUp, function (e) {
                 _dt.mouseUp(e, _ep);
             });
         }
     },
     createFigure: function (model) {
-        return new anra.gef.Figure();
+        var f;
+        if (this.config && this.config.createFigure)
+            f = this.config.createFigure.call(this, model);
+        else if (this.config)
+            f = anra.gef.Figure.init(this.config);
+        if (f == null)
+            throw ': EditPart of ' + model.props.id + ' should has a figure config or createFigure function';
+
+        if (this.config.style)
+            f.style = this.config.style;
+        if (this.config.attr)
+            f.attr = this.config.attr;
+        if (this.config.anchor)
+            f.registAnchors(this.config.anchor);
+        return f;
     },
     isActive: function () {
         return this.getFlag(FLAG_ACTIVE);
@@ -398,10 +406,21 @@ anra.gef.EditPart = Base.extend({
         this.refresh();
     },
     createEditPolicies: function () {
+        var key, p;
+        if (this.config && this.config.policies) {
+            for (key in this.config.policies) {
+                p = this.config.policies[key];
+                if (p instanceof anra.gef.Policy)
+                    this.installEditPolicy(key, p);
+                else {
+                    this.installEditPolicy(key, anra.gef.Policy.init(p));
+                }
+            }
+        }
     },
     installPolicies: function (policies) {
         for (var k in policies) {
-            this.installEditPolicy(k, new policies[k]);
+            this.installEditPolicy(k, anra.gef.Policy.init(policies[k]));
         }
     },
     installEditPolicy: function (key, editPolicy) {
@@ -828,6 +847,7 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
 
     }
 });
+
 anra.gef.RootEditPart = anra.gef.EditPart.extend({
     layers: null,
     class: 'RootEditPart',
@@ -842,6 +862,16 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
     setSelection: function (o) {
         if (this.editor != null)
             this.editor.hideContextMenu(o);
+        if (this.selection instanceof Array && o instanceof Array && this.selection.length == o.length) {
+            var f = true;
+            for (i = 0; i < o.length; i++) {
+                if (this.selection[i] != o[i]) {
+                    f = false;
+                    break;
+                }
+            }
+            if (f)return;
+        }
         if (this.selection == o || (this.selection != null && this.selection instanceof Array && this.selection.contains(o)))return;
         this.clearSelection();
         this.selection = o;
@@ -927,11 +957,12 @@ anra.gef.RootEditPart = anra.gef.EditPart.extend({
     _initFigureListeners: function () {
         anra.gef.EditPart.prototype._initFigureListeners.call(this);
         var root = this;
-        this.figure.addListener(anra.EVENT.ContextMenu, function (e) {
+        this.figure.on(anra.EVENT.ContextMenu, function (e) {
             root.editor.showContextMenu(root.selection, e);
         });
     }
 });
+
 anra.gef.RootEditPart.PrimaryLayer = "Primary_Layer";
 anra.gef.RootEditPart.HandleLayer = "Handle_Layer";
 anra.gef.RootEditPart.FeedbackLayer = "Feedback_Layer";
@@ -1017,9 +1048,6 @@ anra.gef.LineEditPart = anra.gef.EditPart.extend({
     },
     getRoot: function () {
         return this.parent.getRoot();
-    },
-    createFigure: function () {
-        return new anra.gef.Line();
     },
     refresh: function () {
         if (this.figure == null) {
@@ -1660,7 +1688,13 @@ anra.gef.DeleteNodeAndLineCommand = anra.ChainedCompoundCommand.extend({
 anra.gef.DeleteNodeCommand = anra.Command.extend({
     constructor: function (root, selection) {
         this.root = root;
-        this.node = selection;
+        if (selection instanceof anra.gef.EditPart)
+            this.node = selection;
+        else if (selection instanceof anra.gef.BaseModel) {
+            this.node = this.root.getEditPart(selection);
+            if (this.node == null)
+                throw 'can not delete model ' + selection.id;
+        }
     },
     canExecute: function () {
         return this.root != null && this.node != null;
@@ -1890,8 +1924,12 @@ anra.gef.Policy = Base.extend({
         return this.editPart;
     },
     activate: function () {
+        if (this.config && this.config.activate)
+            this.config.activate.call(this);
     },
     deactivate: function () {
+        if (this.config && this.config.deactivate)
+            this.config.deactivate.call(this);
     },
     validatePolicy: function () {
     },
@@ -1905,14 +1943,24 @@ anra.gef.Policy = Base.extend({
         return this.getHost().getRoot().getLayer(anra.gef.RootEditPart.FeedbackLayer);
     },
     eraseSourceFeedback: function (request) {
+        if (this.config && this.config.eraseSourceFeedback)
+            this.config.eraseSourceFeedback.call(this, request);
     },
     eraseTargetFeedback: function (request) {
+        if (this.config && this.config.eraseTargetFeedback)
+            this.config.eraseTargetFeedback.call(this, request);
     },
     showSourceFeedback: function (request) {
+        if (this.config && this.config.showSourceFeedback)
+            this.config.showSourceFeedback.call(this, request);
     },
     showTargetFeedback: function (request) {
+        if (this.config && this.config.showSourceFeedback)
+            this.config.showSourceFeedback.call(this, request);
     },
     getCommand: function (request) {
+        if (this.config && this.config.getCommand)
+            return this.config.getCommand.call(this, request);
     },
     removeHandle: function (figure) {
         this.getHandleLayer().removeChild(figure);
@@ -1927,6 +1975,16 @@ anra.gef.Policy = Base.extend({
         this.getFeedbackLayer().addChild(figure);
     }
 });
+anra.gef.Policy.init = function (config) {
+    if (typeof(config) == 'function')
+        return new config();
+    if (typeof(config) == 'object') {
+        var p = new anra.gef.Policy();
+        p.config = config;
+        return p;
+    }
+    throw 'can not init policy :' + config
+};
 anra.gef.LAYOUT_POLICY = 'layoutPolicy';
 anra.gef.CONNECTION_POLICY = 'CONNECTION_POLICY';
 
@@ -1969,7 +2027,7 @@ anra.gef.Editor = Base.extend({
         this.setActiveTool(this.getDefaultTool());
 
         this.element = document.getElementById(parentId);
-        this.actionRegistry = new anra.ActionRegistry();
+        this.actionRegistry = new anra.ActionRegistry(this);
         this.registActions();
         if (this.element == null) {
             anra.Platform.error('GEF的父级元素不能为空');
@@ -2219,11 +2277,10 @@ anra.gef.PathLine = anra.gef.Line.extend({
 
 anra.gef.BaseModel = Base.extend({
     pls: null,
-    prop: null,
     constructor: function () {
         this.properties = new Map();
         var t = this;
-        this.prop = new Proxy({}, {
+        var prop = new Proxy({}, {
             get: function (target, key, receiver) {
                 return t.getValue(key);
             },
@@ -2232,8 +2289,8 @@ anra.gef.BaseModel = Base.extend({
             }
         });
         Object.defineProperty(this, 'props', {
-            get: function () {
-                return t.properties.values();
+            get: function (key) {
+                return prop;
             },
             set: function (key, value) {
                 return t.setProperties(key, value);

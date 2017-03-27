@@ -26,7 +26,7 @@ FlowEditor = anra.gef.Editor.extend({
             run: function () {
                 editor.cmdStack.undo();
             },
-            calculateEnable: function (node) {
+            check: function (node) {
                 return editor.cmdStack.canUndo();
             }
         },{
@@ -48,7 +48,7 @@ FlowEditor = anra.gef.Editor.extend({
                 else if (node instanceof anra.gef.LineEditPart)
                     return new anra.gef.DeleteLineCommand(editor.rootEditPart, node);
             },
-            calculateEnable: function (node) {
+            check: function (node) {
                 return node instanceof anra.gef.NodeEditPart || node instanceof anra.gef.LineEditPart || node instanceof Array;
             }
         },{
@@ -59,7 +59,7 @@ FlowEditor = anra.gef.Editor.extend({
             run: function () {
                 editor.cmdStack.redo();
             },
-            calculateEnable: function (node) {
+            check: function (node) {
                 return editor.cmdStack.canRedo();
             }
         },{
@@ -78,7 +78,7 @@ FlowEditor = anra.gef.Editor.extend({
             run: function () {
                 editor.doSave();
             },
-            calculateEnable: function (node) {
+            check: function (node) {
                 return editor.isDirty();
             }
         },{
@@ -89,7 +89,7 @@ FlowEditor = anra.gef.Editor.extend({
             run: function () {
                 editor.rootEditPart.setSelection(editor.rootEditPart.children);
             },
-            calculateEnable: function (node) {
+            check: function (node) {
                 return true;
             }
         }]);
@@ -183,8 +183,8 @@ FlowEditor = anra.gef.Editor.extend({
 ;
 
 
-FlowLayoutPolicy = anra.gef.LayoutPolicy.extend({});
-
+FlowLayoutPolicy = anra.gef.LayoutPolicy.extend({
+});
 
 ContainerLayoutPolicy = anra.gef.LayoutPolicy.extend({
     createFeedback: function (ep) {
@@ -195,7 +195,7 @@ ContainerLayoutPolicy = anra.gef.LayoutPolicy.extend({
     },
     getCreateCommand: function (request) {
         console.log(request);
-        var model = request.event.prop.drag.model;
+        var model = request.event.props.drag.model;
         var b = model.bounds;
         // model.setValue('bounds', [request.event.x - b[2] / 2, request.event.y - b[3] / 2, b[2], b[3]]);
         model.bounds = [request.event.x - b[2] / 2, request.event.y - b[3] / 2, b[2], b[3]];
@@ -259,6 +259,7 @@ var SystemEditPart = CommonNodeEditPart.extend({
         this.installEditPolicy('text', new TextInfoPolicy());
         this.installEditPolicy(anra.gef.CONNECTION_POLICY, new anra.gef.ConnectionPolicy());
         this.installEditPolicy("selection", new anra.gef.ResizableEditPolicy());
+        this.installEditPolicy('DialogPolicy',new DialogPolicy());
     }
 });
 var SegmentEditPart = CommonNodeEditPart.extend({
@@ -300,6 +301,8 @@ EditPartRegistry = {
     5: EndEditPart
 };
 
+
+
 /*-------详细节点控制器定义结束-------*/
 /*-------策略------*/
 TextInfoPolicy = anra.gef.AbstractEditPolicy.extend({
@@ -321,6 +324,18 @@ TextHandle = anra.Handle.extend(anra.svg.Text).extend({
     }
 
 });
+
+
+DialogPolicy=anra.gef.AbstractEditPolicy.extend({
+    activate: function () {
+        this.getHostFigure().on(anra.EVENT.MouseDoubleClick, function () {
+            // alert(123);
+        });
+    },
+    deactivate: function () {
+    }
+});
+
 
 
 /**
@@ -393,18 +408,25 @@ CommonLineEditPart = anra.gef.LineEditPart.extend({
     createFigure: function (model) {
         var f = new Line(this.model);
         var e = this;
-        f.addListener(anra.EVENT.MouseIn, function () {
-            f.model.prop.color = 'red';
+        f.on(anra.EVENT.MouseIn, function () {
+            f.model.props.color = 'red';
             e.refresh();
         });
-        f.addListener(anra.EVENT.MouseOut, function () {
-            f.model.prop.color = 'green';
+        f.on(anra.EVENT.MouseOut, function () {
+            f.model.props.color = 'green';
             e.refresh();
         });
         return f;
     },
     createEditPolicies: function () {
         this.installEditPolicy("selection", new anra.gef.LineSelectionPolicy());
+        this.installEditPolicy(anra.gef.LAYOUT_POLICY, new LineInsertNodePolicy());
+    }
+});
+
+LineInsertNodePolicy = anra.gef.LayoutPolicy.extend({
+    getCreateCommand: function (request) {
+        return new anra.Command();
     }
 });
 

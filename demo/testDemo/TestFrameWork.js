@@ -274,11 +274,11 @@ ClickGridPolicy = anra.gef.Policy.extend({
             //host.model.flag = (host.model.flag == MapNodeModel.TRANSITABlLE) ? MapNodeModel.IMPASSABILITY : MapNodeModel.TRANSITABlLE;
             host.refresh();
         };
-        this.getHost().getFigure().addListener(anra.EVENT.MouseDown, this.listener);
+        this.getHost().getFigure().on(anra.EVENT.MouseDown, this.listener);
     },
 
     deactivate: function () {
-        this.getHost().getFigure().removeListener(anra.EVENT.MouseDown, this.listener);
+        this.getHost().getFigure().off(anra.EVENT.MouseDown, this.listener);
     }
 });
 
@@ -348,11 +348,11 @@ AddLinePolicy = anra.gef.Policy.extend({
                         var s = ep.getRoot().getEditPart(ep.editor.source);*/
 
         }
-        this.getHost().getFigure().addListener(anra.EVENT.MouseUp, this.listener);
+        this.getHost().getFigure().on(anra.EVENT.MouseUp, this.listener);
     },
 
     deactivate: function () {
-        this.getHost().getFigure().removeListener(anra.EVENT.MouseUp, this.listener);
+        this.getHost().getFigure().off(anra.EVENT.MouseUp, this.listener);
     }
 });
 

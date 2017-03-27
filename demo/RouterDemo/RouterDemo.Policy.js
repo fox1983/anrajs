@@ -34,10 +34,10 @@ CreateWallPolicy = anra.gef.Policy.extend({
 
             host.refresh();
         };
-        this.getHost().getFigure().addListener(anra.EVENT.MouseDown, this.listener);
+        this.getHost().getFigure().on(anra.EVENT.MouseDown, this.listener);
     },
     deactivate: function () {
-        this.getHost().getFigure().removeListener(anra.EVENT.MouseDown, this.listener);
+        this.getHost().getFigure().off(anra.EVENT.MouseDown, this.listener);
     }
 });
 
@@ -50,10 +50,10 @@ ClickDestroyPolicy = anra.gef.Policy.extend({
             MapStruct.wallStruct.remove(host.model.id);
             host.getRoot().refresh();
         }
-        this.getHost().getFigure().addListener(anra.EVENT.MouseDown, this.listener);
+        this.getHost().getFigure().on(anra.EVENT.MouseDown, this.listener);
     },
     deactivate: function () {
-        this.getHost().getFigure().removeListener(anra.EVENT.MouseDown, this.listener);
+        this.getHost().getFigure().off(anra.EVENT.MouseDown, this.listener);
     }
 });
 
@@ -62,10 +62,10 @@ RouterPolicy = anra.gef.Policy.extend({
     activate: function () {
         this.initProcessor(new ROUTER());
         this.initListener();
-        this.getHost().getFigure().addListener(anra.EVENT.MouseUp, this.listener);
+        this.getHost().getFigure().on(anra.EVENT.MouseUp, this.listener);
     },
     deactivate: function () {
-        this.getHost().getFigure().removeListener(anra.EVENT.MouseUp, this.listener);
+        this.getHost().getFigure().off(anra.EVENT.MouseUp, this.listener);
     },
     initProcessor: function (routerProcessor) {
         if (!routerProcessor instanceof BasicRouterProcessor)
@@ -146,10 +146,10 @@ RouterPolicy = anra.gef.Policy.extend({
 DestroyRouterPolicy = anra.gef.Policy.extend({
     activate: function () {
         this.initListener();
-        this.getHost().getFigure().addListener(anra.EVENT.MouseUp, this.listener);
+        this.getHost().getFigure().on(anra.EVENT.MouseUp, this.listener);
     },
     deactivate: function () {
-        this.getHost().getFigure().removeListener(anra.EVENT.MouseUp, this.listener);
+        this.getHost().getFigure().off(anra.EVENT.MouseUp, this.listener);
     },
     initListener: function () {
         var policy = this;

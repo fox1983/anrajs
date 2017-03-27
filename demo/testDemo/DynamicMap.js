@@ -413,11 +413,11 @@ CreateWallPolicy = anra.gef.Policy.extend({
 
             host.refresh();
         };
-        this.getHost().getFigure().addListener(anra.EVENT.MouseDown, this.listener);
+        this.getHost().getFigure().on(anra.EVENT.MouseDown, this.listener);
 
     },
     deactivate: function () {
-        this.getHost().getFigure().removeListener(anra.EVENT.MouseDown, this.listener);
+        this.getHost().getFigure().off(anra.EVENT.MouseDown, this.listener);
     }
 });
 
@@ -429,10 +429,10 @@ ClickDestroyPolicy = anra.gef.Policy.extend({
             MapStruct.struct.remove(host.model.getValue('x') + '_' + host.model.getValue('y'));
             host.getRoot().refresh();
         }
-        this.getHost().getFigure().addListener(anra.EVENT.MouseDown, this.listener);
+        this.getHost().getFigure().on(anra.EVENT.MouseDown, this.listener);
     },
     deactivate: function () {
-        this.getHost().getFigure().removeListener(anra.EVENT.MouseDown, this.listener);
+        this.getHost().getFigure().off(anra.EVENT.MouseDown, this.listener);
     }
 });
 
@@ -467,10 +467,10 @@ CreatePathPolicy = anra.gef.Policy.extend({
             s.refresh();
             t.refresh();
         }
-        this.getHost().getFigure().addListener(anra.EVENT.MouseUp, this.listener);
+        this.getHost().getFigure().on(anra.EVENT.MouseUp, this.listener);
     },
     deactivate: function () {
-        this.getHost().getFigure().removeListener(anra.EVENT.MouseUp, this.listener);
+        this.getHost().getFigure().off(anra.EVENT.MouseUp, this.listener);
     }
 });
 
@@ -607,10 +607,10 @@ CreatePathPolicy = anra.gef.Policy.extend({
         this.initProcessor(new SingleASRouterProcessor());
         //this.initProcessor(new DyDoubleAStarRouterProcessor());
         this.initListener();
-        this.getHost().getFigure().addListener(anra.EVENT.MouseUp, this.listener);
+        this.getHost().getFigure().on(anra.EVENT.MouseUp, this.listener);
     },
     deactivate: function () {
-        this.getHost().getFigure().removeListener(anra.EVENT.MouseUp, this.listener);
+        this.getHost().getFigure().off(anra.EVENT.MouseUp, this.listener);
     }
 });
 

@@ -199,10 +199,10 @@ ClickPolicy = anra.gef.Policy.extend({
 
             ep.getRoot().refresh();
         };
-        this.getHost().figure.addListener(anra.EVENT.MouseDown, this.listener);
+        this.getHost().figure.on(anra.EVENT.MouseDown, this.listener);
     },
     deactivate:function () {
-        this.getHost().figure.removeListener(anra.EVENT.MouseDown, this.listener);
+        this.getHost().figure.off(anra.EVENT.MouseDown, this.listener);
     }
 });
 
@@ -215,10 +215,10 @@ RemoveLinePolicy = anra.gef.Policy.extend({
             var linePart = ep.getRoot().getEditPart(line);
             linePart.unregister();
         };
-        this.getHost().figure.addListener(anra.EVENT.MouseUp, this.listener);
+        this.getHost().figure.on(anra.EVENT.MouseUp, this.listener);
     },
     deactivate:function () {
-        this.getHost().figure.removeListener(anra.EVENT.MouseUp, this.listener);
+        this.getHost().figure.off(anra.EVENT.MouseUp, this.listener);
     }
 });
 
@@ -235,9 +235,9 @@ AddLinePolicy = anra.gef.Policy.extend({
             s.refresh();
             t.refresh();
         };
-        this.getHost().figure.addListener(anra.EVENT.MouseUp, this.listener);
+        this.getHost().figure.on(anra.EVENT.MouseUp, this.listener);
     },
     deactivate:function () {
-        this.getHost().figure.removeListener(anra.EVENT.MouseUp, this.listener);
+        this.getHost().figure.off(anra.EVENT.MouseUp, this.listener);
     }
 });

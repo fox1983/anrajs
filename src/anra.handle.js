@@ -34,34 +34,34 @@ anra.Handle = Control.extend({
     initListeners:function () {
         var _dt = this.editPart.getRoot().editor.getTopDragTracker();
         var _ep = this;
-        this.addListener(anra.EVENT.MouseDown, function (e) {
+        this.on(anra.EVENT.MouseDown, function (e) {
             _dt.mouseDown(e, _ep);
         });
-        this.addListener(anra.EVENT.MouseIn, function (e) {
+        this.on(anra.EVENT.MouseIn, function (e) {
             _dt.mouseIn(e, _ep);
         });
-        this.addListener(anra.EVENT.MouseOut, function (e) {
+        this.on(anra.EVENT.MouseOut, function (e) {
             _dt.mouseOut(e, _ep);
         });
-        this.addListener(anra.EVENT.MouseClick, function (e) {
+        this.on(anra.EVENT.MouseClick, function (e) {
             _dt.mouseClick(e, _ep);
         });
-        this.addListener(anra.EVENT.DragStart, function (e) {
+        this.on(anra.EVENT.DragStart, function (e) {
             _dt.dragStart(e, _ep);
         });
-        this.addListener(anra.EVENT.DragEnd, function (e) {
+        this.on(anra.EVENT.DragEnd, function (e) {
             _dt.dragEnd(e, _ep);
         });
-        this.addListener(anra.EVENT.MouseDrag, function (e) {
+        this.on(anra.EVENT.MouseDrag, function (e) {
             _dt.mouseDrag(e, _ep);
         });
-        this.addListener(anra.EVENT.MouseMove, function (e) {
+        this.on(anra.EVENT.MouseMove, function (e) {
             _dt.mouseMove(e, _ep);
         });
-        this.addListener(anra.EVENT.MouseUp, function (e) {
+        this.on(anra.EVENT.MouseUp, function (e) {
             _dt.mouseUp(e, _ep);
         });
-        this.addListener(anra.EVENT.Dropped, function (e) {
+        this.on(anra.EVENT.Dropped, function (e) {
             _dt.dragDropped(e, _ep);
         });
     },
@@ -78,7 +78,7 @@ anra.gef.LineHandle = anra.Handle.extend({
         this.style = style;
     },
     _init:function () {
-        this.bounds = {'x':0, 'y':0, 'width':100, 'height':100};
+        this.bds = {'x':0, 'y':0, 'width':100, 'height':100};
         if (this.init != null)this.init();
     },
     dragStart:function (e, p) {
@@ -137,27 +137,27 @@ anra.ResizeHandle = Control.extend({
                 'fill':'#FFFFFF'
             });
 //            var dt = this.getResizeTracker(direction);
-//            this.addListener(anra.EVENT.MouseDown, function (e) {
+//            this.on(anra.EVENT.MouseDown, function (e) {
 //                if (dt != null)
 //                    dt.mouseDown(e, editPart);
 //            });
-//            this.addListener(anra.EVENT.DragStart, function (e) {
+//            this.on(anra.EVENT.DragStart, function (e) {
 //                if (dt != null)
 //                    dt.dragStart(e, editPart);
 //            });
-//            this.addListener(anra.EVENT.DragEnd, function (e) {
+//            this.on(anra.EVENT.DragEnd, function (e) {
 //                if (dt != null)
 //                    dt.dragEnd(e, editPart);
 //            });
-//            this.addListener(anra.EVENT.MouseDrag, function (e) {
+//            this.on(anra.EVENT.MouseDrag, function (e) {
 //                if (dt != null)
 //                    dt.mouseDrag(e, editPart);
 //            });
-//            this.addListener(anra.EVENT.MouseUp, function (e) {
+//            this.on(anra.EVENT.MouseUp, function (e) {
 //                if (dt != null)
 //                    dt.mouseUp(e, editPart);
 //            });
-//            this.addListener(anra.EVENT.MouseClick, function (e) {
+//            this.on(anra.EVENT.MouseClick, function (e) {
 //                if (dt != null&&dt.mouseClick!=null)
 //                    dt.mouseClick(e, editPart);
 //            });

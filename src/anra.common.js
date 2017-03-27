@@ -60,7 +60,7 @@ Array.prototype.contains = function (obj) {
     return false;
 };
 
-function isJson(obj){
+function isJson(obj) {
     var isjson = typeof(obj) == "object" && Object.prototype.toString.call(obj).toLowerCase() == "[object object]" && !obj.length;
     return isjson;
 }
@@ -75,10 +75,10 @@ Map.prototype.put = Map.prototype.set;
  *
  */
 var anra = anra || {
-    common:function () {
-    },
-    util:{}
-};
+        common: function () {
+        },
+        util: {}
+    };
 
 anra.EAST = 0x1;
 anra.WEST = 0x1 << 1;
@@ -99,8 +99,8 @@ SELECTED_NONE = 1;
 SELECTED_PRIMARY = 2;
 /*图片加载器，用于内存管理*/
 anra.ImageRegistry = Base.extend({
-    images:new Map(),
-    regist:function (imageURL) {
+    images: new Map(),
+    regist: function (imageURL) {
         var img = this.images.get(imageURL);
         if (img == null) {
             img = new Image();
@@ -109,7 +109,7 @@ anra.ImageRegistry = Base.extend({
         }
         return img;
     },
-    isLoaded:function (imageURL) {
+    isLoaded: function (imageURL) {
         var img = this.images.get(imageURL);
         if (img == null)
             img = this.regist(imageURL);
@@ -117,10 +117,10 @@ anra.ImageRegistry = Base.extend({
             return true;
         return false;
     },
-    get:function (imageURL) {
+    get: function (imageURL) {
         return this.images.get(imageURL);
     },
-    clear:function () {
+    clear: function () {
         this.images.clear();
     }
 });
@@ -132,11 +132,11 @@ anra.ImageRegistry = new anra.ImageRegistry();
  *全局使用
  */
 anra.Platform = {
-    pool:new Map(),
-    ready:false,
-    focus:null,
-    displayList:[],
-    regist:function (key, object) {
+    pool: new Map(),
+    ready: false,
+    focus: null,
+    displayList: [],
+    regist: function (key, object) {
         var list = this.pool.get(key);
         if (list == null) {
             list = [];
@@ -146,7 +146,7 @@ anra.Platform = {
         if (!this.ready)
             this.init();
     },
-    init:function () {
+    init: function () {
         //TODO 全局事件
         var p = this;
         window.addEventListener('keydown', function (event) {
@@ -168,20 +168,20 @@ anra.Platform = {
         });
         this.ready = true;
     },
-    get:function (key) {
+    get: function (key) {
         return this.pool.get(key);
     },
-    unregist:function (key) {
+    unregist: function (key) {
         this.pool.delete(key);
     },
-    getCurrentScene:function () {
+    getCurrentScene: function () {
         var canvas = this.get(this.DISPLAY);
         return canvas.scenes[canvas.currentScene];
     },
-    getDisplay:function () {
+    getDisplay: function () {
         return this.focus == null ? this.get(this.DISPLAY)[0] : this.focus;
     },
-    error:function (e) {
+    error: function (e) {
         this.getDisplay().error(e);
     }
 };
@@ -191,15 +191,15 @@ anra.Platform = {
  * @type {Object}
  */
 anra.Rectangle = {
-    contains:function (rect, x, y) {
+    contains: function (rect, x, y) {
         if (rect == null)
             return false;
         return (x >= rect.x) && (y >= rect.y) && x < (rect.x + rect.width) && y < (rect.y + rect.height);
     },
-    observe:function (r1, r2) {
+    observe: function (r1, r2) {
         return (r1.x < r2.x) && (r1.y < r2.y ) && ( r1.x + r1.width > r2.x + r2.width) && ( r1.y + r1.height > r2.y + r2.height);
     },
-    distance:function (r1, r2) {
+    distance: function (r1, r2) {
         return Math.sqrt((r1[0] - r2[0]) * (r1[0] - r2[0]) + (r1[1] - r2[1]) * (r1[1] - r2[1]));
     }
 };
@@ -209,23 +209,23 @@ anra.Platform.PAINTER = 1;
 
 
 anra._EventTable = {
-    addListener:function (eventType, listener) {
-        if (listener == null)anra.Platform.getDisplay().error("listener can not be null");
-        if (this.eventTable == null)this.eventTable = new anra.event.EventTable();
+    on: function (eventType, listener) {
+        if (listener == null) anra.Platform.getDisplay().error("listener can not be null");
+        if (this.eventTable == null) this.eventTable = new anra.event.EventTable();
         this.eventTable.hook(eventType, listener);
-        if (this.afterAddListener != null)this.afterAddListener();
+        if (this.afterAddListener != null) this.afterAddListener();
     },
-    removeListener:function (eventType, listener) {
-        if (listener == null)anra.Platform.getDisplay().error("listener can not be null");
+    off: function (eventType, listener) {
+        if (listener == null) anra.Platform.getDisplay().error("listener can not be null");
         if (this.eventTable == null)return;
         this.eventTable.unhook(eventType, listener);
-        if (this.afterRemoveListener != null)this.afterRemoveListener();
+        if (this.afterRemoveListener != null) this.afterRemoveListener();
     },
-    dispose:function () {
+    dispose: function () {
         if (this.eventTable != null)
             this.eventTable.dispose();
     },
-    notifyListeners:function (eventType, event, isGlobalEvent) {
+    notifyListeners: function (eventType, event, isGlobalEvent) {
         if (this.parent != null && !isGlobalEvent && anra.BubbleEvent.contains(eventType)) {
             var ls = this.eventTable == null ? null : this.eventTable.getListeners(eventType);
             if (ls == null || ls.length == 0) {
@@ -254,37 +254,37 @@ anra._EventTable = {
  * @type {*}
  */
 anra._Display = {
-    id:"default canvas",
-    element:null,
-    globalListener:null,
-    postEvent:function (e) {
+    id: "default canvas",
+    element: null,
+    globalListener: null,
+    postEvent: function (e) {
         if (this.eventTable != null)
             this.eventTable.sendEvent(e);
     },
-    notifyListeners:function () {
+    notifyListeners: function () {
     },
-    error:function (msg) {
+    error: function (msg) {
 //        alert(msg);
         throw msg;
     },
-    p2x:function (p) {
+    p2x: function (p) {
         if (this.element == null)
             return -1;
         return this.element.width * p / 100;
     },
-    p2y:function (p) {
+    p2y: function (p) {
         if (this.element == null)
             return -1;
         return this.element.height * p / 100;
     },
-    getRelativeLocation:function (event) {
+    getRelativeLocation: function (event) {
         var ev = event || window.event;
         var x = ev.clientX - this.getX(this.element) + Math.floor(window.pageXOffset);
         var y = ev.clientY - this.getY(this.element) + Math.floor(window.pageYOffset);
 
         return [x, y];
     },
-    getX:function (obj) {
+    getX: function (obj) {
 //        if (this.left != null)
 //            return this.left - obj.scrollLeft;
         var parObj = obj;
@@ -295,7 +295,7 @@ anra._Display = {
 //        this.left = left;
         return left - obj.scrollLeft;
     },
-    getY:function (obj) {
+    getY: function (obj) {
         /*在外框发生变化时，top也应该随时变化，当然，可以考虑监听外部元素的位置变化来实现*/
 //        if (this.top != null)
 //            return this.top - obj.scrollTop;
@@ -317,52 +317,52 @@ anra.Display = Base.extend(anra._Display).extend(anra._EventTable)
  * @type {*}
  */
 anra.Widget = Base.extend({
-    id:"",
-    image:null,
-    x:0,
-    y:0,
-    width:20,
-    height:20,
-    paint:function () {
+    id: "",
+    image: null,
+    x: 0,
+    y: 0,
+    width: 20,
+    height: 20,
+    paint: function () {
     },
-    error:function (msg) {
+    error: function (msg) {
         this.display.error(this.id + ":" + msg);
     }
 }).extend(anra._EventTable);
 anra.Control = anra.Widget.extend({
-    parent:null,
-    constructor:function () {
+    parent: null,
+    constructor: function () {
         this._init();
     },
-    _init:function () {
-        if (this.init != null)this.init();
+    _init: function () {
+        if (this.init != null) this.init();
     },
-    addMouseListener:function (listener) {
+    addMouseListener: function (listener) {
         if (listener == null) this.error("NullPointException anra.Control#addMouseListener");
-        this.addListener(anra.EVENT.MouseDown, listener);
-        this.addListener(anra.EVENT.MouseUp, listener);
-        this.addListener(anra.EVENT.MouseDoubleClick, listener);
+        this.on(anra.EVENT.MouseDown, listener);
+        this.on(anra.EVENT.MouseUp, listener);
+        this.on(anra.EVENT.MouseDoubleClick, listener);
     },
-    addKeyListener:function (listener) {
+    addKeyListener: function (listener) {
         if (listener == null) this.error("NullPointException anra.Control#addKeyListener");
-        this.addListener(anra.EVENT.KeyDown, listener);
-        this.addListener(anra.EVENT.KeyUp, listener);
+        this.on(anra.EVENT.KeyDown, listener);
+        this.on(anra.EVENT.KeyUp, listener);
     },
-    addTouchListener:function (listener) {
+    addTouchListener: function (listener) {
         if (listener == null) this.error("NullPointException anra.Control#addTouchListener");
-        this.addListener(anra.EVENT.TouchStart, listener);
-        this.addListener(anra.EVENT.TouchMove, listener);
-        this.addListener(anra.EVENT.TouchEnd, listener);
+        this.on(anra.EVENT.TouchStart, listener);
+        this.on(anra.EVENT.TouchMove, listener);
+        this.on(anra.EVENT.TouchEnd, listener);
     },
-    selected:function (s) {
+    selected: function (s) {
     }
 });
 anra.Composite = anra.Control.extend({
-    selection:null,
+    selection: null,
     /*找到指定位置的控件*/
-    findWidgetOnXY:function (x, y) {
+    findWidgetOnXY: function (x, y) {
     },
-    setSelection:function (o) {
+    setSelection: function (o) {
         if (this.selection != null)
             this.selection.setSelected(false);
         this.selection = o;
@@ -376,25 +376,25 @@ anra.Composite = anra.Control.extend({
  * @type {*|void}
  */
 anra.Listener = Base.extend({
-    func:null,
-    constructor:function (func) {
+    func: null,
+    constructor: function (func) {
         this.func = func;
     },
-    handleEvent:function (event) {
+    handleEvent: function (event) {
         if (this.func != null)
             this.func(event);
     }
 });
 anra.KeyListener = anra.Listener.extend({
-    handleEvent:function (event) {
+    handleEvent: function (event) {
         if (event.type == anra.EVENT.KeyDown) {
             this.handleKeyDownEvent(event);
         } else if (event.type == anra.EVENT.KeyUp) {
             this.handleKeyDownUp(event);
         }
     },
-    handleKeyDownEvent:function (event) {
-    }, handleKeyDownUp:function (event) {
+    handleKeyDownEvent: function (event) {
+    }, handleKeyDownUp: function (event) {
     }
 });
 
@@ -403,23 +403,23 @@ anra.KeyListener = anra.Listener.extend({
  * @type {*|Object}
  */
 anra.Action = Base.extend({
-    id:"", run:function () {
+    id: "", run: function () {
     }
 });
 
 anra.Menu = Base.extend({
-    show:function () {
+    show: function () {
         if (this.widget == null) {
             this.widget = this.create();
         }
     },
-    create:function () {
+    create: function () {
 
     },
-    update:function () {
+    update: function () {
 
     },
-    hide:function () {
+    hide: function () {
 
     }
 });
@@ -429,25 +429,25 @@ anra.Menu = Base.extend({
  */
 anra.event = anra.event || {};
 anra.EVENT = {
-    NONE:0,
-    MouseDown:1,
-    MouseUp:2,
-    MouseOver:3,
-    MouseIn:4,
-    MouseOut:5,
-    MouseClick:5.5,
-    MouseDoubleClick:6,
-    MouseDrag:7,
-    MouseMove:8,
-    KeyDown:9,
-    KeyUp:10,
-    TouchStart:11,
-    TouchMove:12,
-    TouchEnd:13,
-    DragStart:14,
-    DragEnd:15,
-    Dropped:16,
-    ContextMenu:17
+    NONE: 0,
+    MouseDown: 'mousedown',
+    MouseUp: 'mouseup',
+    MouseOver: 'mouseover',
+    MouseIn: 'mousein',
+    MouseOut: 'mouseout',
+    MouseClick: 'click',
+    MouseDoubleClick: 'dblclick',
+    MouseDrag: 'drag',
+    MouseMove: 'mousemove',
+    KeyDown: 'keydown',
+    KeyUp: 'keyup',
+    TouchStart: 'touchstart',
+    TouchMove: 'touchmove',
+    TouchEnd: 'touchend',
+    DragStart: 'dragstart',
+    DragEnd: 'dragend',
+    Dropped: 'dropped',
+    ContextMenu: 'contextmenu'
 };
 var E = anra.EVENT;
 /**
@@ -459,12 +459,12 @@ anra.BubbleEvent = [
 ];
 
 anra.event.Event = Base.extend({
-    widget:null,
-    type:0,
-    x:undefined,
-    y:undefined,
-    prop:null,
-    constructor:function (obj, location, prop) {
+    widget: null,
+    type: 0,
+    x: undefined,
+    y: undefined,
+    prop: null,
+    constructor: function (obj, location, prop) {
         this.type = obj || anra.EVENT.NONE;
         if (location != null && location.length == 2) {
             this.x = location[0];
@@ -475,9 +475,9 @@ anra.event.Event = Base.extend({
 });
 
 anra.event.KeyEvent = anra.event.Event.extend({
-    key:undefined,
-    keyCode:undefined,
-    constructor:function (obj, location, event) {
+    key: undefined,
+    keyCode: undefined,
+    constructor: function (obj, location, event) {
         if (event != null) {
             //            this.keyCode = event.keyCode;
             for (var k in event) {
@@ -492,8 +492,8 @@ anra.event.KeyEvent = anra.event.Event.extend({
     }
 });
 anra.event.TouchEvent = anra.event.Event.extend({
-    touches:[],
-    constructor:function (obj, location, event) {
+    touches: [],
+    constructor: function (obj, location, event) {
         this.type = obj || anra.EVENT.NONE;
         if (location != null && location.length == 2) {
             this.x = location[0];
@@ -505,17 +505,17 @@ anra.event.TouchEvent = anra.event.Event.extend({
     }
 });
 anra.event.EventTable = Base.extend({
-    types:null,
-    listeners:null,
-    level:0,
-    constructor:function () {
+    types: null,
+    listeners: null,
+    level: 0,
+    constructor: function () {
         this.types = [];
         this.listeners = [];
     },
-    containsEvent:function (eventType) {
+    containsEvent: function (eventType) {
 
     },
-    getListeners:function (eventType) {
+    getListeners: function (eventType) {
         var result = [];
         for (var i = 0; i < this.types.length; i++) {
             if (this.types [i] == eventType) {
@@ -524,11 +524,11 @@ anra.event.EventTable = Base.extend({
         }
         return result;
     },
-    hook:function (eventType, listener) {
+    hook: function (eventType, listener) {
         this.types.push(eventType);
         this.listeners.push(listener);
     },
-    unhook:function (eventType, listener) {
+    unhook: function (eventType, listener) {
         for (var i = 0; i < this.types.length; i++) {
             if (this.types[i] == eventType && this.listeners[i] == listener) {
                 this.remove(i);
@@ -536,15 +536,15 @@ anra.event.EventTable = Base.extend({
             }
         }
     },
-    dispose:function () {
+    dispose: function () {
         this.types.length = 0;
         this.listeners.length = 0;
     },
-    remove:function (i) {
+    remove: function (i) {
         this.types.remove(i);
         this.listeners.remove(i);
     },
-    sendEvent:function (event) {
+    sendEvent: function (event) {
         if (event.type == anra.EVENT.NONE)return;
         for (var i = 0; i < this.types.length; i++) {
             if (this.types[i] == event.type) {
@@ -557,7 +557,7 @@ anra.event.EventTable = Base.extend({
             }
         }
     },
-    size:function () {
+    size: function () {
         return this.types.length;
     }
 });
@@ -567,22 +567,22 @@ anra.event.EventTable = Base.extend({
  */
 anra.Command = Base.extend({
 
-    execute:function () {
+    execute: function () {
     },
-    canExecute:function () {
+    canExecute: function () {
         return true;
     },
-    redo:function () {
+    redo: function () {
         this.execute();
     },
-    undo:function () {
+    undo: function () {
     },
-    canUndo:function () {
+    canUndo: function () {
         return true;
     },
-    dispose:function () {
+    dispose: function () {
     },
-    chain:function (command) {
+    chain: function (command) {
         if (command == null)
             return this;
 
@@ -593,14 +593,14 @@ anra.Command = Base.extend({
     }
 });
 anra.ChainedCompoundCommand = anra.Command.extend({
-    commandList:null,
-    constructor:function () {
+    commandList: null,
+    constructor: function () {
         this.commandList = [];
     },
-    add:function (c) {
-        if (c != null)this.commandList.push(c);
+    add: function (c) {
+        if (c != null) this.commandList.push(c);
     },
-    canExecute:function () {
+    canExecute: function () {
         if (this.commandList.length == 0)
             return false;
         for (var i = 0, len = this.commandList.length; i < len; i++) {
@@ -612,7 +612,7 @@ anra.ChainedCompoundCommand = anra.Command.extend({
         }
         return true;
     },
-    canUndo:function () {
+    canUndo: function () {
         if (this.commandList.length == 0)
             return false;
         for (var i = 0, len = this.commandList.length; i < len; i++) {
@@ -624,30 +624,30 @@ anra.ChainedCompoundCommand = anra.Command.extend({
         }
         return true;
     },
-    dispose:function () {
+    dispose: function () {
         for (var i = 0, len = this.commandList.length; i < len; i++) {
             this.commandList[i].dispose();
         }
     },
-    execute:function () {
+    execute: function () {
         for (var i = 0, len = this.commandList.length; i < len; i++) {
             this.commandList[i].execute();
         }
     },
-    undo:function () {
+    undo: function () {
         for (var i = this.commandList.length - 1; i >= 0; i--)
             this.commandList[i].undo();
     },
-    getCommands:function () {
+    getCommands: function () {
         return this.commandList;
     },
-    isEmpty:function () {
+    isEmpty: function () {
         return this.commandList == null || this.commandList.length == 0;
     },
-    size:function () {
+    size: function () {
         return this.commandList.length;
     },
-    chain:function (c) {
+    chain: function (c) {
         if (c != null)
             this.add(c);
         return this;
@@ -658,10 +658,10 @@ anra.ChainedCompoundCommand = anra.Command.extend({
  * @type {*}
  */
 anra.CommandEvent = Base.extend({
-    statck:null,
-    command:null,
-    state:null,
-    constructor:function (stack, cmd, state) {
+    statck: null,
+    command: null,
+    state: null,
+    constructor: function (stack, cmd, state) {
         this.stack = stack;
         this.command = cmd;
         this.state = state;
@@ -680,13 +680,14 @@ ACTION_PROPERTY = 0;
  * @type {*}
  */
 anra.ActionRegistry = Base.extend({
-    constructor:function () {
+    constructor: function (host) {
         this.selectionActions = new Map();
         this.cmdStackActions = new Map();
         this.propertyActions = new Map();
         this.handles = new Map();
+        this.host = host;
     },
-    keyHandle:function (e) {
+    keyHandle: function (e) {
         var keys = [];
         if (e.altKey)
             keys.push('alt');
@@ -698,18 +699,19 @@ anra.ActionRegistry = Base.extend({
         keys.push(e.key.toLowerCase());
 
         var action = this.handles.get(keys.sort().join('+'));
-        if (action != null)action.run();
+        if (action != null) action.run();
     },
-    regist:function (action) {
+    regist: function (action) {
         if (action instanceof Array) {
             for (var i = 0; i < action.length; i++) {
                 this.registAction(action[i]);
             }
-        } else
+        } else {
             this.registAction(action);
+        }
         return this;
     },
-    registAction:function (action) {
+    registAction: function (action) {
         if (action.id == null) {
             console.log('action id can not be null');
             return;
@@ -726,9 +728,10 @@ anra.ActionRegistry = Base.extend({
                 this.propertyActions.put(action.id, action);
                 break;
         }
+        action.host = this.host;
         this.registKeyHandler(action);
     },
-    registKeyHandler:function (action) {
+    registKeyHandler: function (action) {
         var key = action.key;
         if (key == null)return;
         this.handles.put(key.toLowerCase().split('+').sort().join('+'), action);
@@ -741,26 +744,26 @@ anra.ActionRegistry = Base.extend({
  * @type {*}
  */
 anra.CommandStack = Base.extend({
-    redoable:null,
-    undoable:null,
-    listeners:null,
-    saveLocation:0,
-    constructor:function () {
+    redoable: null,
+    undoable: null,
+    listeners: null,
+    saveLocation: 0,
+    constructor: function () {
         this.redoable = [];
         this.undoable = [];
         this.listeners = [];
     },
-    addCommandStackEventListener:function (e) {
-        if (e instanceof  anra.Listener)
+    addCommandStackEventListener: function (e) {
+        if (e instanceof anra.Listener)
             this.listeners.push(e);
     },
-    canRedo:function () {
+    canRedo: function () {
         return this.redoable.length > 0;
     },
-    canUndo:function () {
+    canUndo: function () {
         return this.undoable.length == 0 ? false : this.undoable[this.undoable.length - 1].canUndo();
     },
-    redo:function () {
+    redo: function () {
         if (!this.canRedo())
             return;
         var command = this.redoable.pop();
@@ -769,32 +772,32 @@ anra.CommandStack = Base.extend({
         this.undoable.push(command);
         this.notifyListeners();
     },
-    undo:function () {
+    undo: function () {
         if (!this.canUndo())return;
         var command = this.undoable.pop();
         this.notifyListeners(command, PRE_UNDO);
         command.undo();
         this.redoable.push(command);
         this.notifyListeners();
-    }, notifyListeners:function (command, state) {
+    }, notifyListeners: function (command, state) {
         for (var i = 0; i < this.listeners.length; i++)
             this.listeners[i].handleEvent(event);
     },
-    flush:function () {
+    flush: function () {
         this.flushRedo();
         this.flushUndo();
         this.saveLocation = 0;
         this.notifyListeners();
     },
-    flushRedo:function () {
+    flushRedo: function () {
         while (!this.redoable.isEmpty())
             this.redoable.pop().dispose();
     },
-    flushUndo:function () {
+    flushUndo: function () {
         while (!this.undoable.isEmpty())
             this.undoable.pop().dispose();
     },
-    execute:function (c) {
+    execute: function (c) {
         if (c == null || !c.canExecute())
             return;
         this.flushRedo();
@@ -814,31 +817,31 @@ anra.CommandStack = Base.extend({
             this.notifyListeners(c, POST_EXECUTE);
         }
     },
-    getUndoLimit:function () {
+    getUndoLimit: function () {
         return 15;
     },
-    markSaveLocation:function () {
+    markSaveLocation: function () {
         this.saveLocation = this.undoable.length;
     },
-    isDirty:function () {
+    isDirty: function () {
         return this.undoable.length != this.saveLocation;
     }
 })
 ;
 
 anra.PropertyListenerSupport = Base.extend({
-    constructor:function () {
+    constructor: function () {
         this.map = new anra.ArrayMap();
     },
-    addPropertyListener:function (listener, key) {
+    addPropertyListener: function (listener, key) {
         if (listener == null)return;
         this.map.put(key != null ? key : listener.key != null ? listener.key : null, listener);
     },
-    removePropertyListener:function (listener, key) {
+    removePropertyListener: function (listener, key) {
         if (listener == null)return;
         this.map.remove(key != null ? key : listener.key != null ? listener.key : null, listener);
     },
-    firePropertyChanged:function (key, oldValue, newValue) {
+    firePropertyChanged: function (key, oldValue, newValue) {
         var named = this.map.getListeners(key);
         this.fire(named, key, oldValue, newValue);
         if (key != null) {
@@ -846,7 +849,7 @@ anra.PropertyListenerSupport = Base.extend({
             this.fire(common, key, oldValue, newValue);
         }
     },
-    fire:function (ls, key, oldValue, newValue) {
+    fire: function (ls, key, oldValue, newValue) {
         if (ls != null)
             for (var i = 0, len = ls.length; i < len; i++) {
                 if (typeof ls[i] == 'function')
@@ -858,11 +861,11 @@ anra.PropertyListenerSupport = Base.extend({
 });
 
 anra.ArrayMap = Base.extend({
-    map:null,
-    constructor:function () {
+    map: null,
+    constructor: function () {
         this.map = new HashMap();
     },
-    put:function (k, v) {
+    put: function (k, v) {
         if (v == null)return;
         var vs = this.map.get(k);
         if (vs == null) {
@@ -871,10 +874,10 @@ anra.ArrayMap = Base.extend({
         }
         vs.push(v);
     },
-    getListeners:function (key) {
+    getListeners: function (key) {
         return this.map.get(key);
     },
-    remove:function (k, v) {
+    remove: function (k, v) {
         if (v == null)return;
         var vs = this.map.get(k);
         if (vs == null)

@@ -45,8 +45,6 @@ anra.svg.Control = anra.Control.extend({
     parent: null,
     _attr: null,
     _style: null,
-    attr: null,
-    style: null,
     ready: false,
     enable: true,
     bds: null,
@@ -55,7 +53,9 @@ anra.svg.Control = anra.Control.extend({
         this.bds = {'x': 0, 'y': 0, 'width': 100, 'height': 100};
         this._style = {'pointer-events': 'none'};
         var t = this;
-        this.attr = new Proxy({}, {
+
+
+        var attrs = new Proxy({}, {
             get: function (target, key, receiver) {
                 return t.getAttr(key);
             },
@@ -63,7 +63,16 @@ anra.svg.Control = anra.Control.extend({
                 return t.setAttribute(key, value);
             }
         });
-        this.style = new Proxy({}, {
+        Object.defineProperty(this, 'attr', {
+            get: function () {
+                return attrs;
+            },
+            set: function (value) {
+                t.setAttribute(value);
+            }
+        });
+
+        var styles = new Proxy({}, {
             get: function (target, key, receiver) {
                 return t.owner.getStyle(key);
             },
@@ -71,12 +80,22 @@ anra.svg.Control = anra.Control.extend({
                 return t.setStyle(key, value);
             }
         });
+        Object.defineProperty(this, 'style', {
+            get: function () {
+                return styles;
+            },
+            set: function (value) {
+                t.setStyle(value);
+            }
+        });
+
+
         Object.defineProperty(this, 'bounds', {
             get: function () {
                 return t.bds;
             },
-            set: function (key) {
-                t.setBounds(key);
+            set: function (value) {
+                t.setBounds(value);
             }
         });
         if (this.init != null) this.init();
@@ -133,6 +152,7 @@ anra.svg.Control = anra.Control.extend({
         return [this.fattr('x'), this.fattr('y'), this.fattr('width'), this.fattr('height')];
     },
     getAttr: function (k, h) {
+        if (this.owner == null)return this._attr ? this._attr[k] : null;
         if (h == null || typeof(h) != 'function')
             return this.owner.getAttribute(k);
         var a = this.owner.getAttribute(k);
@@ -374,7 +394,7 @@ anra.svg.Group = Composite.extend({
     },
     applyBounds: function () {
     },
-    addListener: function () {
+    on: function () {
     },
     create: function () {
         //重写create方法，使Group不再接收任何事件
@@ -512,9 +532,7 @@ anra.svg.Polyline = {
     },
     initProp: function () {
         this.setAttribute({
-            stroke: 'white',
             fill: 'none',
-            'stroke-width': 1
         });
     },
     compute: function () {
@@ -657,6 +675,9 @@ anra.svg.Circle = {
 anra.svg.Image = {
     tagName: 'image',
     url: null,
+    applyConfig: function (config) {
+        this.setUrl(config.url);
+    },
     setUrl: function (url) {
         this.url = url;
         if (this.owner != null) {
@@ -940,17 +961,17 @@ anra.svg.MenuItem = Composite.extend({
         text.setBounds({x: 30, y: 20});
 
         var item = this;
-        this.addListener(anra.EVENT.MouseIn, function () {
+        this.on(anra.EVENT.MouseIn, function () {
             item.setAttribute({
                 fill: 'green'
             });
         });
-        this.addListener(anra.EVENT.MouseOut, function () {
+        this.on(anra.EVENT.MouseOut, function () {
             item.setAttribute({
                 fill: 'none'
             });
         });
-        this.addListener(anra.EVENT.MouseDown, function (e) {
+        this.on(anra.EVENT.MouseDown, function (e) {
             if (e.button != 0)return;
             item.action.run();
             item.menu.hide();
@@ -965,9 +986,9 @@ anra.svg.MenuItem = Composite.extend({
 });
 
 anra.svg.DefMenu = Composite.extend({
-    constructor: function (editor) {
+    constructor: function (host) {
         Composite.prototype.constructor.call(this);
-        this.editor = editor;
+        this.host = host;
     },
     domContainer: function (action) {
         return this.owner.parentNode;
@@ -1004,8 +1025,8 @@ anra.svg.DefMenu = Composite.extend({
         this.setBounds({x: e.x, y: e.y});
         this.setStyle('visibility', 'visible');
 
-        var count = this.addActions(this.editor.actionRegistry.selectionActions, selection);
-        count += this.addActions(this.editor.actionRegistry.cmdStackActions, selection);
+        var count = this.addActions(this.host.actionRegistry.selectionActions, selection);
+        count += this.addActions(this.host.actionRegistry.cmdStackActions, selection);
 
         if (count == null)
             return;
@@ -1027,7 +1048,7 @@ anra.svg.DefMenu = Composite.extend({
         if (actions != null) {
             actions = actions.values();
             for (var i = 0; i < actions.length; i++) {
-                if (actions[i].calculateEnable && actions[i].calculateEnable(selection)) {
+                if (actions[i].check && actions[i].check(selection)) {
                     actions[i].enable = true;
                     count++;
                     this.addMenuItem(actions[i]);
