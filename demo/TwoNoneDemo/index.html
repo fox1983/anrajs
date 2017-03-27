@@ -1,0 +1,54 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <!--Frame-->
+    <script src="../../src/Base.js"></script>
+    <script src="../../src/anra.common.js"></script>
+    <script src="../../src/anra.svg.js"></script>
+    <script src="../../src/anra.gef.js"></script>
+    <script src="../../src/anra.policy.js"></script>
+    <script src="../../src/anra.handle.js"></script>
+    <script src="../../src/anra.layout.js"></script>
+
+    <!--Demo-->
+    <script src='EditPart.js'></script>
+    <script src=Editor.js></script>
+    
+    <script src='MapController.js'></script>
+    <script src='Figure.js'></script>
+    <script src='Model.js'></script>
+    <script src='Policy.js'></script>
+    <script src='Util.js'></script>
+    <script src='Point.js'></script>
+    <script>
+        window.onload = function() {
+            var Dy = new MapController("Dy");
+            var i = 0;
+            createStart = function() {Dy.createStart()};
+            createEnd = function() {Dy.createEnd()};
+            createWall = function() {Dy.createWall()};
+            Dy.createCustomWall(100);
+        }
+    </script>
+    <style>
+        .pltItem {
+            width: 30px;
+            height: 30px;
+            margin: 3% 20%;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="Dy" style="position: absolute;top: 0px;left: 0px;width: 100%;height: 100%;background-color: rgb(13,13,13);float: left;">
+        <div id="palatte" style="position: relative;top: 0;width: 10%;height: 100%;background-color: #d3d3d3;float:left">
+            <image class='pltItem' src="Start.png" onmousedown='createStart()' ondragstart='return false'></image>
+            <image class='pltItem' src="End.png" onmousedown='createEnd()' ondragstart='return false'></image>
+            <image class='pltItem' src="Wall.png" onmousedown='createWall()' ondragstart='return false'></image>
+        </div>
+    </div>
+</body>
+
+</html>

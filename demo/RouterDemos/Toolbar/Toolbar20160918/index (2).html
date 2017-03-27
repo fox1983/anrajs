@@ -1,0 +1,209 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" type="text/css" href="css/default.css">
+    <link href="http://www.jq22.com/jquery/font-awesome.4.6.0.css" rel="stylesheet" media="screen">
+    <link rel="stylesheet" href="css/documentation.css">
+    <link href="css/prettify.css" rel="stylesheet">
+    <link href="css/jquery.toolbar.css" rel="stylesheet" />
+    <!--Frame-->
+    <script src="../../../../src/Base.js"></script>
+    <script src="../../../../src/anra.common.js"></script>
+    <script src="../../../../src/anra.svg.js"></script>
+    <script src="../../../../src/anra.gef.js"></script>
+    <script src="../../../../src/anra.policy.js"></script>
+    <script src="../../../../src/anra.handle.js"></script>
+    <script src="../../../../src/anra.layout.js"></script>
+
+    <!--Demo-->
+    <script src="../../RouterDemo.EditPart.js"></script>
+    <script src="../../RouterDemo.js"></script>
+    <script src="../../RouterDemo.Model.js"></script>
+    <script src="../../RouterDemo.Figure.js"></script>
+    <script src="../../RouterDemo.Policy.js"></script>
+    <script src="../../RouterDemo.Point.js"></script>
+    <script src="../../RouterDemo.BasicRouterProcessor.js"></script>
+    <script src="../../RouterDemo.StrongRouterProcessor.js"></script>
+    <script src="../../RouterDemo.JumpRouterProcessor.js"></script>
+    <script src="../../RouterDemo.Util.js"></script>
+    <script src="../../RouterDemo.FindingTool.js"></script>
+    <script src="../../RouterDemo.Parameters.js"></script>
+    <script src="../../RouterDemos.Command.js"></script>
+    <!--test heap-->
+    <script src="../../heap.js"></script>
+    <!--dp test-->
+    <script src="../../ext.js"></script>
+    <script>
+        window.onload = function() {
+            var Dy = new DynamicMapEditor();
+            Dy.setInput({
+                width: 25,
+                hnum: 20,
+                vnum: 20
+            });
+            Dy.createContent("Dy");
+            largen = function() {
+                Dy.resetSize(WIDTH + 25);
+            };
+            diminish = function() {
+                Dy.resetSize(WIDTH - 25);
+            };
+
+            clearWalls = function() {
+                Dy.clearWall();
+            };
+
+            change = function() {
+                var objS = document.getElementById("type");
+                var i = objS.options.selectedIndex;
+                var value = objS.options[i].value;
+                ROUTER = RouterList[i];
+            };
+
+            addWalls = function() {
+                Dy.createWalls(10);
+            };
+        }
+
+    </script>
+</head>
+
+<body>
+    <div id="Dy" style="position: absolute;top: 0px;left: 0px;width: 100%;height: 100%;background-color: rgb(13,13,13);float: left;">
+        <div id="palatte" style="position: relative;top: 0;width: 10%;height: 100%;background-color: #d3d3d3;float:left">
+            <div data-toolbar="user-options" class="btn-toolbar pull-left"><i class="fa fa-cog"></i></div>
+            <div class="clear"></div>
+        </div>
+
+    </div>
+
+    <script src="js/jquery-1.11.0.min.js"></script>
+    <script src="js/jquery.toolbar.js"></script>
+    <script type="text/javascript">
+        jQuery(document).ready(function($) {
+
+            // Define any icon actions before calling the toolbar
+            $('.toolbar-icons a').on('click', function(event) {
+                event.preventDefault();
+            });
+
+            $('div[data-toolbar="user-options"]').toolbar({
+                content: '#user-options',
+                position: 'top',
+            });
+
+            $('div[data-toolbar="transport-options"]').toolbar({
+                content: '#transport-options',
+                position: 'top',
+            });
+
+            $('div[data-toolbar="transport-options-o"]').toolbar({
+                content: '#transport-options-o',
+                position: 'bottom',
+                event: 'click',
+                hideOnClick: true,
+            });
+
+            $('div[data-toolbar="content-option"]').toolbar({
+                content: '#transport-options',
+            });
+
+            $('div[data-toolbar="position-option"]').toolbar({
+                content: '#transport-options',
+                position: 'bottom',
+            });
+
+            $('div[data-toolbar="style-option"]').toolbar({
+                content: '#transport-options',
+                position: 'bottom',
+                style: 'primary',
+            });
+
+            $('div[data-toolbar="animation-option"]').toolbar({
+                content: '#transport-options',
+                position: 'bottom',
+                style: 'primary',
+                animation: 'flyin'
+            });
+
+            $('div[data-toolbar="event-option"]').toolbar({
+                content: '#transport-options',
+                position: 'bottom',
+                style: 'primary',
+                event: 'click',
+            });
+
+            $('div[data-toolbar="hide-option"]').toolbar({
+                content: '#transport-options',
+                position: 'bottom',
+                style: 'primary',
+                event: 'click',
+                hideOnClick: true
+            });
+
+            $('#link-toolbar').toolbar({
+                content: '#user-options',
+                position: 'top',
+                event: 'click',
+                adjustment: 35
+            });
+
+            $('div[data-toolbar="set-01"]').toolbar({
+                content: '#set-01-options',
+                position: 'top',
+            });
+
+            $('div[data-toolbar="set-02"]').toolbar({
+                content: '#set-02-options',
+                position: 'left',
+            });
+
+            $('div[data-toolbar="set-03"]').toolbar({
+                content: '#set-03-options',
+                position: 'bottom',
+            });
+
+            $('div[data-toolbar="set-04"]').toolbar({
+                content: '#set-04-options',
+                position: 'right',
+            });
+
+            $(".download").on('click', function() {
+                mixpanel.track("Toolbar.Download");
+            });
+
+            $("#transport-options-2").find('a').on('click', function() {
+                $this = $(this);
+                $button = $('div[data-toolbar="transport-options-2"]');
+                $newClass = $this.find('i').attr('class').substring(3);
+                $oldClass = $button.find('i').attr('class').substring(3);
+                if ($newClass != $oldClass) {
+                    $button.find('i').animate({
+                        top: "+=50",
+                        opacity: 0
+                    }, 200, function() {
+                        $(this).removeClass($oldClass).addClass($newClass).css({
+                            top: "-=100",
+                            opacity: 1
+                        }).animate({
+                            top: "+=50"
+                        });
+                    });
+                }
+
+            });
+
+            $('div[data-toolbar="transport-options-2"]').toolbar({
+                content: '#transport-options-2',
+                position: 'top',
+            });
+
+
+        });
+
+    </script>
+</body>
+
+</html>

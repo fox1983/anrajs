@@ -30,7 +30,9 @@ BasicRouterProcessor = Base.extend({
      * 返回整条Path数组点
      * @returns {Array} 点数组
      */
-    getPath: function () {}
+    getPath: function () {},
+    
+    toString() {}
 });
 
 /*Single Router Processor(srp)*/
@@ -112,6 +114,9 @@ BFSRouterProcessor = SingleRouterProcessor.extend({
             }
             FindingTool.addBatchPause();
         }
+    },
+    toString : function() {
+        return "BFSRouterProcessor";
     }
 });
 
@@ -182,6 +187,9 @@ HeapBSF = TestHeapRouterProcessor.extend({
     },
     calculateF: function(sourcePoint, targetPoint) {
         sourcePoint.setValue('f', sourcePoint.getValue('g'));
+    },
+    toString: function() {
+        return "HeapBSF";
     }
 });
 
@@ -191,6 +199,9 @@ HeapGreed = TestHeapRouterProcessor.extend({
     },
     calculateF: function (sourcePoint, targetPoint) {
         sourcePoint.setValue('f', DISTANCE(sourcePoint, targetPoint));
+    },
+    toString : function() {
+        return "HeapGreed";
     }
 });
 
@@ -200,6 +211,9 @@ HeapStar = TestHeapRouterProcessor.extend({
     },
     calculateF: function(sourcePoint, targetPoint) {
         sourcePoint.setValue('f', DISTANCE(sourcePoint, targetPoint) + sourcePoint.getValue('f'));
+    },
+    toString: function() {
+        return "HeapStar";
     }
 });
 

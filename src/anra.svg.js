@@ -520,6 +520,7 @@ anra.svg.Line = {
     }
 }
 
+
 anra.svg.Polyline = {
     points: null,
     close: false,
@@ -540,17 +541,58 @@ anra.svg.Polyline = {
             return null;
         var l = this.locArea();
         var result = '';
-
-        for (var i = 0; i < this.points.length; i++) {
-            result += (i == 0 ? 'M' : 'L') + (this.points[i].x + l[0]) + ',' + (this.points[i].y + l[1]) + ' ';
-        }
-        return result;
+        
+        //未调用
+        this.setcomputeStrategy(this.Straight);
+        
+        return this.strategy(this.points, l);
     },
     getStartPoint: function () {
         return this.points == null || this.points.length == 0 ? null : this.points[0];
     },
     getEndPoint: function () {
         return this.points == null || this.points.length == 0 ? null : this.points[this.points.length - 1];
+    },
+    setcomputeStrategy : function(strategy) {
+        this.strategy = strategy;
+    },
+    Straight : function(points, l) {
+        var result = '';
+        for (var i = 0; i < points.length; i++) {
+            result += (i == 0 ? 'M' : 'L') + (points[i].x + l[0]) + ',' + (points[i].y + l[1]) + ' ';
+        }
+        return result;
+    },
+    Curve : function(points, l) {
+        var result = '';
+        for (var i = 0; i < points.length; i++) {
+            result += (i == 0 ? 'M' : points.length - i - 1 < (points.length - 1)%3 ? 'L' : i%3 == 1 ? 'C' : '') + (points[i].x + l[0]) + ',' + (points[i].y + l[1]) + ' ';
+        }
+        return result;
+    },
+    x : function (points, l) {
+        if (points.length > 2) {
+            var p = []
+                , j = 0
+                , slope1, slope2;
+            p.push(points[0]);
+            while (j < points.length - 2) {
+                slope1 = (points[j].y - points[j + 1].y) / (points[j].x - points[j + 1].x);
+                slope2 = (points[j].y - points[j + 2].y) / (points[j].x - points[j + 2].x);
+                if (slope1 != slope2) {
+                    p.push(points[j + 1]);
+                }
+                j++;
+            }
+            p.push(points.last());
+        }
+        
+        var result = '';
+        for (var i = 0; i < p.length; i++) {
+            result += (i == 0 ? 'M' : p.length - i - 1 < (p.length - 1)%3 ? 'L' : i%3 == 1 ? 'C' : '') + (p[i].x + l[0]) + ',' + (p[i].y + l[1]) + ' ';
+        }
+        return result;
+        
     }
 };
 
@@ -596,7 +638,7 @@ anra.SVG = Composite.extend(anra._Display).extend(anra._EventTable).extend({
                 d.setMouseTarget(t);
                 d.dispatchContextMenu(event);
             } catch (e) {
-                console.log(e)
+                console.error(e)
             }
             return false;
         };

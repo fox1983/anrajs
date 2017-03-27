@@ -20,14 +20,8 @@ DynamicMapEditor = anra.gef.Editor.extend({
  
         var part,
             type = model.getValue('type'); 
-
-        if (type == _SOURCE)
-            part = new SourcePart();
-        else if (type == _TARGET)
-            part = new TargetPart();
-        else if (type == _MAP) {
-            part = new WallPart();
-        }
+        
+        part = new EditPartResiger[type]();
 
         part.model = model;
         this.editorParts.put(model.id, part);
@@ -35,6 +29,7 @@ DynamicMapEditor = anra.gef.Editor.extend({
     },
     getCustomPolicies: function () {
         this.put('createWall', new CreateWallPolicy());
+        this.put(anra.gef.LAYOUT_POLICY, new anra.gef.LayoutPolicy());
     }
 });
 
@@ -48,8 +43,8 @@ MapStruct = Base.extend({
     },
     setMapStruct : function(width, vnum, hnum) {
         WIDTH = width || WIDTH;
-        VERTIVAL_VALUE = vnum || VERTIVAL_VALUE;
-        HORIZONTAL_VALUE = hnum || HORIZONTAL_VALUE;
+        this.verticalValue = vnum || VERTIVAL_VALUE;
+        this.horizontalValue = hnum || HORIZONTAL_VALUE;
     },
     get : function(key) {
         return this.struct.get(key);
@@ -120,6 +115,12 @@ MapStruct = new MapStruct();
 _SOURCE = 1;
 _TARGET = 2;
 _MAP = 3;
+
+EditPartResiger = {
+    1 : SourcePart,
+    2 : TargetPart,
+    3 : WallPart
+};
 
 /*地图信息*/
 WIDTH = 50;

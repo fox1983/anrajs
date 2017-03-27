@@ -237,7 +237,7 @@ GridPart = CommonPart.extend({
 
 SourcePart = CommonPart.extend({
     createDragTracker: function (request) {
-        return new anra.gef.RootDragTracker();
+        return new anra.gef.DragTracker();
     },
 
     createEditPolicies: function () {
@@ -252,7 +252,7 @@ SourcePart = CommonPart.extend({
 
 TargetPart = CommonPart.extend({
     createDragTracker: function (request) {
-        return new anra.gef.RootDragTracker();
+        return new anra.gef.DragTracker();
     },
 
     createEditPolicies: function () {

@@ -21,7 +21,7 @@ DistanceList= {
 };
 
 /*注册router*/
-ROUTER = RouterList[7];
+ROUTER = RouterList[0];
 
 /*注册距离计算方式*/
 DISTANCE = DistanceList[0];

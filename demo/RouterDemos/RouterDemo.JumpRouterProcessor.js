@@ -193,5 +193,8 @@ Jump = JumpPointSearchBasic.extend({
     },
     calculateF: function (sourcePoint, targetPoint) {
         sourcePoint.setValue('f', sourcePoint.getValue('g') + DISTANCE(sourcePoint, targetPoint));
+    },
+    toString: function() {
+        return "Jump";
     }
 });

@@ -14,6 +14,11 @@ CommonNodeEditPart = anra.gef.NodeEditPart.extend({
             width: w,
             height: w
         });
+        this.figure.setAttribute({
+            fill: this.model.getValue('color'),
+            stroke: this.model.getValue('stroke')
+        });
+        this.model.setBounds({0:x, 1:y, 2: w, 3: w});
         this.figure.paint();
     },
 
@@ -46,7 +51,7 @@ CommonLineEditPart = anra.gef.LineEditPart.extend({
 /*障碍EditPart*/
 WallPart = CommonNodeEditPart.extend({
     createEditPolicies: function () {
-        this.installEditPolicy('clickDestroy', new ClickDestroyPolicy());
+        //this.installEditPolicy('clickDestroy', new ClickDestroyPolicy());
     },
     createFigure: function () {
         return new RectFigure();
@@ -60,7 +65,7 @@ SourcePart = CommonNodeEditPart.extend({
     },
 
     createEditPolicies: function () {
-        this.installEditPolicy('drag', new DragPolicy());
+        //this.installEditPolicy('drag', new DragPolicy());
         this.installEditPolicy('router', new RouterPolicy());
     },
     createLineEditPart: function () {
@@ -75,7 +80,7 @@ TargetPart = CommonNodeEditPart.extend({
     },
 
     createEditPolicies: function () {
-        this.installEditPolicy('drag', new DragPolicy());
+        //this.installEditPolicy('drag', new DragPolicy());
         this.installEditPolicy('destroy', new DestroyRouterPolicy());
     },
 
