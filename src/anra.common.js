@@ -97,6 +97,26 @@ SELECTED_NONE = 1;
  * @type {Number}
  */
 SELECTED_PRIMARY = 2;
+
+/**
+ * 数据库
+ * @type {{}}
+ */
+anra.Store = {
+    _storeMap: {},
+    newStore: function (id) {
+        id || ( id = anra.genUUID());
+        this._storeMap[id] = {
+            node: TAFFY(),
+            line: TAFFY()
+        };
+        return id;
+    },
+    get: function (id, key) {
+        return key != null ? this._storeMap[id][key] : this._storeMap[id];
+    }
+};
+
 /*图片加载器，用于内存管理*/
 anra.ImageRegistry = Base.extend({
     images: new Map(),

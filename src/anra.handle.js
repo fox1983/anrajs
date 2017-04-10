@@ -101,6 +101,7 @@ anra.gef.LineHandle = anra.Handle.extend({
             p = points[0];
         } else if (this.style == REQ_RECONNECT_TARGET) {
             p = points[points.length - 1];
+            
         }
         var w = 6;
         var hf = w / 2;
@@ -131,7 +132,7 @@ anra.ResizeHandle = Control.extend({
         this.direction = direction;
         var model = editPart.model;
         if (model != null) {
-            this.setLocator(model.getBounds());
+            this.setLocator(model.get('bounds'));
             this.setStyle({
                 'stroke':'#000000',
                 'fill':'#FFFFFF'
@@ -195,7 +196,7 @@ anra.ResizeHandle = Control.extend({
         });
     },
     refreshLocation:function () {
-        this.setLocator(this.editPart.model.getBounds(),true);
+        this.setLocator(this.editPart.model.get('bounds'),true);
     },
     getResizeTracker:function (direction) {
         return  anra.gef.ResizeTracker.getInstance(direction);
@@ -225,10 +226,10 @@ anra.gef.ResizeTracker = Base.extend({
         this.xStart = me.x;
         this.yStart = me.y;
         this.oldConstraint = {
-            x:editPart.model.getBounds()[0],
-            y:editPart.model.getBounds()[1],
-            width:editPart.model.getBounds()[2],
-            height:editPart.model.getBounds()[3]
+            x:editPart.model.get('bounds')[0],
+            y:editPart.model.get('bounds')[1],
+            width:editPart.model.get('bounds')[2],
+            height:editPart.model.get('bounds')[3]
         };
 
     },
@@ -236,10 +237,10 @@ anra.gef.ResizeTracker = Base.extend({
         if (!this.ondrag)return;
         this.status = me.type;
         editPart.editor.execute(new anra.gef.RelocalCommand(editPart, this.oldConstraint, {
-            x:editPart.model.getBounds()[0],
-            y:editPart.model.getBounds()[1],
-            width:editPart.model.getBounds()[2],
-            height:editPart.model.getBounds()[3]
+            x:editPart.model.get('bounds')[0],
+            y:editPart.model.get('bounds')[1],
+            width:editPart.model.get('bounds')[2],
+            height:editPart.model.get('bounds')[3]
         }));
         anra.gef.DragTracker.prototype.dragEnd.call({host:editPart}, me, editPart);
         this.ondrag = false;
@@ -260,27 +261,27 @@ anra.gef.ResizeTracker.getInstance = function (direction) {
 anra.gef.NorthWestTracker = anra.gef.ResizeTracker.extend({
     mouseDrag:function (me, editPart) {
         this.status = me.type;
-        editPart.model.getBounds()[0] = this.oldConstraint.x + (me.x - this.xStart);
-        editPart.model.getBounds()[1] = this.oldConstraint.y + (me.y - this.yStart);
-        editPart.model.getBounds()[2] = this.oldConstraint.width - (me.x - this.xStart);
-        editPart.model.getBounds()[3] = this.oldConstraint.height - (me.y - this.yStart);
+        editPart.model.get('bounds')[0] = this.oldConstraint.x + (me.x - this.xStart);
+        editPart.model.get('bounds')[1] = this.oldConstraint.y + (me.y - this.yStart);
+        editPart.model.get('bounds')[2] = this.oldConstraint.width - (me.x - this.xStart);
+        editPart.model.get('bounds')[3] = this.oldConstraint.height - (me.y - this.yStart);
         editPart.refresh();
     }
 });
 anra.gef.NorthTracker = anra.gef.ResizeTracker.extend({
     mouseDrag:function (me, editPart) {
         this.status = me.type;
-        editPart.model.getBounds()[1] = this.oldConstraint.y + (me.y - this.yStart);
-        editPart.model.getBounds()[3] = this.oldConstraint.height - (me.y - this.yStart);
+        editPart.model.get('bounds')[1] = this.oldConstraint.y + (me.y - this.yStart);
+        editPart.model.get('bounds')[3] = this.oldConstraint.height - (me.y - this.yStart);
         editPart.refresh();
     }
 });
 anra.gef.NorthEastTracker = anra.gef.ResizeTracker.extend({
     mouseDrag:function (me, editPart) {
         this.status = me.type;
-        editPart.model.getBounds()[1] = this.oldConstraint.y + (me.y - this.yStart);
-        editPart.model.getBounds()[2] = this.oldConstraint.width + (me.x - this.xStart);
-        editPart.model.getBounds()[3] = this.oldConstraint.height - (me.y - this.yStart);
+        editPart.model.get('bounds')[1] = this.oldConstraint.y + (me.y - this.yStart);
+        editPart.model.get('bounds')[2] = this.oldConstraint.width + (me.x - this.xStart);
+        editPart.model.get('bounds')[3] = this.oldConstraint.height - (me.y - this.yStart);
         editPart.refresh();
     }
 });
@@ -288,15 +289,15 @@ anra.gef.NorthEastTracker = anra.gef.ResizeTracker.extend({
 anra.gef.WestTracker = anra.gef.ResizeTracker.extend({
     mouseDrag:function (me, editPart) {
         this.status = me.type;
-        editPart.model.getBounds()[0] = this.oldConstraint.x + (me.x - this.xStart);
-        editPart.model.getBounds()[2] = this.oldConstraint.width - (me.x - this.xStart);
+        editPart.model.get('bounds')[0] = this.oldConstraint.x + (me.x - this.xStart);
+        editPart.model.get('bounds')[2] = this.oldConstraint.width - (me.x - this.xStart);
         editPart.refresh();
     }
 });
 anra.gef.EastTracker = anra.gef.ResizeTracker.extend({
     mouseDrag:function (me, editPart) {
         this.status = me.type;
-        editPart.model.getBounds()[2] = this.oldConstraint.width + (me.x - this.xStart);
+        editPart.model.get('bounds')[2] = this.oldConstraint.width + (me.x - this.xStart);
         editPart.refresh();
     }
 });
@@ -304,24 +305,24 @@ anra.gef.EastTracker = anra.gef.ResizeTracker.extend({
 anra.gef.SouthWestTracker = anra.gef.ResizeTracker.extend({
     mouseDrag:function (me, editPart) {
         this.status = me.type;
-        editPart.model.getBounds()[0] = this.oldConstraint.x + (me.x - this.xStart);
-        editPart.model.getBounds()[2] = this.oldConstraint.width - (me.x - this.xStart);
-        editPart.model.getBounds()[3] = this.oldConstraint.height + (me.y - this.yStart);
+        editPart.model.get('bounds')[0] = this.oldConstraint.x + (me.x - this.xStart);
+        editPart.model.get('bounds')[2] = this.oldConstraint.width - (me.x - this.xStart);
+        editPart.model.get('bounds')[3] = this.oldConstraint.height + (me.y - this.yStart);
         editPart.refresh();
     }
 });
 anra.gef.SouthTracker = anra.gef.ResizeTracker.extend({
     mouseDrag:function (me, editPart) {
         this.status = me.type;
-        editPart.model.getBounds()[3] = this.oldConstraint.height + (me.y - this.yStart);
+        editPart.model.get('bounds')[3] = this.oldConstraint.height + (me.y - this.yStart);
         editPart.refresh();
     }
 });
 anra.gef.SouthEastTracker = anra.gef.ResizeTracker.extend({
     mouseDrag:function (me, editPart) {
         this.status = me.type;
-        editPart.model.getBounds()[2] = this.oldConstraint.width + (me.x - this.xStart);
-        editPart.model.getBounds()[3] = this.oldConstraint.height + (me.y - this.yStart);
+        editPart.model.get('bounds')[2] = this.oldConstraint.width + (me.x - this.xStart);
+        editPart.model.get('bounds')[3] = this.oldConstraint.height + (me.y - this.yStart);
         editPart.refresh();
     }
 });

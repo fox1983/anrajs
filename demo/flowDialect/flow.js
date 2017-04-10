@@ -29,7 +29,7 @@ FlowEditor = anra.gef.Editor.extend({
             check: function (node) {
                 return editor.cmdStack.canUndo();
             }
-        },{
+        }, {
             id: 2,
             type: ACTION_SELECTION,
             key: 'delete',
@@ -51,7 +51,7 @@ FlowEditor = anra.gef.Editor.extend({
             check: function (node) {
                 return node instanceof anra.gef.NodeEditPart || node instanceof anra.gef.LineEditPart || node instanceof Array;
             }
-        },{
+        }, {
             id: 3,
             type: ACTION_SELECTION,
             name: 'redo',
@@ -62,7 +62,7 @@ FlowEditor = anra.gef.Editor.extend({
             check: function (node) {
                 return editor.cmdStack.canRedo();
             }
-        },{
+        }, {
             id: 4,
             type: ACTION_SELECTION,
             key: 'escape',
@@ -70,7 +70,7 @@ FlowEditor = anra.gef.Editor.extend({
                 editor.setActiveTool(editor.getDefaultTool());
 //                    editor.cmdStack.redo();
             }
-        },{
+        }, {
             id: 'saveAction',
             name: '保存',
             type: ACTION_STACK,
@@ -81,7 +81,7 @@ FlowEditor = anra.gef.Editor.extend({
             check: function (node) {
                 return editor.isDirty();
             }
-        },{
+        }, {
             id: 'selectAll',
             name: '全选',
             type: ACTION_SELECTION,
@@ -111,7 +111,7 @@ FlowEditor = anra.gef.Editor.extend({
             //定义EditPart
             nm.editPartClass = EditPartRegistry[nodes[i].type];
             //设置属性
-            // nm.setProperties(nodes[i]);
+            // nm.setValues(nodes[i]);
             nm.props = nodes[i];
             lines = nodes[i]['lines'];
 
@@ -122,14 +122,14 @@ FlowEditor = anra.gef.Editor.extend({
                     line = this.createLine(lines[inx]);
                     nm.addSourceLine(line);
                     //记录连线目标节点的id
-                    list = targetCache.get(line.getValue('target'));
+                    list = targetCache.get(line.get('target'));
                     if (list == null) {
                         list = [];
-                        targetCache.set(line.getValue('target'), list);
+                        targetCache.set(line.get('target'), list);
                     }
                     list.push(line);
 
-                    target = rootModel.getChild(line.getValue('target'));
+                    target = rootModel.getChild(line.get('target'));
                     if (target != null)
                         target.addTargetLine(line);
                 }
@@ -148,7 +148,7 @@ FlowEditor = anra.gef.Editor.extend({
     },
     addNode: function (json) {
         var node = new anra.gef.NodeModel();
-        node.setProperties(json);
+        node.setValues(json);
         node.id = json.id;
 
         node.editPartClass = EditPartRegistry[json.type];
@@ -160,7 +160,7 @@ FlowEditor = anra.gef.Editor.extend({
         if (lines != null)
             for (var inx = 0; inx < lines.length; inx++) {
                 var line = this.createLine(lines[inx]);
-                cmd = cmd.chain(new anra.gef.CreateLineCommand(this.rootEditPart, line, json.id, line.getValue('target')));
+                cmd = cmd.chain(new anra.gef.CreateLineCommand(this.rootEditPart, line, json.id, line.get('target')));
             }
 
         this.cmdStack.execute(cmd);
@@ -169,10 +169,7 @@ FlowEditor = anra.gef.Editor.extend({
     },
     createLine: function (json) {
         var lineModel = new anra.gef.LineModel();
-        lineModel.setProperties(json);
-        lineModel.id = json.id;
-        lineModel.sourceTerminal = json.sTML;
-        lineModel.targetTerminal = json.tTML;
+        lineModel.props=json;
         return lineModel;
     },
     getCustomPolicies: function () {
@@ -183,8 +180,7 @@ FlowEditor = anra.gef.Editor.extend({
 ;
 
 
-FlowLayoutPolicy = anra.gef.LayoutPolicy.extend({
-});
+FlowLayoutPolicy = anra.gef.LayoutPolicy.extend({});
 
 ContainerLayoutPolicy = anra.gef.LayoutPolicy.extend({
     createFeedback: function (ep) {
@@ -196,9 +192,9 @@ ContainerLayoutPolicy = anra.gef.LayoutPolicy.extend({
     getCreateCommand: function (request) {
         console.log(request);
         var model = request.event.props.drag.model;
-        var b = model.bounds;
-        // model.setValue('bounds', [request.event.x - b[2] / 2, request.event.y - b[3] / 2, b[2], b[3]]);
-        model.bounds = [request.event.x - b[2] / 2, request.event.y - b[3] / 2, b[2], b[3]];
+        var b = model.get('bounds');
+        // model.set('bounds', [request.event.x - b[2] / 2, request.event.y - b[3] / 2, b[2], b[3]]);
+        model.set('bounds', [request.event.x - b[2] / 2, request.event.y - b[3] / 2, b[2], b[3]]);
         return new anra.gef.CreateNodeCommand(this.getHost(), model);
     }
 });
@@ -221,7 +217,7 @@ var CommonNodeEditPart = anra.gef.NodeEditPart.extend({
      */
     refreshVisual: function () {
         if (this.model != null && this.figure != null) {
-            var b = this.model.bounds;
+            var b = this.model.get('bounds');
             this.figure.bounds = {x: b[0], y: b[1], width: b[2], height: b[3]};
 
         }
@@ -259,7 +255,7 @@ var SystemEditPart = CommonNodeEditPart.extend({
         this.installEditPolicy('text', new TextInfoPolicy());
         this.installEditPolicy(anra.gef.CONNECTION_POLICY, new anra.gef.ConnectionPolicy());
         this.installEditPolicy("selection", new anra.gef.ResizableEditPolicy());
-        this.installEditPolicy('DialogPolicy',new DialogPolicy());
+        this.installEditPolicy('DialogPolicy', new DialogPolicy());
     }
 });
 var SegmentEditPart = CommonNodeEditPart.extend({
@@ -302,7 +298,6 @@ EditPartRegistry = {
 };
 
 
-
 /*-------详细节点控制器定义结束-------*/
 /*-------策略------*/
 TextInfoPolicy = anra.gef.AbstractEditPolicy.extend({
@@ -310,7 +305,7 @@ TextInfoPolicy = anra.gef.AbstractEditPolicy.extend({
     class: 'TextInfoPolicy',
     activate: function () {
         this.handle = new TextHandle(this.getHost());
-        this.handle.setText(this.getHost().model.getValue('name'));
+        this.handle.setText(this.getHost().model.get('name'));
         this.getHandleLayer().addChild(this.handle);
     },
     deactivate: function () {
@@ -326,7 +321,7 @@ TextHandle = anra.Handle.extend(anra.svg.Text).extend({
 });
 
 
-DialogPolicy=anra.gef.AbstractEditPolicy.extend({
+DialogPolicy = anra.gef.AbstractEditPolicy.extend({
     activate: function () {
         this.getHostFigure().on(anra.EVENT.MouseDoubleClick, function () {
             // alert(123);
@@ -335,7 +330,6 @@ DialogPolicy=anra.gef.AbstractEditPolicy.extend({
     deactivate: function () {
     }
 });
-
 
 
 /**
@@ -401,7 +395,7 @@ ContainerFigure = anra.gef.Figure.extend({
 CommonLineEditPart = anra.gef.LineEditPart.extend({
     refreshVisual: function () {
 
-        var color = this.model.getValue('color') == null ? 'green' : this.model.getValue('color');
+        var color = this.model.get('color') == null ? 'green' : this.model.get('color');
         this.figure.setAttribute('stroke', color);
         this.figure.paint();
     },

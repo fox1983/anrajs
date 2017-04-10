@@ -22,11 +22,11 @@ AStarZoom = anra.gef.Editor.extend({
             for (var i = 0; i < hn; i++) {
                 var nm = new anra.gef.NodeModel();
                 nm.id = i + '_' + j;
-                nm.setValue('width', w);
-                nm.setValue('x', i);
-                nm.setValue('y', j);
-                nm.setValue('type', GRID);
-                nm.setValue('color', 'white');
+                nm.set('width', w);
+                nm.set('x', i);
+                nm.set('y', j);
+                nm.set('type', GRID);
+                nm.set('color', 'white');
                 nm.editPartClass = GridPart;
                 rootModel.addChild(nm);
             }
@@ -35,11 +35,11 @@ AStarZoom = anra.gef.Editor.extend({
         //开始节点
         nm = new anra.gef.NodeModel();
         nm.id = 'source';
-        nm.setValue('x', 5);
-        nm.setValue('y', 5);
-        nm.setValue('width', w);
-        nm.setValue('type', SOURCE);
-        nm.setValue('color', 'red');
+        nm.set('x', 5);
+        nm.set('y', 5);
+        nm.set('width', w);
+        nm.set('type', SOURCE);
+        nm.set('color', 'red');
         nm.editPartClass = SourcePart;
         rootModel.addChild(nm);
         this.source = nm;
@@ -47,11 +47,11 @@ AStarZoom = anra.gef.Editor.extend({
         //结束节点
         nm = new anra.gef.NodeModel();
         nm.id = 'target';
-        nm.setValue('x', 10);
-        nm.setValue('y', 5);
-        nm.setValue('width', w);
-        nm.setValue('type', TARGET);
-        nm.setValue('color', 'blue');
+        nm.set('x', 10);
+        nm.set('y', 5);
+        nm.set('width', w);
+        nm.set('type', TARGET);
+        nm.set('color', 'blue');
         nm.editPartClass = TargetPart;
         this.target = nm;
         rootModel.addChild(nm);
@@ -68,7 +68,7 @@ RectFigure = anra.gef.Figure.extend({
     },
     initProp:function () {
         this.setAttribute({
-            fill:this.model.getValue('color'),
+            fill:this.model.get('color'),
             stroke:'black'
         });
     },
@@ -85,13 +85,13 @@ CommonPart = anra.gef.NodeEditPart.extend({
      * 用于同步model和figure。
      */
     refreshVisual:function () {
-        var x = this.model.getValue('x');
-        var y = this.model.getValue('y');
-        var w = this.model.getValue('width');
+        var x = this.model.get('x');
+        var y = this.model.get('y');
+        var w = this.model.get('width');
         this.figure.setBounds({x:x * w, y:y * w, width:w, height:w});
 
         this.figure.setAttribute({
-            fill:this.model.getValue('color')
+            fill:this.model.get('color')
         });
         this.figure.paint();
     },
@@ -170,8 +170,8 @@ DragPolicy = anra.gef.Policy.extend({
             var w = 50;
 
 //            console.log(x,y);
-            this.getHost().model.setValue('x', Math.floor(x / w));
-            this.getHost().model.setValue('y', Math.floor(y / w));
+            this.getHost().model.set('x', Math.floor(x / w));
+            this.getHost().model.set('y', Math.floor(y / w));
 
             this.getHost().refresh();
         }
@@ -188,8 +188,8 @@ ClickPolicy = anra.gef.Policy.extend({
     activate:function () {
         var ep = this.getHost();
         this.listener = function () {
-//            var color = ep.model.getValue('color');
-//            ep.model.setValue('color', color == 'white' ? 'gray' : 'white');
+//            var color = ep.model.get('color');
+//            ep.model.set('color', color == 'white' ? 'gray' : 'white');
 //            ep.refresh();
 
             var rootModel = ep.getRoot().model;

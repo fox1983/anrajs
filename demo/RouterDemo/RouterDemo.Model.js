@@ -9,15 +9,15 @@ MapNodeModel = anra.gef.NodeModel.extend({
         this.init();
     },
     init: function () {
-        this.setValue('width', WIDTH);
+        this.set('width', WIDTH);
     },
     setAbsolutePosition: function (x, y) {
-        this.setValue('x', Math.floor(x / WIDTH));
-        this.setValue('y', Math.floor(y / WIDTH));
+        this.set('x', Math.floor(x / WIDTH));
+        this.set('y', Math.floor(y / WIDTH));
     },
     setRelativePosition: function (x, y) {
-        this.setValue('x', y);
-        this.setValue('y', x);
+        this.set('x', y);
+        this.set('y', x);
     }
 });
 
@@ -27,14 +27,14 @@ SourceNodeModel = MapNodeModel.extend({
         MapNodeModel.prototype.constructor.call(this);
     },
     init: function () {
-        this.setValue('width', WIDTH);
-        this.setValue('type', _SOURCE);
-        this.setValue('color', 'red');
+        this.set('width', WIDTH);
+        this.set('type', _SOURCE);
+        this.set('color', 'red');
         this.setRelativePosition(1, 1);
         this.id = 'source';
     },
     refresh: function() {
-        this.setValue('width', WIDTH);
+        this.set('width', WIDTH);
     }
 });
 source = new SourceNodeModel();
@@ -45,14 +45,14 @@ TargetNodeModel = MapNodeModel.extend({
         MapNodeModel.prototype.constructor.call(this);
     },
     init: function () {
-        this.setValue('width', WIDTH);
-        this.setValue('type', _TARGET);
-        this.setValue('color', 'blue');
+        this.set('width', WIDTH);
+        this.set('type', _TARGET);
+        this.set('color', 'blue');
         this.setRelativePosition(10, 10);
         this.id = 'target';
     },
     refresh: function() {
-        this.setValue('width', WIDTH);
+        this.set('width', WIDTH);
     }
 });
 target = new TargetNodeModel();
@@ -62,12 +62,12 @@ WallNodeModel = MapNodeModel.extend({
     constructor: function (x, y) {
         MapNodeModel.prototype.constructor.call(this);
         this.setAbsolutePosition(x, y);
-        this.id = this.getValue('x') + '_' + this.getValue('y');
+        this.id = this.get('x') + '_' + this.get('y');
     },
     init: function () {
-        this.setValue('width', WIDTH);
-        this.setValue('type', _MAP);
-        this.setValue('color', 'gray');
+        this.set('width', WIDTH);
+        this.set('type', _MAP);
+        this.set('color', 'gray');
     }
 });
 
@@ -79,8 +79,8 @@ RouterLineModel = anra.gef.LineModel.extend({
     },
     initRouterLine: function () {
         this.id = RouterLineModel.id;
-        this.sourceTerminal = 'source';
-        this.targetTerminal = 'target';
+        this.exit = 'source';
+        this.entr = 'target';
     }
 });
 RouterLineModel.id = 'routerLine';

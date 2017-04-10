@@ -15,21 +15,21 @@ TestFrameEditor = anra.gef.Editor.extend({
 
         nm = new anra.gef.NodeModel();
         nm.id = 'source';
-        nm.setValue('width', w);
-        nm.setValue('x', 5);
-        nm.setValue('y', 5);
-        nm.setValue('type', SOURCE);
-        nm.setValue('color', 'red');
+        nm.set('width', w);
+        nm.set('x', 5);
+        nm.set('y', 5);
+        nm.set('type', SOURCE);
+        nm.set('color', 'red');
         rootModel.addChild(nm);
         this.source = nm;
 
         nm = new anra.gef.NodeModel();
         nm.id = 'target';
-        nm.setValue('width', w);
-        nm.setValue('x', 10);
-        nm.setValue('y', 10);
-        nm.setValue('type', TARGET);
-        nm.setValue('color', 'blue');
+        nm.set('width', w);
+        nm.set('x', 10);
+        nm.set('y', 10);
+        nm.set('type', TARGET);
+        nm.set('color', 'blue');
         rootModel.addChild(nm);
         this.target = nm;
 
@@ -63,7 +63,7 @@ TestFrameEditor = anra.gef.Editor.extend({
             this.editorParts = new Map();
         var part;
 
-        var type = model.getValue('type');
+        var type = model.get('type');
         switch (type) {
             case GRID:
                 part = new GridPart();
@@ -94,7 +94,7 @@ RectFigure = anra.gef.Figure.extend({
 
     initProp: function () {
         this.setAttribute({
-            fill: this.model.getValue('color'),
+            fill: this.model.get('color'),
             stroke: 'black'
         });
     },
@@ -157,8 +157,8 @@ MapNodeModel = anra.gef.NodeModel.extend({
     initMapNodeModel: function () {
         var node = this;
         this.flag = MapNodeModel.TRANSITABlLE;
-        this.setValue("type", GRID);
-        this.setValue('color', 'white');
+        this.set("type", GRID);
+        this.set('color', 'white');
         this.listener = function () {
             console.log(this instanceof MapNodeModel);//false
             //console.log(this instanceof anra.gef.NodeModel);
@@ -170,9 +170,9 @@ MapNodeModel = anra.gef.NodeModel.extend({
         this.addPropertyListener(this.listener, 'color');
     },
     setPosition(x, y, w) {
-        this.setValue('x', x);
-        this.setValue('y', y);
-        this.setValue('width', w);
+        this.set('x', x);
+        this.set('y', y);
+        this.set('width', w);
         this.id = x + '_' + y;
     }
 });
@@ -182,9 +182,9 @@ MapNodeModel.IMPASSABILITY = 'impassability';
 CommonPart = anra.gef.NodeEditPart.extend({
 
     refreshVisual: function () {
-        var x = this.model.getValue('x');
-        var y = this.model.getValue('y');
-        var w = this.model.getValue('width');
+        var x = this.model.get('x');
+        var y = this.model.get('y');
+        var w = this.model.get('width');
         this.figure.setBounds({
             x: x * w,
             y: y * w,
@@ -192,7 +192,7 @@ CommonPart = anra.gef.NodeEditPart.extend({
             height: w
         });
         this.figure.setAttribute({
-            fill: this.model.getValue('color')
+            fill: this.model.get('color')
         });
         this.figure.paint();
     },
@@ -269,8 +269,8 @@ ClickGridPolicy = anra.gef.Policy.extend({
     activate: function () {
         var host = this.getHost();
         this.listener = function () {
-            var color = host.model.getValue('color');
-            host.model.setValue('color', color == 'white' ? 'gray' : 'white');
+            var color = host.model.get('color');
+            host.model.set('color', color == 'white' ? 'gray' : 'white');
             //host.model.flag = (host.model.flag == MapNodeModel.TRANSITABlLE) ? MapNodeModel.IMPASSABILITY : MapNodeModel.TRANSITABlLE;
             host.refresh();
         };
@@ -289,8 +289,8 @@ DragPolicy = anra.gef.Policy.extend({
             var y = request.event.y;
             var w = 50;
 
-            this.getHost().model.setValue('x', Math.floor(x / w));
-            this.getHost().model.setValue('y', Math.floor(y / w));
+            this.getHost().model.set('x', Math.floor(x / w));
+            this.getHost().model.set('y', Math.floor(y / w));
 
             this.getHost().refresh();
         }

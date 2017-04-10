@@ -119,7 +119,7 @@ addSortedList = function (point, list) {
     while (low <= high) {
         mid = Math.floor((high + low) / 2);
 
-        if (list[mid].getValue('f') > point.getValue('f'))
+        if (list[mid].get('f') > point.get('f'))
             low = mid + 1;
         else
             high = mid - 1;
@@ -130,22 +130,22 @@ addSortedList = function (point, list) {
 Util.addSortedList = addSortedList;
 
 calculateG = function (point, prePoint) {
-    var key = point.getValue('g') == null ? 'g' : 'newG';
+    var key = point.get('g') == null ? 'g' : 'newG';
     if (!DIAGONAL) {
-        point.setValue(key, RE + prePoint.getValue('g'));
+        point.set(key, RE + prePoint.get('g'));
         return;
     }
 
     if (point.x != prePoint.x && point.y != prePoint.y)
-        point.setValue(key, BE + prePoint.getValue('g'));
+        point.set(key, BE + prePoint.get('g'));
     else
-        point.setValue(key, RE + prePoint.getValue('g'));
+        point.set(key, RE + prePoint.get('g'));
 };
 Util.calculateG = calculateG;
 
 octileG = function (point, prePoint) {
-    point.setValue(point.getValue('g') == null ? 'g' : 'newG',
-        octile(point, prePoint) + prePoint.getValue('g'));
+    point.set(point.get('g') == null ? 'g' : 'newG',
+        octile(point, prePoint) + prePoint.get('g'));
 };
 Util.octileG = octileG;
 

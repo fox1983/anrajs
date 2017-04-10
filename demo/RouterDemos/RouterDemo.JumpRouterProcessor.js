@@ -49,11 +49,11 @@ JumpPointSearchBasic = SingleRouterProcessor.extend({
         FindingTool.addFindingPoint(Point.inOpen, point);
     },
     removeFromOpen: function (point, open) {
-        if (point.getValue('newG') >= point.getValue('g'))
+        if (point.get('newG') >= point.get('g'))
             return;
 
         open.removeObject(point);
-        point.setValue('g', point.getValue('newG'));
+        point.set('g', point.get('newG'));
         point.state = Point.notFound;
     },
     getNeighbors: function (point) {
@@ -192,7 +192,7 @@ Jump = JumpPointSearchBasic.extend({
         JumpPointSearchBasic.prototype.constructor.call(this);
     },
     calculateF: function (sourcePoint, targetPoint) {
-        sourcePoint.setValue('f', sourcePoint.getValue('g') + DISTANCE(sourcePoint, targetPoint));
+        sourcePoint.set('f', sourcePoint.get('g') + DISTANCE(sourcePoint, targetPoint));
     },
     toString: function() {
         return "Jump";

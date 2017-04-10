@@ -25,8 +25,8 @@ RectFigure = anra.gef.Figure.extend({
         
         try {
         this.setAttribute({
-            fill: this.model.getValue('color'),
-            stroke: this.model.getValue('stroke')
+            fill: this.model.get('color'),
+            stroke: this.model.get('stroke')
         });
         } catch(e) {
             console.log(this.model)

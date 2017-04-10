@@ -44,11 +44,11 @@ StrongSingleRouterProcessor = SingleRouterProcessor.extend({
         }
     },
     removeFromOpen: function (point, open) {
-        if (point.getValue('newG') >= point.getValue('g'))
+        if (point.get('newG') >= point.get('g'))
             return;
 
         open.removeObject(point);
-        point.setValue('g', point.getValue('newG'));
+        point.set('g', point.get('newG'));
         point.state = Point.notFound;
     },
     addOpenList: function (point, open) {
@@ -124,11 +124,11 @@ StrongDoubleRouterProcessor = DoubleRouterProcessor.extend({
         return false;
     },
     removeFromOpen: function (point, open) {
-        if (point.getValue('newG') >= point.getValue('g'))
+        if (point.get('newG') >= point.get('g'))
             return;
 
         open.removeObject(point);
-        point.setValue('g', point.getValue('newG'));
+        point.set('g', point.get('newG'));
         point.state = Point.notFound;
     }
 });
@@ -140,7 +140,7 @@ BFS = StrongSingleRouterProcessor.extend({
         StrongSingleRouterProcessor.prototype.constructor.call(this);
     },
     calculateF: function (sourcePoint, targetPoint) {
-        sourcePoint.setValue('f', sourcePoint.getValue('g'));
+        sourcePoint.set('f', sourcePoint.get('g'));
     }
 });
 
@@ -150,7 +150,7 @@ Greed = StrongSingleRouterProcessor.extend({
         StrongSingleRouterProcessor.prototype.constructor.call(this);
     },
     calculateF: function (sourcePoint, targetPoint) {
-        sourcePoint.setValue('f', DISTANCE(sourcePoint, targetPoint));
+        sourcePoint.set('f', DISTANCE(sourcePoint, targetPoint));
     }
 });
 
@@ -160,7 +160,7 @@ AStar = StrongSingleRouterProcessor.extend({
         StrongSingleRouterProcessor.prototype.constructor.call(this);
     },
     calculateF: function (sourcePoint, targetPoint) {
-        sourcePoint.setValue('f', DISTANCE(sourcePoint, targetPoint) + sourcePoint.getValue('g'));
+        sourcePoint.set('f', DISTANCE(sourcePoint, targetPoint) + sourcePoint.get('g'));
     }
 });
 
@@ -169,7 +169,7 @@ DoubleBFS = StrongDoubleRouterProcessor.extend({
         StrongDoubleRouterProcessor.prototype.constructor.call(this);
     },
     calculateF: function (sourcePoint, targetPoint) {
-        sourcePoint.setValue('f', sourcePoint.getValue('g'));
+        sourcePoint.set('f', sourcePoint.get('g'));
     }
 });
 
@@ -178,7 +178,7 @@ DoubleGreed = StrongDoubleRouterProcessor.extend({
         StrongDoubleRouterProcessor.prototype.constructor.call(this);
     },
     calculateF: function (sourcePoint, targetPoint) {
-        sourcePoint.setValue('f', DISTANCE(sourcePoint, targetPoint));
+        sourcePoint.set('f', DISTANCE(sourcePoint, targetPoint));
     }
 });
 
@@ -187,7 +187,7 @@ DoubleAStar = StrongDoubleRouterProcessor.extend({
         StrongDoubleRouterProcessor.prototype.constructor.call(this);
     },
     calculateF: function (sourcePoint, targetPoint) {
-        sourcePoint.setValue('f', DISTANCE(sourcePoint, targetPoint) + sourcePoint.getValue('g'));
+        sourcePoint.set('f', DISTANCE(sourcePoint, targetPoint) + sourcePoint.get('g'));
     }
 });
 
@@ -255,11 +255,11 @@ StrongRedirectDoubleRouterProcessor = DoubleRouterProcessor.extend({
         return false;
     },
     removeFromOpen: function (point, open) {
-        if (point.getValue('newG') >= point.getValue('g'))
+        if (point.get('newG') >= point.get('g'))
             return;
 
         open.removeObject(point);
-        point.setValue('g', point.getValue('newG'));
+        point.set('g', point.get('newG'));
         point.state = Point.notFound;
     }
 });
@@ -269,6 +269,6 @@ DoReAs = StrongRedirectDoubleRouterProcessor.extend({
         StrongRedirectDoubleRouterProcessor.prototype.constructor.call(this);
     },
     calculateF: function (sourcePoint, targetPoint) {
-        sourcePoint.setValue('f', DISTANCE(sourcePoint, targetPoint) + sourcePoint.getValue('g'));
+        sourcePoint.set('f', DISTANCE(sourcePoint, targetPoint) + sourcePoint.get('g'));
     }
 });

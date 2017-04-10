@@ -13,23 +13,23 @@ DynamicMapEditor = anra.gef.Editor.extend({
         /*临时source与target*/
         nm = new anra.gef.NodeModel();
         nm.id = 'source';
-        nm.setValue('width', MapNodeModel.width);
-        nm.setValue('x', 5);
-        nm.setValue('y', 5);
-        nm.setValue('type', SOURCE);
-        nm.setValue('color', 'red');
-        nm.setValue('stroke', 'black');
+        nm.set('width', MapNodeModel.width);
+        nm.set('x', 5);
+        nm.set('y', 5);
+        nm.set('type', SOURCE);
+        nm.set('color', 'red');
+        nm.set('stroke', 'black');
         rootModel.addChild(nm);
         this.source = nm;
         //nm.editPartClass = EditPartRegistry[nm.type];
         nm = new anra.gef.NodeModel();
         nm.id = 'target';
-        nm.setValue('width', MapNodeModel.width);
-        nm.setValue('x', 10);
-        nm.setValue('y', 10);
-        nm.setValue('type', TARGET);
-        nm.setValue('color', 'blue');
-        nm.setValue('stroke', 'black');
+        nm.set('width', MapNodeModel.width);
+        nm.set('x', 10);
+        nm.set('y', 10);
+        nm.set('type', TARGET);
+        nm.set('color', 'blue');
+        nm.set('stroke', 'black');
         rootModel.addChild(nm);
         this.target = nm;
         
@@ -42,7 +42,7 @@ DynamicMapEditor = anra.gef.Editor.extend({
             this.editorParts = new Map();
 
         var part;
-        var type = model.getValue('type');
+        var type = model.get('type');
 
         if (type == SOURCE)
             part = new SourcePart();
@@ -78,26 +78,26 @@ MapNodeModel = anra.gef.NodeModel.extend({
         this.initMapModel();
     },
     initMapModel: function () {
-        this.setValue('width', MapNodeModel.width);
-        this.setValue('type', MAP);
-        this.setValue('color', 'gray');
-        this.setValue('stroke', 'black');
+        this.set('width', MapNodeModel.width);
+        this.set('type', MAP);
+        this.set('color', 'gray');
+        this.set('stroke', 'black');
     },
     setPosition: function (x, y) {
         x = Math.floor(x / MapNodeModel.width);
         y = Math.floor(y / MapNodeModel.width);
 
         this.id = x + '_' + y;
-        this.setValue('x', x);
-        this.setValue('y', y);
+        this.set('x', x);
+        this.set('y', y);
     },
     conversion() {
-        if (this.getValue('color') == 'gray') {
-            this.setValue('color', 'white');
-            this.setValue('stroke', 'white');
+        if (this.get('color') == 'gray') {
+            this.set('color', 'white');
+            this.set('stroke', 'white');
         } else {
-            this.setValue('color', 'gray');
-            this.setValue('stroke', 'black');
+            this.set('color', 'gray');
+            this.set('stroke', 'black');
         }
     }
 });
@@ -113,9 +113,9 @@ MapNodeModel.width = 40;
 /*EditPart*/
 CommonNodeEditPart = anra.gef.NodeEditPart.extend({
     refreshVisual: function () {
-        var x = this.model.getValue('x');
-        var y = this.model.getValue('y');
-        var w = this.model.getValue('width');
+        var x = this.model.get('x');
+        var y = this.model.get('y');
+        var w = this.model.get('width');
         this.figure.setBounds({
             x: x * w,
             y: y * w,
@@ -123,8 +123,8 @@ CommonNodeEditPart = anra.gef.NodeEditPart.extend({
             height: w
         });
         this.figure.setAttribute({
-            fill: this.model.getValue('color'),
-            stroke: this.model.getValue('stroke')
+            fill: this.model.get('color'),
+            stroke: this.model.get('stroke')
         });
         this.figure.paint();
     },
@@ -196,8 +196,8 @@ RectFigure = anra.gef.Figure.extend({
 
     initProp: function () {
         this.setAttribute({
-            fill: this.model.getValue('color'),
-            stroke: this.model.getValue('stroke')
+            fill: this.model.get('color'),
+            stroke: this.model.get('stroke')
         });
     },
 
@@ -273,18 +273,18 @@ DragPolicy = anra.gef.Policy.extend({
             y = Math.floor(y / w);
 
             if (x < 0)
-                this.getHost().model.setValue('x', 0);
+                this.getHost().model.set('x', 0);
             else if (x > MapNodeModel.horizontalValue)
-                this.getHost().model.setValue('x', MapNodeModel.horizontalValue);
+                this.getHost().model.set('x', MapNodeModel.horizontalValue);
             else
-                this.getHost().model.setValue('x', x);
+                this.getHost().model.set('x', x);
 
             if (y < 0)
-                this.getHost().model.setValue('y', 0);
+                this.getHost().model.set('y', 0);
             else if (y > MapNodeModel.verticalValue)
-                this.getHost().model.setValue('y', MapNodeModel.verticalValue = 60);
+                this.getHost().model.set('y', MapNodeModel.verticalValue = 60);
             else
-                this.getHost().model.setValue('y', y);
+                this.getHost().model.set('y', y);
 
             this.getHost().refresh();
         }

@@ -10,7 +10,7 @@ PolygonCentroid = anra.gef.Editor.extend({
 
     input2model:function (input, rootModel) {
         var nm = new anra.gef.NodeModel();
-        nm.setValue('points', input);
+        nm.set('points', input);
         nm.editPartClass = PolygonPart;
         rootModel.addChild(nm);
     }
@@ -24,7 +24,7 @@ PolygonPart = anra.gef.NodeEditPart.extend({
      */
     refreshVisual:function () {
         if (this.model != null && this.figure != null) {
-            this.figure.points = this.model.getValue('points');
+            this.figure.points = this.model.get('points');
         }
         this.figure.paint();
     },

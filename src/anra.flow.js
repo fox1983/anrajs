@@ -70,12 +70,12 @@
  * 对外的API
  * @type {{}}
  */
-$AGEF = {};
+$AG = {};
 
 /**
  * 图形常量
  */
-$AGEF.figure = {
+$AG.figure = {
     CIRCLE: anra.svg.Circle,
     RECTANGLE: anra.svg.Rectangle,
     IMAGE: anra.svg.Image
@@ -85,38 +85,14 @@ $AGEF.figure = {
  * 编辑器的API
  * @type {{}}
  */
-$AGEF.Editor = anra.gef.Editor.extend({
+$AG.Editor = anra.gef.Editor.extend({
     config: null,
     constructor: function (config) {
         this.config = config;
-        this.setInput(config.data);
+        this.setInput(config);
     },
     input2model: function (data, rootModel) {
-        var nodeModel, lineModel;
-        var i;
-        //节点处理
-        if (data)
-            for (i = 0; i < data.length; i++) {
-                nodeModel = createNode.call(this, data[i], this.config.children[data[i].type]);
-                this.rootModel.addChild(nodeModel);
-            }
-        //连线处理
-        var lines = this.config.line;
-        var line, source, target;
-        if (lines)
-            for (i = 0; i < lines.length; i++) {
-                line = lines[i];
-                lineModel = createLine(line);
-                source = this.rootModel.getChild(line.source);
-                if (source == null)
-                    throw 'source of line[' + line.id + '] does not exist';
-                target = this.rootModel.getChild(line.target);
-                if (target == null)
-                    throw 'target of line[' + line.id + '] does not exist';
-
-                source.addSourceLine(lineModel);
-                target.addTargetLine(lineModel);
-            }
+        doInit.call(this, data, rootModel, this.config);
     },
     registActions: function () {
         this.actionRegistry.regist(this.config.commands);
@@ -126,7 +102,7 @@ $AGEF.Editor = anra.gef.Editor.extend({
         editPart.addNotify();
     },
     addNode: function (data) {
-        this.exec(new anra.gef.CreateNodeCommand(this.rootEditPart, createNode.call(this, data, this.config.children[data.type])));
+        this.exec(new anra.gef.CreateNodeCommand(this.rootEditPart, $AG.Node.create(data)));
     },
     removeNode: function (node) {
         if (!(node instanceof anra.gef.NodeModel))
@@ -136,7 +112,7 @@ $AGEF.Editor = anra.gef.Editor.extend({
         this.exec(new anra.gef.DeleteNodeAndLineCommand(this.rootEditPart, node));
     },
     addLine: function (data) {
-        this.exec(new anra.gef.CreateLineCommand(this.rootEditPart, createLine(data), data.source, data.target));
+        this.exec(new anra.gef.CreateLineCommand(this.rootEditPart, $AG.Line.create(data), data.source, data.target));
     },
     removeLine: function (line) {
         this.exec(new anra.gef.DeleteLineCommand(this.rootEditPart, line));
@@ -166,76 +142,104 @@ $AGEF.Editor = anra.gef.Editor.extend({
             this.cmdStack.canRedo(cmd);
     },
     createEditPart: function (parentControl, model) {
-        var config = this.config.children[model.props.type];
-        if (config == null)throw 'can not found EditPart config on node [' + model.props.type + ']';
+        var nodeConfig = this.config.children[model.props.type];
+        if (nodeConfig == null)throw 'can not found EditPart config on node [' + model.props.type + ']';
         var e = new anra.gef.NodeEditPart();
-        e.config = config;
-        e.refreshVisual = config.refresh;
+        e.config = nodeConfig;
+        e.refreshVisual = nodeConfig.refresh;
 
-        if (config.on) {
+        if (nodeConfig.on) {
             e.installEditPolicy('on create figure', anra.gef.Policy.init({
                 activate: function () {
                     var key;
-                    for (key in config.on) {
-                        this.getHostFigure().on(key, config.on[key]);
+                    for (key in nodeConfig.on) {
+                        this.getHostFigure().on(key, nodeConfig.on[key]);
                     }
                 },
                 deactivate: function () {
                     var key;
-                    for (key in config.on) {
-                        this.getHostFigure().off(key, config.on[key]);
+                    for (key in nodeConfig.on) {
+                        this.getHostFigure().off(key, nodeConfig.on[key]);
                     }
                 }
             }));
         }
-
-        if (config.selectable) {
-            var p = new anra.gef.ResizableEditPolicy();
-            p.selected = config.selected;
-            p.unselected = config.unselected;
-            e.installEditPolicy('selection', p);
-            config.onselect && e.addSelectionListener(config.onselect);
+        if (nodeConfig.linkable) {
+            e.installEditPolicy('CONNECTION_POLICY', new $AG.ConnectionPolicy());
         }
 
-        if (config.canDrag) {
+        if (nodeConfig.selectable) {
+            var p = new anra.gef.ResizableEditPolicy();
+            p.selected = nodeConfig.selected;
+            p.unselected = nodeConfig.unselected;
+            e.installEditPolicy('selection', p);
+            nodeConfig.onselect && e.addSelectionListener(nodeConfig.onselect);
+        }
+
+        if (nodeConfig.canDrag) {
             e.dragTracker = new anra.gef.DragTracker();
         }
+        if (this.config.lines) {
+            var lineConfigs = this.config.lines;
 
-        if (config.line) {
             e.createLineEditPart = function (model) {
                 var l = new anra.gef.LineEditPart(model);
-                l.config = config.line;
+                l.config = lineConfigs[model.get('type')];
+
+                if(l.config.selectable){
+                    l.installEditPolicy('line selection',new anra.gef.LineSelectionPolicy());
+                }
+
                 l.onCreateFigure = function (figure) {
-                    figure.router = config.line.router;
+                    figure.router = l.config.router;
                 };
                 return l;
             }
-        }
+        } else
+            console.error('editor config must contains lines');
         return e;
     },
     getCustomPolicies: function () {
         this.put(anra.gef.LAYOUT_POLICY, new anra.gef.LayoutPolicy());
+    },
+    setTool: function (toolConfig) {
+        this.setActiveTool(anra.gef.Tool.init(toolConfig));
     }
+});
 
-})
-;
-var createLine = function (data) {
-    var lineModel = new anra.gef.LineModel();
-    lineModel.setProperties(data);
-    lineModel.id = data.id;
-    lineModel.sourceTerminal = data.exit;
-    lineModel.targetTerminal = data.entr;
-    return lineModel;
-};
-var createNode = function (data, controller) {
-    var key = this.config.key || 'id';
-    var nodeModel = new anra.gef.NodeModel();
-    nodeModel.id = data[key];
-    // nodeModel.editPartClass = controller;
-    // if (nodeModel.editPartClass == null)
-    //     throw "node type " + data.type + " invalid";
-    nodeModel.props = data;
-    return nodeModel;
+
+/**
+ * 从json生成NodeModel，目前只考虑了一层，以后可以改为递归
+ * @param data
+ * @param parentModel
+ * @param config
+ */
+var doInit = function (input, parentModel, config) {
+    var lineModel;
+    var i;
+    //节点处理
+    if (input.data) {
+        for (i = 0, len = input.data.length; i < len; i++) {
+            parentModel.addChild($AG.Node.create(input.data[i]));
+        }
+    }
+    //连线处理
+    var lines = config.line;
+    var line, source, target;
+    if (lines)
+        for (i = 0; i < lines.length; i++) {
+            line = lines[i];
+            lineModel = $AG.Line.create(line);
+            source = parentModel.getChild(line.source);
+            if (source == null)
+                throw 'source of line[' + line.id + '] does not exist';
+            target = parentModel.getChild(line.target);
+            if (target == null)
+                throw 'target of line[' + line.id + '] does not exist';
+
+            source.addSourceLine(lineModel);
+            target.addTargetLine(lineModel);
+        }
 };
 
 /**
@@ -243,4 +247,30 @@ var createNode = function (data, controller) {
  * @type {{}}
  */
 
-$AGEF.EditPart = anra.gef.EditPart.extend({});
+$AG.EditPart = anra.gef.EditPart.extend({});
+
+
+$AG.Node = anra.gef.NodeModel.extend({});
+
+$AG.Line = anra.gef.LineModel.extend({});
+
+$AG.Line.create = function (data) {
+    var l = new $AG.Line();
+    l.props = data;
+    return l;
+};
+
+$AG.Node.create = function (data) {
+    var n = new $AG.Node();
+    n.props = data;
+    return n;
+};
+
+$AG.ConnectionPolicy = anra.gef.ConnectionPolicy.extend({});
+
+$AG.LineTool = anra.gef.LinkLineTool.extend({
+    constructor: function (m) {
+        var line = $AG.Line.create(m);
+        anra.gef.LinkLineTool.prototype.constructor.call(this, line);
+    }
+});

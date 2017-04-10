@@ -2,27 +2,73 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <script src="../../lib/taffy-min.js"></script>
     <script src="../../src/Base.js"></script>
     <script src="../../src/anra.common.js"></script>
     <script src="../../src/anra.svg.js"></script>
     <script src="../../src/anra.gef.js"></script>
     <script src="../../src/anra.layout.js"></script>
     <script src="../../src/anra.policy.js"></script>
-    <script src="../../src/anra.handle.js"></script>
     <script src="../../src/anra.flow.js"></script>
+    <script src="../../src/anra.handle.js"></script>
     <script>
-
-
         window.onload = function () {
             off = 10;
+            var directLineConfig = {
+                attr: {
+                    'stroke-width': 1
+                },
+                style: {
+                    stroke: 'black'
+                },
+                type: anra.gef.Line,
+                policies: {}
+            };
+
+            var lineConfig = {
+                selectable: true,
+                router: function (line) {
+                    if (line.points == null || line.points.length < 2)
+                        return null;
+                    var sp = line.getStartPoint(), ep = line.getEndPoint();
+
+                    var mid = (sp.x + ep.x) / 2;
+
+                    var p1 = {
+                        x: mid,
+                        y: sp.y
+                    };
+
+                    var p2 = {
+                        x: mid,
+                        y: ep.y
+                    };
+                    return [sp, p1, p2, ep];
+                },
+                attr: {
+                    stroke: 'red',
+                    'stroke-width': 1
+                },
+                style: {},
+                type: anra.gef.Line,
+                policies: {
+                    'test': {
+                        activate: function () {
+                            console.log('line policy activated');
+                        }
+                    }
+                }
+            };
+
             var NodeConfig = {
                 canDrag: true,
                 selectable: true,
+                linkable: true,
                 selected: function () {
-//                    console.log('selected')
+                    console.log('selected')
                 },
                 unselected: function () {
-//                    console.log('unselected')
+                    console.log('unselected')
                 },
                 on: {
                     'mousemove': function (e) {
@@ -32,12 +78,12 @@
                 children: {},
                 refresh: function () {
                     if (this.model != null && this.figure != null) {
-                        var b = this.model.bounds;
+                        var b = this.model.get('bounds');
                         this.figure.bounds = {x: b[0], y: b[1], width: b[2], height: b[3]};
                     }
                     this.figure.paint();
                 },
-                type: $AGEF.figure.IMAGE,
+                type: $AG.figure.IMAGE,
                 url: 'system.png',
                 anchor: [
                     {id: 0, dir: anra.EAST, offset: -off},
@@ -49,44 +95,17 @@
                     {id: 6, dir: anra.SOUTH, offset: -off},
                     {id: 7, dir: anra.SOUTH, offset: off}
                 ],
-                line: {
-                    router:function (line) {
-                        if (line.points == null || line.points.length < 2)
-                            return null;
-                        var sp = line.getStartPoint(), ep = line.getEndPoint();
-                        var mid = (sp.x + ep.x) / 2;
-                        var p1 = {
-                            x: mid,
-                            y: sp.y
-                        };
-
-                        var p2 = {
-                            x: mid,
-                            y: ep.y
-                        };
-                        return [sp, p1, p2, ep];
-                    },
-                    attr: {
-                        stroke: 'red',
-                        'stroke-width': 1
-                    },
-                    style: {},
-                    createFigure: function (model) {
-                        return new anra.gef.Line();
-                    },
-                    policies: {}
-                },
                 policies: {}
             };
             var SegConfig = {
                 refresh: function () {
                     if (this.model != null && this.figure != null) {
-                        var b = this.model.bounds;
+                        var b = this.model.get('bounds');
                         this.figure.bounds = {x: b[0], y: b[1], width: b[2], height: b[3]};
                     }
                     this.figure.paint();
                 },
-                type: $AGEF.figure.IMAGE,
+                type: $AG.figure.IMAGE,
                 url: 'segment.png',
                 anchor: [
                     {id: 0, dir: anra.EAST, offset: -off},
@@ -110,27 +129,29 @@
                 {id: 7, name: 'CSRS', type: 2, bounds: [430, 260, 40, 40]}];
 
             var line = [
-                {id: 'line1', source: 1, target: 2, exit: 0, entr: 1},
-                {id: 'line2', source: 2, target: 3, exit: 2, entr: 1},
-                {id: 'line3', source: 4, target: 2, exit: 1, entr: 2}
+                {id: 'line1', source: 1, type: 0, target: 2, exit: 0, entr: 1},
+                {id: 'line2', source: 2, type: 0, target: 3, exit: 2, entr: 1},
+                {id: 'line3', source: 4, type: 1, target: 2, exit: 1, entr: 2}
             ];
 
-            editor = new $AGEF.Editor({
-                children: {
-                    0: SegConfig
-                }
-            });
-
-            editor = new $AGEF.Editor({
+            editor = new $AG.Editor({
                 data: data,
                 line: line,
                 id: 'my',
                 name: 'EditorName',
-                key: 'id',
+                tools: {
+//                    'selection':selectionTool,
+//                    'marquee':marquuTool,
+//                    'creationSys':createSys
+                },
                 children: {
                     0: NodeConfig,
                     1: NodeConfig,
                     2: SegConfig
+                },
+                lines: {
+                    0: lineConfig,
+                    1: directLineConfig
                 },
                 commands: [{
                     id: 0,
@@ -143,7 +164,19 @@
                     check: function (node) {
                         return this.host.canUndo();
                     }
-                }],
+                },
+                    {
+                        id: 'saveAction',
+                        name: '保存',
+                        type: ACTION_STACK,
+                        key: 'ctrl+s',
+                        run: function () {
+                            console.log(data);
+                        },
+                        check: function (node) {
+                            return editor.isDirty();
+                        }
+                    }],
                 policies: {
                     'test': {
                         activate: function () {
@@ -154,7 +187,22 @@
                 }
             });
             editor.createContent('my');
+
+
+            //TODO
+            var lineTool = new $AG.LineTool({type: 1});
+            linkTool = function () {
+                if (editor.getActiveTool() == lineTool) {
+                    editor.setActiveTool(editor.getDefaultTool());
+                } else
+                    editor.setActiveTool(lineTool);
+                return false;
+            };
+            selectTool = function () {
+                editor.setActiveTool(editor.getDefaultTool());
+            };
         };
+
 
         function addNode() {
             editor.addNode({id: 10, name: 'CAPP', type: 0, bounds: [120, 150, 40, 40]});
@@ -173,6 +221,8 @@
     <div id="palatte" style="position: relative;top: 0;width: 10%;height: 100%;background-color: #d3d3d3;float:left">
         <button onclick="addNode()"> add</button>
         <button onclick="removeNode()"> remove</button>
+        <button onclick="linkTool()"> link</button>
+        <button onclick="selectTool()"> selection</button>
     </div>
 </div>
 </body>

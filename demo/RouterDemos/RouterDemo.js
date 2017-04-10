@@ -75,7 +75,7 @@ DynamicMapEditor = anra.gef.Editor.extend({
             this.editorParts = new Map();
  
         var part,
-            type = model.getValue('type'); 
+            type = model.get('type');
         
         part = new EditPartResiger[type]();
 
@@ -181,8 +181,8 @@ MapStruct = Base.extend({
         return this.struct.get(key);
     },
     getSource : function() {
-        var x = source.getValue('x'),
-            y = source.getValue('y');
+        var x = source.get('x'),
+            y = source.get('y');
         
         if(this.source == null)
             this.source = new Point();            
@@ -193,8 +193,8 @@ MapStruct = Base.extend({
         return this.source;
     },
     getTarget : function() {
-        var x = target.getValue('x'),
-            y = target.getValue('y');
+        var x = target.get('x'),
+            y = target.get('y');
         
         if(this.target == null)
             this.target = new Point();

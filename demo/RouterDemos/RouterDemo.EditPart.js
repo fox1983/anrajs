@@ -5,9 +5,9 @@
 /*地图节点EditPart*/
 CommonNodeEditPart = anra.gef.NodeEditPart.extend({
     refreshVisual: function () {
-        var x = this.model.getValue('x'),
-            y = this.model.getValue('y'),
-            w = this.model.getValue('width');
+        var x = this.model.get('x'),
+            y = this.model.get('y'),
+            w = this.model.get('width');
         this.figure.setBounds({
             x: x * w,
             y: y * w,
@@ -15,8 +15,8 @@ CommonNodeEditPart = anra.gef.NodeEditPart.extend({
             height: w
         });
         this.figure.setAttribute({
-            fill: this.model.getValue('color'),
-            stroke: this.model.getValue('stroke')
+            fill: this.model.get('color'),
+            stroke: this.model.get('stroke')
         });
         this.model.setBounds({0:x, 1:y, 2: w, 3: w});
         this.figure.paint();
@@ -42,7 +42,7 @@ CommonLineEditPart = anra.gef.LineEditPart.extend({
             if (!this.isLine(l))
                 return null;
             
-            return rp.model.getValue('route');
+            return rp.model.get('route');
         };
         return line;
     }

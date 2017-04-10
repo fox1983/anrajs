@@ -24,10 +24,10 @@ Point = Base.extend({
             this.parent = point;
         }
     },
-    setValue: function (key, value) {
+    set: function (key, value) {
         this._extraAttribute.put(key, value);
     },
-    getValue: function (key) {
+    get: function (key) {
         if (!this._extraAttribute.has(key))
             return null;
 

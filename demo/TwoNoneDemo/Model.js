@@ -6,22 +6,22 @@ MapNodeModel = anra.gef.NodeModel.extend({
         anra.gef.NodeModel.prototype.constructor.call(this);
     },
     setRelativePosition: function (point) {
-        var b = this.getValue('bounds');
+        var b = this.get('bounds');
 
         b[0] = point.x * DEFAULT_WIDTH;
         b[1] = point.y * DEFAULT_HEIGHT;
 
-        this.setValue('bounds', b);
+        this.set('bounds', b);
     },
     setSize: function(width, height) {
-        var b = this.getValue('bounds');
+        var b = this.get('bounds');
         
         b[2] = width;
         b[3] = height;
         
-        this.setValue('bounds', b);
-        this.setValue('width', width);
-        this.setValue('height', height);
+        this.set('bounds', b);
+        this.set('width', width);
+        this.set('height', height);
     },
     getPoint: function () {
         //TODO
@@ -38,11 +38,11 @@ StartModel = MapNodeModel.extend({
         this.init();
     },
     init: function () {
-        this.setValue('width', DEFAULT_WIDTH);
-        this.setValue('height', DEFAULT_HEIGHT);
-        this.setValue('type', START);
-        this.setValue('color', 'red');
-        this.setValue('bounds', [0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT]);
+        this.set('width', DEFAULT_WIDTH);
+        this.set('height', DEFAULT_HEIGHT);
+        this.set('type', START);
+        this.set('color', 'red');
+        this.set('bounds', [0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT]);
     },
     setToEnd: function (end) {
         this.end = end;
@@ -63,11 +63,11 @@ EndModel = MapNodeModel.extend({
         this.init();
     },
     init: function () {
-        this.setValue('width', DEFAULT_WIDTH);
-        this.setValue('height', DEFAULT_HEIGHT);
-        this.setValue('type', END);
-        this.setValue('color', 'blue');
-        this.setValue('bounds', [0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT]);
+        this.set('width', DEFAULT_WIDTH);
+        this.set('height', DEFAULT_HEIGHT);
+        this.set('type', END);
+        this.set('color', 'blue');
+        this.set('bounds', [0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT]);
     }
 });
 
@@ -77,20 +77,20 @@ WallModel = MapNodeModel.extend({
         this.init();
     },
     init: function () {
-        this.setValue('width', DEFAULT_WIDTH);
-        this.setValue('height', DEFAULT_HEIGHT);
-        this.setValue('type', WALL);
-        this.setValue('color', 'gray');
-        this.setValue('bounds', [0, 0,
+        this.set('width', DEFAULT_WIDTH);
+        this.set('height', DEFAULT_HEIGHT);
+        this.set('type', WALL);
+        this.set('color', 'gray');
+        this.set('bounds', [0, 0,
             DEFAULT_WIDTH,
             DEFAULT_HEIGHT]);
     },
     setAbsolutePosition: function (x, y) {
-        var b = this.getValue('bounds');
+        var b = this.get('bounds');
         
         b[0] = x;
         b[1] = y;
-        this.setValue('bounds', b);
+        this.set('bounds', b);
         this.id = this.calRelativePosition(x, b[2]) + '_' + this.calRelativePosition(y, b[3]);
     },
     calRelativePosition : function(absolute, off) {

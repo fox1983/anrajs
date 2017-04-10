@@ -62,7 +62,7 @@ TwoNoneEditor = anra.gef.Editor.extend({
             this.editorParts = new Map();
         }
 
-        var type = model.getValue('type'),
+        var type = model.get('type'),
             editPart;
 
         editPart = new editPartRegistry[type]();

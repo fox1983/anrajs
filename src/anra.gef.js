@@ -154,9 +154,13 @@ anra.gef.Figure = anra.svg.Composite.extend({
 anra.gef.Figure.init = function (config) {
     if (config.type == null)
         throw 'figure config need a type like anra.svg.Circle';
-    var f = anra.gef.Figure.extend(config.type);
+    var f;
+    if (typeof(config.type) == 'function')
+        f = config.type;
+    else
+        f = anra.gef.Figure.extend(config.type);
     f = new f();
-    f.applyConfig(config);
+    f.applyConfig && f.applyConfig(config);
     return f;
 };
 var FLAG_ACTIVE = 1;
@@ -329,7 +333,6 @@ anra.gef.EditPart = Base.extend({
         if (this.figure == null) {
             this.figure = this.createFigure(this.model);
             this.figure.setModel(this.model);
-            this.onCreateFigure && this.onCreateFigure(this.figure);
         }
         return this.figure;
     },
@@ -370,17 +373,17 @@ anra.gef.EditPart = Base.extend({
         var f;
         if (this.config && this.config.createFigure)
             f = this.config.createFigure.call(this, model);
-        else if (this.config)
+        else if (this.config.type)
             f = anra.gef.Figure.init(this.config);
         if (f == null)
             throw ': EditPart of ' + model.props.id + ' should has a figure config or createFigure function';
-
         if (this.config.style)
             f.style = this.config.style;
         if (this.config.attr)
             f.attr = this.config.attr;
         if (this.config.anchor)
             f.registAnchors(this.config.anchor);
+        this.onCreateFigure && this.onCreateFigure(f);
         return f;
     },
     isActive: function () {
@@ -661,11 +664,11 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
     getAnchors: function () {
         return this.figure.getAnchors();
     },
-    getTargetTermianl: function (id) {
-        return this.figure.getTargetTermianl(id);
+    getTargetTerminal: function (id) {
+        return this.figure.getTargetTerminal(id);
     },
-    getSourceTermianl: function (id) {
-        return this.figure.getSourceTermianl(id);
+    getSourceTerminal: function (id) {
+        return this.figure.getSourceTerminal(id);
     },
     getSourceAnchorByTerminal: function (id) {
         return this.figure.getSourceAnchorByTerminal(id);
@@ -704,7 +707,7 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
             }
         }
         var modelObjects = this.getModelSourceLines();
-//        console.log('before: ',this.model.getValue('name'), this.sConns.length, modelObjects.length);
+//        console.log('before: ',this.model.get('name'), this.sConns.length, modelObjects.length);
         for (i = 0; i < modelObjects.length; i++) {
             model = modelObjects[i];
             if (i < this.sConns.length && this.sConns[i].model == model) {
@@ -730,7 +733,7 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
                 this.removeSourceConnection(trash[i]);
             }
         }
-//        console.log('after: ',this.model.getValue('name'), this.sConns.length, modelObjects.length);
+//        console.log('after: ',this.model.get('name'), this.sConns.length, modelObjects.length);
 
     },
     reorderSourceConnection: function (line, index) {
@@ -1066,12 +1069,12 @@ anra.gef.LineEditPart = anra.gef.EditPart.extend({
     },
     getSourceAnchor: function () {
         if (this.source != null)
-            return this.source.getSourceAnchorByTerminal(this.model.sourceTerminal);
+            return this.source.getSourceAnchorByTerminal(this.model.get('exit'));
         return {x: 0, y: 0};
     },
     getTargetAnchor: function () {
         if (this.target != null)
-            return this.target.getTargetAnchorByTerminal(this.model.targetTerminal);
+            return this.target.getTargetAnchorByTerminal(this.model.get('entr'));
         return {x: 100, y: 100};
     },
     attachSource: function () {
@@ -1336,7 +1339,7 @@ anra.gef.LinkLineTool = anra.gef.Tool.extend({
         return true;
     },
     createGuideLine: function (editPart) {
-        return editPart.createLineEditPart().createFigure();
+        return editPart.createLineEditPart(this.model).createFigure();
     },
     removeGuideLine: function () {
         if (this.type == REQ_RECONNECT_SOURCE || this.type == REQ_RECONNECT_TARGET) {
@@ -1392,7 +1395,8 @@ anra.gef.LinkLineTool = anra.gef.Tool.extend({
                 target: v,
                 event: e,
                 type: v.type,
-                anchor: p.getSourceAnchor({event: e})
+                anchor: p.getSourceAnchor({event: e}),
+                model: this.model
             };
             if (policy != null) {
                 this.command = policy.getCommand(req);
@@ -1629,13 +1633,13 @@ anra.gef.RelocalCommand = anra.Command.extend({
     },
     execute: function () {
         this.editPart = this.root.getEditPart(this.model);
-        this.editPart.model.getBounds()[0] = this.ep.x;
-        this.editPart.model.getBounds()[1] = this.ep.y;
+        this.editPart.model.get('bounds')[0] = this.ep.x;
+        this.editPart.model.get('bounds')[1] = this.ep.y;
         this.editPart.refresh();
     },
     undo: function () {
-        this.editPart.model.getBounds()[0] = this.sp.x;
-        this.editPart.model.getBounds()[1] = this.sp.y;
+        this.editPart.model.get('bounds')[0] = this.sp.x;
+        this.editPart.model.get('bounds')[1] = this.sp.y;
         this.editPart.refresh();
     }
 
@@ -1735,8 +1739,8 @@ anra.gef.DeleteLineCommand = anra.Command.extend({
             this.tnode = this.line.target.model;
 
 
-        this.sid = this.line.model.sourceTerminal;
-        this.tid = this.line.model.targetTerminal;
+        this.sid = this.line.model.get('exit');
+        this.tid = this.line.model.get('entr');
 
         this.line.dettachSource(true);
         this.line.dettachTarget(true);
@@ -1794,8 +1798,8 @@ anra.gef.ReconnectSourceCommand = anra.Command.extend({
             this.line.setSource(this.source);
             this.line.attachSource();
         }
-        this.oldTerminal = this.line.model.sourceTerminal;
-        this.line.model.sourceTerminal = this.terminal;
+        this.oldTerminal = this.line.model.get('exit');
+        this.line.model.set('exit', this.terminal);
         this.line.refresh();
     },
     undo: function () {
@@ -1803,7 +1807,7 @@ anra.gef.ReconnectSourceCommand = anra.Command.extend({
             this.line.setSource(this.oldSource);
             this.line.attachSource();
         }
-        this.line.model.sourceTerminal = this.oldTerminal;
+        this.line.model.set('exit', this.oldTerminal);
         this.line.refresh();
     }
 });
@@ -1815,8 +1819,8 @@ anra.gef.ReconnectTargetCommand = anra.Command.extend({
             this.line.setTarget(this.target);
             this.line.attachTarget();
         }
-        this.oldTerminal = this.line.model.targetTerminal;
-        this.line.model.targetTerminal = this.terminal;
+        this.oldTerminal = this.line.model.get('entr');
+        this.line.model.set('entr', this.terminal);
         this.line.refresh();
     },
     undo: function () {
@@ -1824,7 +1828,7 @@ anra.gef.ReconnectTargetCommand = anra.Command.extend({
             this.line.setTarget(this.oldTarget);
             this.line.attachTarget();
         }
-        this.line.model.targetTerminal = this.oldTerminal;
+        this.line.model.set('entr', this.oldTerminal);
         this.line.refresh();
     }
 });
@@ -1855,6 +1859,7 @@ anra.gef.CreateLineCommand = anra.Command.extend({
         if (this.source == null)
             anra.Platform.error('can not found line source id: ' + this.sourceId);
         var flag = this.source.addSourceLine(this.line);
+
         if (!flag)return;
         flag &= this.target.addTargetLine(this.line);
         if (!flag)return;
@@ -1892,17 +1897,17 @@ anra.gef.ConstraintCommand = anra.Command.extend({
         return this.editPart != null && this.sp != null && this.ep != null;
     },
     execute: function () {
-        this.editPart.model.getBounds()[0] = this.ep.x;
-        this.editPart.model.getBounds()[1] = this.ep.y;
-        this.editPart.model.getBounds()[2] = this.ep.width;
-        this.editPart.model.getBounds()[3] = this.ep.height;
+        this.editPart.model.get('bounds')[0] = this.ep.x;
+        this.editPart.model.get('bounds')[1] = this.ep.y;
+        this.editPart.model.get('bounds')[2] = this.ep.width;
+        this.editPart.model.get('bounds')[3] = this.ep.height;
         this.editPart.refresh();
     },
     undo: function () {
-        this.editPart.model.getBounds()[0] = this.sp.x;
-        this.editPart.model.getBounds()[1] = this.sp.y;
-        this.editPart.model.getBounds()[2] = this.sp.width;
-        this.editPart.model.getBounds()[3] = this.sp.height;
+        this.editPart.model.get('bounds')[0] = this.sp.x;
+        this.editPart.model.get('bounds')[1] = this.sp.y;
+        this.editPart.model.get('bounds')[2] = this.sp.width;
+        this.editPart.model.get('bounds')[3] = this.sp.height;
         this.editPart.refresh();
     }
 });
@@ -2001,8 +2006,15 @@ anra.gef.Editor = Base.extend({
     background: '#EEFFEE',
     setInput: function (input) {
         this.input = input;
-        this.rootModel = new anra.gef.ContentModel();
+        this.storeId = anra.Store.newStore();
+        this.store = anra.Store.get(this.storeId);
+        this.rootModel = this.createRootModel(input);
+        this.rootModel.storeId = this.storeId;
         this.input2model(this.input, this.rootModel);
+        console.log('editor created : ' + this.storeId);
+    },
+    createRootModel: function () {
+        return new anra.gef.ContentModel();
     },
     input2model: function (input) {
         return input;
@@ -2277,63 +2289,31 @@ anra.gef.PathLine = anra.gef.Line.extend({
 
 anra.gef.BaseModel = Base.extend({
     pls: null,
+    props: null,
     constructor: function () {
-        this.properties = new Map();
-        var t = this;
-        var prop = new Proxy({}, {
-            get: function (target, key, receiver) {
-                return t.getValue(key);
-            },
-            set: function (target, key, value, receiver) {
-                return t.setValue(key, value);
-            }
-        });
-        Object.defineProperty(this, 'props', {
-            get: function (key) {
-                return prop;
-            },
-            set: function (key, value) {
-                return t.setProperties(key, value);
-            }
-        });
-        Object.defineProperty(this, 'bounds', {
-            get: function () {
-                return t.getBounds();
-            },
-            set: function (key, value) {
-                return t.setBounds(key, value);
-            }
-        });
+        this.props = {};
     },
     /**
      * 输入应当为json
      * @param p
      * @param fire
      */
-    setProperties: function (p, fire) {
-        var o, key;
+    setValues: function (p, unfire) {
         for (key in p) {
-            o = this.properties.get(key);
-            this.properties.set(key, p[key]);
-            if (fire && this.pls) {
-                this.pls.firePropertyChanged(key, o, p[key]);
-            }
+            this.set(key, p[key], unfire);
         }
     },
-    getBounds: function () {
-        return this.properties.get('bounds');
-    },
-    setBounds: function (b, unfire) {
-        var old = this.getBounds();
-        this.properties.put('bounds', b);
-        if (!unfire && this.pls)
-            this.pls.firePropertyChanged('bounds', old, b);
-    },
-    setValue: function (key, value) {
-        var o = this.properties.get(key);
-        this.properties.set(key, value);
-        if (this.pls)
+    set: function (key, value, unfire) {
+        if (this.store)
+            this.props = this.store.update(key, value).first();
+        else
+            this.props[key] = value;
+
+        if (this.pls && !unfire)
             this.pls.firePropertyChanged(key, o, value);
+    },
+    get: function (key) {
+        return this.props[key];
     },
     addPropertyListener: function (l, k) {
         if (this.pls == null)
@@ -2343,9 +2323,6 @@ anra.gef.BaseModel = Base.extend({
     removePropertyListener: function (l, k) {
         if (this.pls != null)
             this.pls.removePropertyListener(l, k);
-    },
-    getValue: function (key) {
-        return this.properties.get(key);
     },
     hashCode: function () {
         if (this.uuid == null)
@@ -2362,7 +2339,7 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
         anra.gef.BaseModel.prototype.constructor.call(this);
         this.sourceLines = new Map();
         this.targetLines = new Map();
-        this.children = new Map();
+        this.children = {};
     },
     hasSourceLine: function (line) {
         if (line instanceof anra.gef.LineModel) {
@@ -2373,26 +2350,40 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
     },
     hasTargetLine: function (line) {
         if (line instanceof anra.gef.LineModel) {
-            return this.targetLines.has(this.lineId(line.id));
+            return this.targetLines.has(this.lineId(line.get('id')));
         } else {
             return this.targetLines.has(line);
         }
     },
     addSourceLine: function (line) {
-        var nId = this.lineId(line.id);
+        var nId = this.lineId(line.get('id'));
         line.sourceNode = this;
         if (!this.sourceLines.has(nId)) {
             this.sourceLines.put(nId, line);
+            if (this.storeId) {
+                if (line.store) {
+                    line.store.update(line.props);
+                } else {
+                    line.store = anra.Store.get(this.storeId).line.insert(line.props);
+                }
+            }
             return true;
         }
         console.log('duplicate line id: ' + line.id);
         return false;
     },
     addTargetLine: function (line) {
-        var nId = this.lineId(line.id);
+        var nId = this.lineId(line.get('id'));
         line.targetNode = this;
         if (!this.targetLines.has(nId)) {
             this.targetLines.put(nId, line);
+            if (this.storeId) {
+                if (line.store) {
+                    line.store.update(line.props);
+                } else {
+                    line.store = anra.Store.get(this.storeId).line.insert(line.props);
+                }
+            }
             return true;
         }
         console.log('duplicate line id: ' + line.id);
@@ -2416,31 +2407,51 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
         l = this.sourceLines.remove(lk);
         if (l != null)
             l.sourceNode = null;
+        if (line.store) {
+            line.store.update({source: null});
+        }
     },
     removeTargetLine: function (line) {
         var l, lk;
         if (line instanceof anra.gef.LineModel)
-            lk = this.lineId(line.id);
+            lk = this.lineId(line.get('id'));
         else
             lk = this.lineId(line);
         l = this.targetLines.remove(lk);
         if (l != null)
             l.targetNode = null;
+
+        if (line.store) {
+            line.store.update({target: null});
+        }
     },
-    addChild: function (model) {
-        this.children.put(model.id, model);
+    addChild: function (model, callback) {
+        this.children[model.get('id')] = model;
+        model.storeId = this.storeId;
+
+        var oldStore = anra.Store.get(this.storeId).node({id: model.get('id')});
+        if (oldStore.first()) {
+            console.error('duplicate model : ' + model.get('id'));
+            model.store = oldStore.update(model.props);
+        } else {
+            model.store = anra.Store.get(this.storeId).node.insert(model.props);
+        }
+        callback && callback(model);
     },
-    removeChild: function (model) {
-        this.children.remove(model.id);
+    removeChild: function (model, callback) {
+        delete this.children[model.get('id')];
+        anra.Store.get(this.storeId, 'node')({id: model.get('id')}).remove();
+        callback && callback(model);
     },
     getChild: function (id) {
-        return this.children.get(id);
+        return this.children[id];
     },
     getAllChildren: function () {
-        return this.children.values();
-    },
-    getAllChildrenID: function () {
-        return this.children.keys();
+        var c = [];
+        for (var key in this.children) {
+            c.push(this.children[key]);
+        }
+        return c;
     },
     equals: function (o) {
         return this == o || this.id == o.id;
@@ -2450,10 +2461,6 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
 anra.gef.ContentModel = anra.gef.NodeModel.extend({});
 
 anra.gef.LineModel = anra.gef.BaseModel.extend({
-    sourceNode: null,
-    targetNode: null,
-    sourceTerminal: 0,
-    targetTerminal: 0,
     equals: function (o) {
         return this == o || this.id == o.id;
     }
@@ -2484,7 +2491,7 @@ anra.FigureUtil = {
         ghost.disableEvent();
         return ghost;
     }
-}
+};
 
 
 REQ_CONNECTION_START = "connection start";

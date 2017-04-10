@@ -124,7 +124,7 @@ TestHeapRouterProcessor = SingleRouterProcessor.extend({
     },
     router: function () {
         var openList = new heap(function(p1, p2) {
-            return p1.getValue('f') - p2.getValue('f');
+            return p1.get('f') - p2.get('f');
         }),
             currentPoint, tempPoint, neighbors;
 
@@ -158,12 +158,12 @@ TestHeapRouterProcessor = SingleRouterProcessor.extend({
         }
     },
     removeFromOpen: function (point, open) {
-        if (point.getValue('newG') >= point.getValue('g'))
+        if (point.get('newG') >= point.get('g'))
             return;
 
         //open.removeObject(point);
         open.remove(point);
-        point.setValue('g', point.getValue('newG'));
+        point.set('g', point.get('newG'));
         point.state = Point.notFound;
     },
     addOpenList: function (point, open) {
@@ -181,7 +181,7 @@ HeapBSF = TestHeapRouterProcessor.extend({
         TestHeapRouterProcessor.prototype.constructor.call(this);
     },
     calculateF: function(sourcePoint, targetPoint) {
-        sourcePoint.setValue('f', sourcePoint.getValue('g'));
+        sourcePoint.set('f', sourcePoint.get('g'));
     }
 });
 
@@ -190,7 +190,7 @@ HeapGreed = TestHeapRouterProcessor.extend({
         TestHeapRouterProcessor.prototype.constructor.call(this);
     },
     calculateF: function (sourcePoint, targetPoint) {
-        sourcePoint.setValue('f', DISTANCE(sourcePoint, targetPoint));
+        sourcePoint.set('f', DISTANCE(sourcePoint, targetPoint));
     }
 });
 
@@ -199,7 +199,7 @@ HeapStar = TestHeapRouterProcessor.extend({
         TestHeapRouterProcessor.prototype.constructor.call(this);
     },
     calculateF: function(sourcePoint, targetPoint) {
-        sourcePoint.setValue('f', DISTANCE(sourcePoint, targetPoint) + sourcePoint.getValue('f'));
+        sourcePoint.set('f', DISTANCE(sourcePoint, targetPoint) + sourcePoint.get('f'));
     }
 });
 
@@ -242,7 +242,7 @@ Jump = SingleRouterProcessor.extend({
                         continue;
                     this.calculateG(jump, currentPoint);
 
-                    if (jump.state == Point.inOpen && jump.getValue('newG') < jump.getValue('g')) {
+                    if (jump.state == Point.inOpen && jump.get('newG') < jump.get('g')) {
                         processQueue.removeObject(jump);
                         jump.state = Point.notFound;
                     }
@@ -261,20 +261,20 @@ Jump = SingleRouterProcessor.extend({
         }
     },
     calculateH: function (sourcePoint, targetPoint) {
-        sourcePoint.setValue('h', DISTANCE(sourcePoint, targetPoint) + sourcePoint.getValue('g'));
+        sourcePoint.set('h', DISTANCE(sourcePoint, targetPoint) + sourcePoint.get('g'));
     },
     calculateG: function (point, prePoint) {
-        var key = point.getValue('g') == null ? 'g' : 'newG';
+        var key = point.get('g') == null ? 'g' : 'newG';
         if (!DIAGONAL) {
-            point.setValue(key, RE + prePoint.getValue('g'));
+            point.set(key, RE + prePoint.get('g'));
             return;
         }
 
         var l = this.octile(Math.abs(point.x - prePoint.x), Math.abs(point.y - prePoint.y));
         if (point.x != prePoint.x && point.y != prePoint.y)
-            point.setValue(key, l + prePoint.getValue('g'));
+            point.set(key, l + prePoint.get('g'));
         else
-            point.setValue(key, l + prePoint.getValue('g'));
+            point.set(key, l + prePoint.get('g'));
     },
     j: function (point, fpoint) {
         var dx = point.x - fpoint.x,

@@ -12,8 +12,8 @@ DragPolicy = anra.gef.Policy.extend({
                 yMax = MapStruct.verticalValue,
                 host = this.getHost();
 
-            host.model.setValue('x', x < 0 ? 0 : x > xMax ? xMax : x);
-            host.model.setValue('y', y < 0 ? 0 : y > yMax ? yMax : y);
+            host.model.set('x', x < 0 ? 0 : x > xMax ? xMax : x);
+            host.model.set('y', y < 0 ? 0 : y > yMax ? yMax : y);
 
             host.refresh();
         }
@@ -34,7 +34,7 @@ CreateWallPolicy = anra.gef.Policy.extend({
                 mn = new WallNodeModel(x, y);
 
             host.editor.rootModel.addChild(mn);
-            MapStruct.wallStruct.put(mn.id, new wallPoint(mn.getValue('x'), mn.getValue('y')));
+            MapStruct.wallStruct.put(mn.id, new wallPoint(mn.get('x'), mn.get('y')));
 
             host.refresh();
         };
@@ -143,7 +143,7 @@ RouterPolicy = anra.gef.Policy.extend({
         source.addSourceLine(ld);
         target.addTargetLine(ld);
         ld.initRouterLine();
-        ld.setValue('route', this.routerProcessor.getPath());
+        ld.set('route', this.routerProcessor.getPath());
 
         root.getEditPart(source).refresh();
         root.getEditPart(target).refresh();

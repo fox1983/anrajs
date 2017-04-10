@@ -1,17 +1,17 @@
 CommonNodeEditPart = anra.gef.NodeEditPart.extend({
     refreshVisual: function () {
-        var bounds = this.model.getValue('bounds');
+        var bounds = this.model.get('bounds');
         
         //约束移动
         var x = Math.floor(bounds[0]/bounds[2])*bounds[2],
             y = Math.floor(bounds[1]/bounds[3])*bounds[3];
         this.figure.setBounds({x:x, y:y, width:bounds[2], height:bounds[3]});
         bounds[0] = x; bounds[1] = y;
-        this.model.setValue('bounds', bounds);
+        this.model.set('bounds', bounds);
         
         this.figure.setAttribute({
-            fill: this.model.getValue('color'),
-            stroke: this.model.getValue('stroke')
+            fill: this.model.get('color'),
+            stroke: this.model.get('stroke')
         });
         this.figure.paint();
     },
@@ -55,18 +55,18 @@ EndEditPart = CommonNodeEditPart.extend({
 
 PlanNodeEditPart = CommonNodeEditPart.extend({
     refreshVisual: function () {
-        var bounds = this.model.getValue('bounds');
+        var bounds = this.model.get('bounds');
         
         //约束移动
         var x = Math.floor(bounds[0]/bounds[2])*bounds[2],
             y = Math.floor(bounds[1]/bounds[3])*bounds[3];
         this.figure.setBounds({x:x, y:y, width:bounds[2], height:bounds[3]});
         bounds[0] = x; bounds[1] = y;
-        this.model.setValue('bounds', bounds);
+        this.model.set('bounds', bounds);
         
         this.figure.setAttribute({
-            fill: this.model.getValue('color'),
-            stroke: this.model.getValue('stroke')
+            fill: this.model.get('color'),
+            stroke: this.model.get('stroke')
         });
         this.figure.paint();
     },

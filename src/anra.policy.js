@@ -166,7 +166,7 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
     },
     getMoveCommand: function (request) {
         var target = this.editParts;
-        if (target instanceof anra.gef.NodeEditPart&&target.dragTracker)
+        if (target instanceof anra.gef.NodeEditPart && target.dragTracker)
             return this.movecmd(target, request);
         else if (target instanceof Array) {
             var cmd, offx, offy, ox, oy;
@@ -177,7 +177,7 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
                 ox = request.target.bounds.x,
                     oy = request.target.bounds.y;
             for (var i = 0; i < target.length; i++) {
-                if(target[i].dragTracker==null)return null;
+                if (target[i].dragTracker == null)return null;
                 offx = target[i].figure.bounds.x - ox;
                 offy = target[i].figure.bounds.y - oy;
                 cmd = cmd == null ?
@@ -199,8 +199,8 @@ anra.gef.LayoutPolicy = anra.gef.AbstractEditPolicy.extend({
     },
     getCreateCommand: function (request) {
         var model = request.event.prop.drag.model;
-        var b = model.getBounds();
-        model.setValue('bounds', [request.event.x - b[2] / 2, request.event.y - b[3] / 2, b[2], b[3]]);
+        var b = model.get('bounds');
+        model.set('bounds', [request.event.x - b[2] / 2, request.event.y - b[3] / 2, b[2], b[3]]);
         return new anra.gef.CreateNodeCommand(this.getHost().getRoot(), model);
     },
     createListener: function () {
@@ -371,25 +371,23 @@ anra.gef.ConnectionPolicy = anra.gef.AbstractEditPolicy.extend({
         }
     },
     showTargetFeedback: function (req) {
-//        console.log('show')
         if (REQ_RECONNECT_TARGET == req.type || REQ_CONNECTION_END == req.type) {
             var anchor = this.getHost().getTargetAnchor(req);
             this.refreshTargetAnchorFeedback(anchor);
         }
     },
     eraseTargetFeedback: function (req) {
-//        console.log('erase')
-        if (this.targetAnchorFeedback != null) {
-            this.removeFeedback(this.targetAnchorFeedback);
-            this.targetAnchorFeedback = null;
+        if (anra.gef.ConnectionPolicy.targetAnchorFeedback != null) {
+            this.removeFeedback(anra.gef.ConnectionPolicy.targetAnchorFeedback);
+            anra.gef.ConnectionPolicy.targetAnchorFeedback = null;
         }
     },
     refreshTargetAnchorFeedback: function (anchor) {
-        if (this.targetAnchorFeedback == null) {
-            this.targetAnchorFeedback = this.createTargetAnchorFeedback();
-            this.addFeedback(this.targetAnchorFeedback);
+        if (anra.gef.ConnectionPolicy.targetAnchorFeedback == null) {
+            anra.gef.ConnectionPolicy.targetAnchorFeedback = this.createTargetAnchorFeedback();
+            this.addFeedback(anra.gef.ConnectionPolicy.targetAnchorFeedback);
         }
-        this.targetAnchorFeedback.setBounds({x: anchor.x, y: anchor.y, width: 10, height: 10});
+        anra.gef.ConnectionPolicy.targetAnchorFeedback.setBounds({x: anchor.x, y: anchor.y, width: 10, height: 10});
     },
     refreshSourceAnchorFeedback: function (anchor) {
         if (this.sourceAnchor == null) {
@@ -444,17 +442,19 @@ anra.gef.ConnectionPolicy = anra.gef.AbstractEditPolicy.extend({
     getCreateConnectionCommand: function (req) {
         var cmd = new anra.gef.CreateLineCommand();
         cmd.line = new anra.gef.LineModel();
-        cmd.line.id = anra.genUUID();
-        cmd.line.sourceTerminal = req.anchor.id;
+        if (req.model)
+            cmd.line.setValues(req.model.props);
+        cmd.line.set('id', anra.genUUID());
+        cmd.line.set('exit', req.anchor.id);
         cmd.rootEditPart = this.getHost().getRoot();
-        cmd.sourceId = this.getHost().model.id;
+        cmd.sourceId = this.getHost().model.get('id');
         return cmd;
     },
     getConnectionCompleteCommand: function (req) {
         var cmd = req.command;
         if (cmd == null)return null;
-        cmd.targetId = this.getHost().model.id;
-        cmd.line.targetTerminal = req.anchor.id;
+        cmd.targetId = this.getHost().model.get('id');
+        cmd.line.set('entr', req.anchor.id);
         return cmd;
     }
 });
@@ -487,12 +487,12 @@ anra.gef.SelectionPolicy = anra.gef.AbstractEditPolicy.extend({
                 switch (editPart.getSelected()) {
                     case SELECTED_NONE:
                         policy.hideSelection();
-                        policy.unselected.call(editPart);
+                        policy.unselected(editPart);
                         break;
                     case SELECTED:
                     case SELECTED_PRIMARY:
                         policy.showPrimarySelection();
-                        policy.selected.call(editPart);
+                        policy.selected(editPart);
                         break;
                     default :
                 }
@@ -557,6 +557,19 @@ anra.gef.LineSelectionPolicy = anra.gef.SelectionPolicy.extend({
 //        anra.gef.SelectionPolicy.prototype.hideSelection.call(this, selection);
 //        console.log(selection)
 //    },
+    unselected: function (editPart) {
+        this.getHostFigure().setStyle({
+            stroke: this.color,
+            'stroke-width': this.sw
+        });
+    },
+    selected: function (editPart) {
+        this.color = this.getHostFigure().getStyle('storke');
+        if(this.color==null)
+            this.color=this.getHostFigure().attr['storke'];
+        this.sw = this.getHostFigure().getStyle('storke-width');
+        this.getHostFigure().setStyle('stroke', 'blue');
+    },
     createSelectionHandles: function (selection) {
         return [new anra.gef.LineHandle(this.getHost(), REQ_RECONNECT_SOURCE), new anra.gef.LineHandle(this.getHost(), REQ_RECONNECT_TARGET)];
     }

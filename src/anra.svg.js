@@ -181,6 +181,13 @@ anra.svg.Control = anra.Control.extend({
         Util.applyAttr(this.owner, a, v);
         return this;
     },
+    getStyle: function (key) {
+        if (this.owner == null && this._style != null)
+            return this._style[key];
+        else if (this.owner != null) {
+            return this.owner.style[key];
+        }
+    },
     setStyle: function (a, v) {
         if (this.owner == null) {
             if (this._style == null)
@@ -541,10 +548,10 @@ anra.svg.Polyline = {
             return null;
         var l = this.locArea();
         var result = '';
-        
+
         //未调用
         this.setcomputeStrategy(this.Straight);
-        
+
         return this.strategy(this.points, l);
     },
     getStartPoint: function () {
@@ -553,24 +560,24 @@ anra.svg.Polyline = {
     getEndPoint: function () {
         return this.points == null || this.points.length == 0 ? null : this.points[this.points.length - 1];
     },
-    setcomputeStrategy : function(strategy) {
+    setcomputeStrategy: function (strategy) {
         this.strategy = strategy;
     },
-    Straight : function(points, l) {
+    Straight: function (points, l) {
         var result = '';
         for (var i = 0; i < points.length; i++) {
             result += (i == 0 ? 'M' : 'L') + (points[i].x + l[0]) + ',' + (points[i].y + l[1]) + ' ';
         }
         return result;
     },
-    Curve : function(points, l) {
+    Curve: function (points, l) {
         var result = '';
         for (var i = 0; i < points.length; i++) {
-            result += (i == 0 ? 'M' : points.length - i - 1 < (points.length - 1)%3 ? 'L' : i%3 == 1 ? 'C' : '') + (points[i].x + l[0]) + ',' + (points[i].y + l[1]) + ' ';
+            result += (i == 0 ? 'M' : points.length - i - 1 < (points.length - 1) % 3 ? 'L' : i % 3 == 1 ? 'C' : '') + (points[i].x + l[0]) + ',' + (points[i].y + l[1]) + ' ';
         }
         return result;
     },
-    x : function (points, l) {
+    x: function (points, l) {
         if (points.length > 2) {
             var p = []
                 , j = 0
@@ -586,13 +593,13 @@ anra.svg.Polyline = {
             }
             p.push(points.last());
         }
-        
+
         var result = '';
         for (var i = 0; i < p.length; i++) {
-            result += (i == 0 ? 'M' : p.length - i - 1 < (p.length - 1)%3 ? 'L' : i%3 == 1 ? 'C' : '') + (p[i].x + l[0]) + ',' + (p[i].y + l[1]) + ' ';
+            result += (i == 0 ? 'M' : p.length - i - 1 < (p.length - 1) % 3 ? 'L' : i % 3 == 1 ? 'C' : '') + (p[i].x + l[0]) + ',' + (p[i].y + l[1]) + ' ';
         }
         return result;
-        
+
     }
 };
 

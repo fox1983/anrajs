@@ -2,7 +2,45 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="145b30c8-b58c-4ccb-a5d2-ed3de5a436c3" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/taffy-min.js" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/lib/taffy.js" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/PolygonCentroid/PolygonCentroid.js" afterPath="$PROJECT_DIR$/demo/PolygonCentroid/PolygonCentroid.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.BasicRouterProcessor.js" afterPath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.BasicRouterProcessor.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.EditPart.js" afterPath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.EditPart.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.Figure.js" afterPath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.Figure.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.JumpRouterProcessor.js" afterPath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.JumpRouterProcessor.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.Model.js" afterPath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.Model.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.Point.js" afterPath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.Point.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.Policy.js" afterPath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.Policy.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.StrongRouterProcessor.js" afterPath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.StrongRouterProcessor.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.Util.js" afterPath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.Util.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.js" afterPath="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemos/RouterDemo.BasicRouterProcessor.js" afterPath="$PROJECT_DIR$/demo/RouterDemos/RouterDemo.BasicRouterProcessor.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemos/RouterDemo.EditPart.js" afterPath="$PROJECT_DIR$/demo/RouterDemos/RouterDemo.EditPart.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemos/RouterDemo.Figure.js" afterPath="$PROJECT_DIR$/demo/RouterDemos/RouterDemo.Figure.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemos/RouterDemo.JumpRouterProcessor.js" afterPath="$PROJECT_DIR$/demo/RouterDemos/RouterDemo.JumpRouterProcessor.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemos/RouterDemo.Model.js" afterPath="$PROJECT_DIR$/demo/RouterDemos/RouterDemo.Model.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemos/RouterDemo.Point.js" afterPath="$PROJECT_DIR$/demo/RouterDemos/RouterDemo.Point.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemos/RouterDemo.Policy.js" afterPath="$PROJECT_DIR$/demo/RouterDemos/RouterDemo.Policy.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemos/RouterDemo.StrongRouterProcessor.js" afterPath="$PROJECT_DIR$/demo/RouterDemos/RouterDemo.StrongRouterProcessor.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemos/RouterDemo.Util.js" afterPath="$PROJECT_DIR$/demo/RouterDemos/RouterDemo.Util.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/RouterDemos/RouterDemo.js" afterPath="$PROJECT_DIR$/demo/RouterDemos/RouterDemo.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/TwoNoneDemo/EditPart.js" afterPath="$PROJECT_DIR$/demo/TwoNoneDemo/EditPart.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/TwoNoneDemo/Editor.js" afterPath="$PROJECT_DIR$/demo/TwoNoneDemo/Editor.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/TwoNoneDemo/Model.js" afterPath="$PROJECT_DIR$/demo/TwoNoneDemo/Model.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/TwoNoneDemo/Point.js" afterPath="$PROJECT_DIR$/demo/TwoNoneDemo/Point.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/astar-zoom/act.js" afterPath="$PROJECT_DIR$/demo/astar-zoom/act.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/flowApi/index.html" afterPath="$PROJECT_DIR$/demo/flowApi/index.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/flowDialect/flow.html" afterPath="$PROJECT_DIR$/demo/flowDialect/flow.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/flowDialect/flow.js" afterPath="$PROJECT_DIR$/demo/flowDialect/flow.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/testDemo/DynamicMap.js" afterPath="$PROJECT_DIR$/demo/testDemo/DynamicMap.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo/testDemo/TestFrameWork.js" afterPath="$PROJECT_DIR$/demo/testDemo/TestFrameWork.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/anra.common.js" afterPath="$PROJECT_DIR$/src/anra.common.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/anra.flow.js" afterPath="$PROJECT_DIR$/src/anra.flow.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/anra.gef.js" afterPath="$PROJECT_DIR$/src/anra.gef.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/anra.handle.js" afterPath="$PROJECT_DIR$/src/anra.handle.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/anra.policy.js" afterPath="$PROJECT_DIR$/src/anra.policy.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/anra.svg.js" afterPath="$PROJECT_DIR$/src/anra.svg.js" />
     </list>
     <ignored path="anrajs.iws" />
@@ -26,12 +64,9 @@
       <file leaf-file-name="anra.flow.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/anra.flow.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="585">
-              <caret line="98" column="46" lean-forward="false" selection-start-line="98" selection-start-column="46" selection-end-line="98" selection-end-column="46" />
-              <folding>
-                <marker date="1490584913648" expanded="true" signature="4731:6378" ph="{...}" />
-                <marker date="1490584913648" expanded="true" signature="6021:6354" ph="{...}" />
-              </folding>
+            <state relative-caret-position="3690">
+              <caret line="189" column="46" lean-forward="false" selection-start-line="189" selection-start-column="46" selection-end-line="189" selection-end-column="46" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -39,8 +74,8 @@
       <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/demo/flowApi/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="545">
-              <caret line="122" column="0" lean-forward="false" selection-start-line="122" selection-start-column="0" selection-end-line="122" selection-end-column="0" />
+            <state relative-caret-position="1170">
+              <caret line="39" column="22" lean-forward="false" selection-start-line="39" selection-start-column="22" selection-end-line="39" selection-end-column="22" />
               <folding>
                 <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
@@ -49,53 +84,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="anra.gef.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/anra.gef.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="375" column="0" lean-forward="false" selection-start-line="375" selection-start-column="0" selection-end-line="375" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="flow.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/demo/flowDialect/flow.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="227" column="28" lean-forward="false" selection-start-line="227" selection-start-column="28" selection-end-line="227" selection-end-column="28" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="flow.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/demo/flowDialect/flow.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="420">
-              <caret line="30" column="50" lean-forward="true" selection-start-line="30" selection-start-column="50" selection-end-line="30" selection-end-column="50" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="RouterDemo.BasicRouterProcessor.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/demo/RouterDemo/RouterDemo.BasicRouterProcessor.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-              <folding>
-                <element signature="n#!!doc" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="anra.common.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/anra.common.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="30">
-              <caret line="217" column="4" lean-forward="false" selection-start-line="217" selection-start-column="4" selection-end-line="217" selection-end-column="4" />
+            <state relative-caret-position="2130">
+              <caret line="71" column="22" lean-forward="false" selection-start-line="71" selection-start-column="22" selection-end-line="71" selection-end-column="22" />
               <folding />
             </state>
           </provider>
@@ -104,18 +97,58 @@
       <file leaf-file-name="anra.policy.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/anra.policy.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="170" column="43" lean-forward="false" selection-start-line="170" selection-start-column="43" selection-end-line="170" selection-end-column="43" />
+            <state relative-caret-position="17040">
+              <caret line="568" column="47" lean-forward="false" selection-start-line="568" selection-start-column="47" selection-end-line="568" selection-end-column="47" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="act.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/demo/astar-zoom/act.js">
+      <file leaf-file-name="anra.gef.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/anra.gef.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3570">
-              <caret line="119" column="11" lean-forward="false" selection-start-line="119" selection-start-column="11" selection-end-line="119" selection-end-column="11" />
+            <state relative-caret-position="26520">
+              <caret line="884" column="38" lean-forward="false" selection-start-line="884" selection-start-column="38" selection-end-line="884" selection-end-column="38" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="flow.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/demo/flowDialect/flow.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="12270">
+              <caret line="415" column="78" lean-forward="false" selection-start-line="415" selection-start-column="44" selection-end-line="415" selection-end-column="78" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="anra.handle.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/anra.handle.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="4890">
+              <caret line="163" column="17" lean-forward="false" selection-start-line="163" selection-start-column="17" selection-end-line="163" selection-end-column="17" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="anra.common.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/anra.common.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="3330">
+              <caret line="111" column="10" lean-forward="false" selection-start-line="111" selection-start-column="10" selection-end-line="111" selection-end-column="10" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="PolygonCentroid.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/demo/PolygonCentroid/PolygonCentroid.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="480">
+              <caret line="16" column="0" lean-forward="false" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -124,8 +157,8 @@
       <file leaf-file-name="anra.svg.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/anra.svg.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="303">
-              <caret line="533" column="27" lean-forward="true" selection-start-line="533" selection-start-column="27" selection-end-line="533" selection-end-column="27" />
+            <state relative-caret-position="466">
+              <caret line="263" column="0" lean-forward="false" selection-start-line="261" selection-start-column="0" selection-end-line="263" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -143,35 +176,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>anra.gef.Figure.init</find>
-      <find>anra.gef.Policy.init</find>
-      <find>anra.gef.NodeEditPart.init</find>
-      <find>init</find>
-      <find>Policy.init</find>
-      <find>RootEditPart</find>
-      <find>rootEditPart</find>
-      <find>initRootEditPart</find>
-      <find>createEditPolicies</find>
-      <find>anra.gef.SelectionPolicy</find>
-      <find>selec</find>
-      <find>addSelectionListener</find>
-      <find>selection</find>
-      <find>anra.gef.EditPartListener</find>
-      <find>editPartList</find>
-      <find>addEditPart</find>
-      <find>Drag</find>
-      <find>createDragTracker</find>
-      <find>Layout</find>
-      <find>LAYOUT_POLICY</find>
-      <find>DragTracker</find>
-      <find>createGhostFigure</find>
-      <find>anra.gef.LayoutPolicy</find>
-      <find>getCustomPolicies</find>
-      <find>router</find>
-      <find>anra.gef.LineEditPart.init</find>
-      <find>LineEditPart.ini</find>
-      <find>style</find>
+      <find>canDrag</find>
+      <find>install</find>
+      <find>targetAnchorFeedback</find>
+      <find>createComm</find>
+      <find>model.id</find>
+      <find>paint</find>
+      <find>Line</find>
+      <find>addLine</find>
+      <find>line</find>
+      <find>ConnectionPolicy</find>
+      <find>LinkLineTool</find>
+      <find>Lin</find>
+      <find>createLine</find>
+      <find>tool</find>
+      <find>onCreateFigure</find>
+      <find>getCreateConnectionCommand</find>
+      <find>REQ_CONNECTION_START</find>
+      <find>sourceAnchor</find>
+      <find>setSourceAnchor</find>
+      <find>anchor.id</find>
+      <find>registAnchor</find>
+      <find>anchor</find>
+      <find>exit</find>
+      <find>.type</find>
+      <find>nodeConfig</find>
+      <find>$AG.ConnectionPolicy</find>
       <find>createFigure</find>
+      <find>type:</find>
+      <find>unselected</find>
+      <find>.style</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -179,6 +213,20 @@
       <replace>on</replace>
       <replace>.props.</replace>
       <replace>off</replace>
+      <replace>setValues</replace>
+      <replace>props</replace>
+      <replace>bounds</replace>
+      <replace>$AG</replace>
+      <replace>get</replace>
+      <replace>set</replace>
+      <replace>AG</replace>
+      <replace>model.get('bounds')</replace>
+      <replace>getTargetTerminal</replace>
+      <replace>getSourceTerminal</replace>
+      <replace>entr</replace>
+      <replace>exit</replace>
+      <replace>.get('exit')</replace>
+      <replace>.get('entr')</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -187,16 +235,18 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/anra.handle.js" />
         <option value="$PROJECT_DIR$/src/Base.js" />
-        <option value="$PROJECT_DIR$/demo/flowDialect/flow.html" />
-        <option value="$PROJECT_DIR$/src/anra.common.js" />
         <option value="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.Policy.js" />
+        <option value="$PROJECT_DIR$/demo/RouterDemo/RouterDemo.Model.js" />
+        <option value="$PROJECT_DIR$/demo/PolygonCentroid/PolygonCentroid.js" />
+        <option value="$PROJECT_DIR$/src/anra.handle.js" />
+        <option value="$PROJECT_DIR$/src/anra.common.js" />
         <option value="$PROJECT_DIR$/demo/flowDialect/flow.js" />
-        <option value="$PROJECT_DIR$/src/anra.policy.js" />
+        <option value="$PROJECT_DIR$/demo/flowDialect/flow.html" />
         <option value="$PROJECT_DIR$/demo/flowApi/index.html" />
-        <option value="$PROJECT_DIR$/src/anra.gef.js" />
         <option value="$PROJECT_DIR$/src/anra.flow.js" />
+        <option value="$PROJECT_DIR$/src/anra.gef.js" />
+        <option value="$PROJECT_DIR$/src/anra.policy.js" />
         <option value="$PROJECT_DIR$/src/anra.svg.js" />
       </list>
     </option>
@@ -228,6 +278,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -240,10 +291,73 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="anrajs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="anrajs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="anrajs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="anrajs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="demo" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="anrajs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="anrajs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="demo" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="PolygonCentroid" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="anrajs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="anrajs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="demo" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="flowApi" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
       <pane id="Scratches" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -255,17 +369,19 @@
     <property name="js-jscs-nodeInterpreter" value="F:\node-v6.10.0\node.exe" />
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="settings.editor.selected.configurable" value="preferences.keymap" />
+    <property name="SearchEverywhereHistoryKey" value="$AG&#9;null&#9;null" />
   </component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="F:\anra.js\anrajs\lib" />
+      <recent name="F:\anra.js\anrajs" />
+    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="F:\anra.js\anrajs\demo\flowApi" />
       <recent name="F:\anra.js\anrajs\lib" />
     </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="F:\anra.js\anrajs" />
-    </key>
   </component>
-  <component name="RunManager" selected="JavaScript Debug.index.html">
+  <component name="RunManager" selected="JavaScript Debug.flow.html">
     <configuration default="false" name="flow.html" type="JavascriptDebugType" factoryName="JavaScript Debug" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/anrajs/demo/flowDialect/flow.html">
       <method />
     </configuration>
@@ -350,8 +466,8 @@
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="JavaScript Debug.index.html" />
-        <item index="1" class="java.lang.String" itemvalue="JavaScript Debug.flow.html" />
+        <item index="0" class="java.lang.String" itemvalue="JavaScript Debug.flow.html" />
+        <item index="1" class="java.lang.String" itemvalue="JavaScript Debug.index.html" />
         <item index="2" class="java.lang.String" itemvalue="Node.js.anra.flow.js" />
         <item index="3" class="java.lang.String" itemvalue="Node.js.anra.svg.js" />
         <item index="4" class="java.lang.String" itemvalue="Node.js.flow.js" />
@@ -376,7 +492,15 @@
       <workItem from="1490144726800" duration="9338000" />
       <workItem from="1490230181976" duration="23868000" />
       <workItem from="1490317187898" duration="19626000" />
-      <workItem from="1490577065600" duration="13069000" />
+      <workItem from="1490577065600" duration="24311000" />
+      <workItem from="1490663198006" duration="20623000" />
+      <workItem from="1490749202037" duration="21696000" />
+      <workItem from="1490836384966" duration="12942000" />
+      <workItem from="1490922640479" duration="20419000" />
+      <workItem from="1491008920778" duration="14880000" />
+      <workItem from="1491440901503" duration="22627000" />
+      <workItem from="1491526839477" duration="23119000" />
+      <workItem from="1491786196450" duration="1307000" />
     </task>
     <task id="LOCAL-00001" summary="修改API">
       <created>1490585887951</created>
@@ -389,30 +513,31 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="96417000" />
+    <option name="totallyTimeSpent" value="245272000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-9" y="-9" width="1938" height="1050" extended-state="7" />
-    <editor active="true" />
+    <frame x="-9" y="-9" width="1938" height="1050" extended-state="6" />
+    <editor active="false" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.14904863" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22357294" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32919955" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32919955" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32919955" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26155582" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32919955" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Documentation" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="FLOATING" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" x="91" y="91" width="1738" height="850" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32919955" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.20067644" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
     </layout>
     <layout-to-restore>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -455,15 +580,11 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="2" />
+      <option name="time" value="4" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/CustomEditor.js" />
-    <entry file="file://$PROJECT_DIR$/js/anra.gef.js" />
-    <entry file="file://$PROJECT_DIR$/js/anra.layout.js" />
-    <entry file="file://$PROJECT_DIR$/layoutTest.html" />
     <entry file="file://$PROJECT_DIR$/Maze.html" />
     <entry file="file://$PROJECT_DIR$/js/anra.svg.js" />
     <entry file="file://$PROJECT_DIR$/svg2gef.html" />
@@ -495,13 +616,6 @@
     <entry file="file://$PROJECT_DIR$/svg2gef.html" />
     <entry file="file://$PROJECT_DIR$/CustomEditor.js" />
     <entry file="file://$PROJECT_DIR$/js/anra.common.js" />
-    <entry file="file://$PROJECT_DIR$/lib/taffy.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="53" column="48" lean-forward="true" selection-start-line="53" selection-start-column="48" selection-end-line="53" selection-end-column="48" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/lib/JavaScriptLanguage.jar!/com/intellij/lang/javascript/index/predefined/DOMCore.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="285">
@@ -513,15 +627,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="187">
           <caret line="6580" column="0" lean-forward="false" selection-start-line="6580" selection-start-column="0" selection-end-line="6580" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/anra.handle.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2070">
-          <caret line="69" column="5" lean-forward="false" selection-start-line="69" selection-start-column="5" selection-end-line="69" selection-end-column="5" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -537,7 +642,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="307">
           <caret line="43" column="10" lean-forward="true" selection-start-line="43" selection-start-column="10" selection-end-line="43" selection-end-column="10" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -549,45 +653,71 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/anra.common.js">
+    <entry file="file://$PROJECT_DIR$/demo/RouterDemo/RouterDemo.BasicRouterProcessor.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="217" column="4" lean-forward="false" selection-start-line="217" selection-start-column="4" selection-end-line="217" selection-end-column="4" />
-          <folding />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/anra.policy.js">
+    <entry file="file://$PROJECT_DIR$/demo/RouterDemo/RouterDemo.Model.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="170" column="43" lean-forward="false" selection-start-line="170" selection-start-column="43" selection-end-line="170" selection-end-column="43" />
-          <folding />
+        <state relative-caret-position="435">
+          <caret line="78" column="6" lean-forward="true" selection-start-line="78" selection-start-column="6" selection-end-line="78" selection-end-column="6" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/anra.gef.js">
+    <entry file="file://$PROJECT_DIR$/lib/taffy.js" />
+    <entry file="file://$PROJECT_DIR$/lib/taffy-min.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="390">
+          <caret line="0" column="1494" lean-forward="false" selection-start-line="0" selection-start-column="1494" selection-end-line="0" selection-end-column="1494" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/lib/JavaScriptLanguage.jar!/com/intellij/lang/javascript/index/predefined/EcmaScript.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="285">
-          <caret line="375" column="0" lean-forward="false" selection-start-line="375" selection-start-column="0" selection-end-line="375" selection-end-column="0" />
+          <caret line="435" column="0" lean-forward="false" selection-start-line="435" selection-start-column="0" selection-end-line="435" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/anra.handle.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4890">
+          <caret line="163" column="17" lean-forward="false" selection-start-line="163" selection-start-column="17" selection-end-line="163" selection-end-column="17" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/anra.flow.js">
+    <entry file="file://$PROJECT_DIR$/demo/PolygonCentroid/PolygonCentroid.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="585">
-          <caret line="98" column="46" lean-forward="false" selection-start-line="98" selection-start-column="46" selection-end-line="98" selection-end-column="46" />
-          <folding>
-            <marker date="1490584913648" expanded="true" signature="4731:6378" ph="{...}" />
-            <marker date="1490584913648" expanded="true" signature="6021:6354" ph="{...}" />
-          </folding>
+        <state relative-caret-position="480">
+          <caret line="16" column="0" lean-forward="false" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/demo/flowDialect/flow.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="12270">
+          <caret line="415" column="78" lean-forward="false" selection-start-line="415" selection-start-column="44" selection-end-line="415" selection-end-column="78" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/demo/flowDialect/flow.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2130">
+          <caret line="71" column="22" lean-forward="false" selection-start-line="71" selection-start-column="22" selection-end-line="71" selection-end-column="22" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/demo/flowApi/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="545">
-          <caret line="122" column="0" lean-forward="false" selection-start-line="122" selection-start-column="0" selection-end-line="122" selection-end-column="0" />
+        <state relative-caret-position="1170">
+          <caret line="39" column="22" lean-forward="false" selection-start-line="39" selection-start-column="22" selection-end-line="39" selection-end-column="22" />
           <folding>
             <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
@@ -595,36 +725,42 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/demo/flowDialect/flow.js">
+    <entry file="file://$PROJECT_DIR$/src/anra.flow.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="227" column="28" lean-forward="false" selection-start-line="227" selection-start-column="28" selection-end-line="227" selection-end-column="28" />
+        <state relative-caret-position="3690">
+          <caret line="189" column="46" lean-forward="false" selection-start-line="189" selection-start-column="46" selection-end-line="189" selection-end-column="46" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/demo/flowDialect/flow.html">
+    <entry file="file://$PROJECT_DIR$/src/anra.common.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="30" column="50" lean-forward="true" selection-start-line="30" selection-start-column="50" selection-end-line="30" selection-end-column="50" />
+        <state relative-caret-position="3330">
+          <caret line="111" column="10" lean-forward="false" selection-start-line="111" selection-start-column="10" selection-end-line="111" selection-end-column="10" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/demo/RouterDemo/RouterDemo.BasicRouterProcessor.js">
+    <entry file="file://$PROJECT_DIR$/src/anra.gef.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
+        <state relative-caret-position="26520">
+          <caret line="884" column="38" lean-forward="false" selection-start-line="884" selection-start-column="38" selection-end-line="884" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/anra.policy.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17040">
+          <caret line="568" column="47" lean-forward="false" selection-start-line="568" selection-start-column="47" selection-end-line="568" selection-end-column="47" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/anra.svg.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="303">
-          <caret line="533" column="27" lean-forward="true" selection-start-line="533" selection-start-column="27" selection-end-line="533" selection-end-column="27" />
+        <state relative-caret-position="466">
+          <caret line="263" column="0" lean-forward="false" selection-start-line="261" selection-start-column="0" selection-end-line="263" selection-end-column="0" />
           <folding />
         </state>
       </provider>
