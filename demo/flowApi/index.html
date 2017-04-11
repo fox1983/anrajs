@@ -83,7 +83,7 @@
                     }
                     this.figure.paint();
                 },
-                type: $AG.figure.IMAGE,
+                type: $AG.IMAGE,
                 url: 'system.png',
                 anchor: [
                     {id: 0, dir: anra.EAST, offset: -off},
@@ -105,7 +105,7 @@
                     }
                     this.figure.paint();
                 },
-                type: $AG.figure.IMAGE,
+                type: $AG.IMAGE,
                 url: 'segment.png',
                 anchor: [
                     {id: 0, dir: anra.EAST, offset: -off},
@@ -153,7 +153,7 @@
                     0: lineConfig,
                     1: directLineConfig
                 },
-                commands: [{
+                operations: [{
                     id: 0,
                     name: 'undo',
                     type: ACTION_STACK,
@@ -161,14 +161,14 @@
                     run: function () {
                         this.host.undo();
                     },
-                    check: function (node) {
+                    check: function () {
                         return this.host.canUndo();
                     }
                 },
                     {
                         id: 'saveAction',
                         name: '保存',
-                        type: ACTION_STACK,
+                        type: ACTION_SELECTION,
                         key: 'ctrl+s',
                         run: function () {
                             console.log(data);
@@ -186,7 +186,7 @@
                 paint: function () {
                 }
             });
-            editor.createContent('my');
+//            editor.createContent('my');
 
 
             //TODO

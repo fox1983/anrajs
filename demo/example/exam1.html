@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="../../lib/taffy-min.js"></script>
+    <script src="../../src/Base.js"></script>
+    <script src="../../src/anra.common.js"></script>
+    <script src="../../src/anra.svg.js"></script>
+    <script src="../../src/anra.gef.js"></script>
+    <script src="../../src/anra.layout.js"></script>
+    <script src="../../src/anra.policy.js"></script>
+    <script src="../../src/anra.flow.js"></script>
+    <script src="../../src/anra.handle.js"></script>
+    <script>
+        window.onload = function () {
+
+            var rectNodeConfig = {
+                canDrag:true,
+                refresh: function () {
+                    if (this.model != null && this.figure != null) {
+                        var b = this.model.get('bounds');
+                        this.figure.bounds = {x: b[0], y: b[1], width: b[2], height: b[3]};
+                        this.figure.style.fill = this.model.get('color');
+                    }
+                    this.figure.paint();
+                },
+                anchor: [
+                    {id: 0, dir: 's', offset: 5},
+                    {id: 1, dir: 's', offset: 5}
+                ],
+                type: $AG.RECT
+            };
+            var circleNodeConfig = {
+                canDrag:true,
+                refresh: function () {
+                    if (this.model != null && this.figure != null) {
+                        var b = this.model.get('bounds');
+                        this.figure.bounds = {x: b[0], y: b[1], width: b[2]};
+                    }
+                    this.figure.paint();
+                },
+                anchor: [
+                    {id: 0, dir: 'c', offset: 0},
+                    {id: 1, dir: 'n', offset: 0}
+                ],
+                type: $AG.CIRCLE
+            };
+
+
+            var lineConfig = {
+                style: {
+                    stroke: 'green',
+                    'stroke-width': 1
+                },
+                type: $AG.LINE
+            };
+
+            var editor = new $AG.Editor({
+                id: 'editorPanel',
+                data: [
+                    {id: 1, type: 'rectNode', bounds: [100, 100, 30, 30],color:'red'},
+                    {id: 2, type: 'rectNode', bounds: [150, 100, 30, 30],color:'blue'},
+                    {id: 3, type: 'circleNode', bounds: [200, 200, 40]}
+                ],
+                line:[
+                    {id: 'line1', source: 1, type: 0, target: 3, exit: 0, entr: 0},
+                    {id: 'line2', source: 2, type: 0, target: 3, exit: 0, entr: 1}
+                ],
+                lines:{
+                    0:lineConfig
+                },
+                children: {
+                    'rectNode': rectNodeConfig,
+                    'circleNode': circleNodeConfig
+                },
+                operations: [{
+                    id: 0,
+                    type: ACTION_EDITOR,
+                    key: 'ctrl+shift+g',
+                    run: function () {
+                        alert('按下了ctrl+shift+g');
+                    }
+                },
+                    {
+                        id: 1,
+                        name: 'Test',
+                        type: ACTION_SELECTION,
+                        run: function () {
+                           alert('选中节点ID:'+this.selection.model.get('id'));
+                        },
+                        check:function() {
+                            return this.selection != null && this.selection.model.get('type') == 'rectNode';
+                        }
+                    }
+                ]
+            });
+
+        }
+    </script>
+    <style>
+    </style>
+</head>
+<body>
+
+<div id="editorPanel"
+     style="position: absolute;left:0px;top: 0px;width: 100%;height: 100%;background-color: rgb(13,13,13);float: left;">
+
+</div>
+</body>
+
+</html>

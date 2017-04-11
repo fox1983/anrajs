@@ -75,7 +75,7 @@ anra.gef.LineHandle = anra.Handle.extend({
     constructor:function (editPart, style) {
         Control.prototype.constructor.call(this);
         this.editPart = editPart;
-        this.style = style;
+        this.setStyle(style);
     },
     _init:function () {
         this.bds = {'x':0, 'y':0, 'width':100, 'height':100};
@@ -84,8 +84,8 @@ anra.gef.LineHandle = anra.Handle.extend({
     dragStart:function (e, p) {
         var tool = new anra.gef.LinkLineTool();
         tool.linePart = this.editPart;
-        tool.type = this.style;
-        tool.oldAnchor = this.style == REQ_RECONNECT_SOURCE ? this.editPart.figure.sourceAnchor : this.editPart.figure.targetAnchor;
+        tool.type = this.type;
+        tool.oldAnchor = this.type == REQ_RECONNECT_SOURCE ? this.editPart.figure.sourceAnchor : this.editPart.figure.targetAnchor;
         this.editPart.getRoot().editor.setActiveTool(tool);
         return true;
     },
@@ -97,11 +97,10 @@ anra.gef.LineHandle = anra.Handle.extend({
     refreshLocation:function (figure) {
         var points = figure.points;
         var p;
-        if (this.style == REQ_RECONNECT_SOURCE) {
+        if (this.type == REQ_RECONNECT_SOURCE) {
             p = points[0];
-        } else if (this.style == REQ_RECONNECT_TARGET) {
+        } else if (this.type == REQ_RECONNECT_TARGET) {
             p = points[points.length - 1];
-            
         }
         var w = 6;
         var hf = w / 2;
@@ -207,6 +206,7 @@ anra.NORTH = "n";
 anra.SOUTH = "s";
 anra.EAST = "e";
 anra.WEST = "w";
+anra.CENTER="c";
 anra.NORTH_EAST = "ne";
 anra.NORTH_WEST = "nw";
 anra.SOUTH_EAST = "se";

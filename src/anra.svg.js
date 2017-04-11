@@ -5,8 +5,12 @@
 anra.svg = anra.svg || {};
 
 anra.svg.Util = {
-    createElement: function (tagName) {
-        return document.createElementNS("http://www.w3.org/2000/svg", tagName);
+    createElement: function (widget, tagName) {
+        var e = document.createElementNS("http://www.w3.org/2000/svg", tagName);
+        if (widget) {
+            widget.style = e.style;
+        }
+        return e;
     },
     apply: function (container, a, v) {
         if (a != null && typeof(a) == 'object')
@@ -48,48 +52,17 @@ anra.svg.Control = anra.Control.extend({
     ready: false,
     enable: true,
     bds: null,
+    class: 'Control',
     defaultEvent: {'pointer-events': 'visible'},
     _init: function () {
         this.bds = {'x': 0, 'y': 0, 'width': 100, 'height': 100};
         this._style = {'pointer-events': 'none'};
         var t = this;
-
-
-        var attrs = new Proxy({}, {
-            get: function (target, key, receiver) {
-                return t.getAttr(key);
-            },
-            set: function (target, key, value, receiver) {
-                return t.setAttribute(key, value);
-            }
-        });
         Object.defineProperty(this, 'attr', {
-            get: function () {
-                return attrs;
-            },
             set: function (value) {
                 t.setAttribute(value);
             }
         });
-
-        var styles = new Proxy({}, {
-            get: function (target, key, receiver) {
-                return t.owner.getStyle(key);
-            },
-            set: function (target, key, value, receiver) {
-                return t.setStyle(key, value);
-            }
-        });
-        Object.defineProperty(this, 'style', {
-            get: function () {
-                return styles;
-            },
-            set: function (value) {
-                t.setStyle(value);
-            }
-        });
-
-
         Object.defineProperty(this, 'bounds', {
             get: function () {
                 return t.bds;
@@ -221,7 +194,8 @@ var Control = anra.svg.Control;
 Control.prototype.create = function () {
     if (this.owner == null) {
         var o = this;
-        this.owner = Util.createElement(this.tagName);
+        this.owner = Util.createElement(this, this.tagName);
+        this.uuid = anra.genUUID();
         var e = this.owner;
         var dispatcher = anra.Platform.getDisplay().dispatcher;
         e.onmousedown = function (event) {
@@ -325,8 +299,10 @@ var _Composite = {
             c.dispose();
             if (this.children != null)
                 this.children.removeObject(c);
-            if (this.domContainer().contains(c.owner))
-                this.domContainer().removeChild(c.owner);
+
+            //this cause bugs, should fix
+            // if (this.domContainer().contains(c.owner))
+            this.domContainer().removeChild(c.owner);
             c.parent = null;
         } else {
             anra.Platform.error('can not remove ' + (c == null ? null : c.toString() ) + ' from Composite');
@@ -340,6 +316,7 @@ var _Composite = {
             if (!this.children.contains(c)) {
                 this.children.push(c);
                 c.create();
+                c.oncreated && c.oncreated();
                 c.setParent(this);
                 if (!norefresh)
                     this.paint();
@@ -407,7 +384,7 @@ anra.svg.Group = Composite.extend({
         //重写create方法，使Group不再接收任何事件
         if (this.owner == null) {
             var o = this;
-            this.owner = Util.createElement(this.tagName);
+            this.owner = Util.createElement(this, this.tagName);
             this.ready = true;
             //应用预设
             this.setAttribute({});
@@ -625,7 +602,7 @@ anra.SVG = Composite.extend(anra._Display).extend(anra._EventTable).extend({
         }
     },
     create: function () {
-        this.owner = Util.createElement('svg');
+        this.owner = Util.createElement(this, 'svg');
         this.owner.setAttribute('version', '1.1');
         this.owner.style.position = 'absolute';
         this.owner.style.top = 0;
@@ -719,6 +696,23 @@ anra.svg.Circle = {
             cx: this.bounds.x + l[0],
             'cy': this.bounds.y + l[1]
         });
+    },
+    calAnchor: function (dir, offset) {
+        if (offset == null) offset = 0;
+        var b = this.bounds;
+        switch (dir) {
+            case anra.EAST:
+                return {x: b['x'] + b['width']/2, y: b['y']};
+            case anra.SOUTH:
+                return {x: b['x'], y: b['y'] + b['width']/2};
+            case anra.WEST:
+                return {x: b['x']- b['width']/2, y: b['y']  };
+            case anra.NORTH:
+                return {x: b['x'], y: b['y'] - b['width']/2};
+            case anra.CENTER:
+                return {x: b['x'] , y: b['y']};
+        }
+        return null;
     }
 };
 anra.svg.Image = {
@@ -763,7 +757,7 @@ anra.svg.Text = {
         //此处没有注册事件分发，因为文本的事件会和anra的事件冲突
         if (this.owner == null) {
             var o = this;
-            this.owner = Util.createElement(this.tagName);
+            this.owner = Util.createElement(this, this.tagName);
 
             var e = this.owner;
             var dispatcher = anra.Platform.getDisplay().dispatcher;
@@ -1066,7 +1060,9 @@ anra.svg.DefMenu = Composite.extend({
     setOpacity: function (opa) {
         this.parent.setOpacity(opa);
     },
-    show: function (selection, e) {
+    show: function (editor, e) {
+        var selection=editor.rootEditPart.selection;
+        var cmdStack=editor.cmdStack;
         if (this.selection == selection) {
             return;
         }
@@ -1075,7 +1071,8 @@ anra.svg.DefMenu = Composite.extend({
         this.setStyle('visibility', 'visible');
 
         var count = this.addActions(this.host.actionRegistry.selectionActions, selection);
-        count += this.addActions(this.host.actionRegistry.cmdStackActions, selection);
+        count += this.addActions(this.host.actionRegistry.cmdStackActions, cmdStack);
+        count += this.addActions(this.host.actionRegistry.propertyActions, editor);
 
         if (count == null)
             return;
@@ -1092,12 +1089,15 @@ anra.svg.DefMenu = Composite.extend({
             p.play(s + intval, intval);
         });
     },
-    addActions: function (actions, selection) {
+    addActions: function (actions, _t) {
         var count = 0;
         if (actions != null) {
             actions = actions.values();
             for (var i = 0; i < actions.length; i++) {
-                if (actions[i].check && actions[i].check(selection)) {
+                actions[i].stack = _t;
+                actions[i].selection = _t;
+                actions[i].editor = _t;
+                if (actions[i].name!=null && (actions[i].check == null || actions[i].check())) {
                     actions[i].enable = true;
                     count++;
                     this.addMenuItem(actions[i]);

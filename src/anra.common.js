@@ -80,11 +80,6 @@ var anra = anra || {
         util: {}
     };
 
-anra.EAST = 0x1;
-anra.WEST = 0x1 << 1;
-anra.SOUTH = 0x1 << 2;
-anra.NORTH = 0x1 << 3;
-anra.CENTER = 0x1 << 4;
 
 SELECTED = 0;
 /**
@@ -694,7 +689,7 @@ POST_EXECUTE = 3;
 
 ACTION_SELECTION = 0;
 ACTION_STACK = 1;
-ACTION_PROPERTY = 0;
+ACTION_EDITOR = 2;
 /**
  * 动作注册器
  * @type {*}
@@ -718,8 +713,7 @@ anra.ActionRegistry = Base.extend({
 //        keys.push(this.getKeyString(e.keyCode, e.code));
         keys.push(e.key.toLowerCase());
 
-        var action = this.handles.get(keys.sort().join('+'));
-        if (action != null) action.run();
+        return this.handles.get(keys.sort().join('+'));
     },
     regist: function (action) {
         if (action instanceof Array) {
@@ -744,7 +738,7 @@ anra.ActionRegistry = Base.extend({
             case ACTION_STACK:
                 this.cmdStackActions.put(action.id, action);
                 break;
-            case ACTION_PROPERTY:
+            case ACTION_EDITOR:
                 this.propertyActions.put(action.id, action);
                 break;
         }

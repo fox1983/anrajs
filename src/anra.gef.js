@@ -378,9 +378,9 @@ anra.gef.EditPart = Base.extend({
         if (f == null)
             throw ': EditPart of ' + model.props.id + ' should has a figure config or createFigure function';
         if (this.config.style)
-            f.style = this.config.style;
+            f.setStyle(this.config.style);
         if (this.config.attr)
-            f.attr = this.config.attr;
+            f.setAttribute(this.config.attr);
         if (this.config.anchor)
             f.registAnchors(this.config.anchor);
         this.onCreateFigure && this.onCreateFigure(f);
@@ -2024,7 +2024,7 @@ anra.gef.Editor = Base.extend({
             this.menu = this.createContextMenu();
             this.rootEditPart.getMenuLayer().addChild(this.menu);
         }
-        this.menu.show(selection, e);
+        this.menu.show(this, e);
     },
     createContextMenu: function () {
         var menu = new anra.svg.DefMenu(this);
@@ -2062,7 +2062,25 @@ anra.gef.Editor = Base.extend({
     _initCanvasListeners: function (cav) {
         var editor = this;
         this.canvas.addKeyListener(function (e) {
-            editor.actionRegistry.keyHandle(e);
+            var action = editor.actionRegistry.keyHandle(e);
+
+            if (action != null) {
+                //need modify
+                var _t = null;
+                switch (action.type) {
+                    case ACTION_EDITOR:
+                        action.editor = editor;
+                        break;
+                    case ACTION_SELECTION:
+                        action.selection = editor.rootEditPart.selection;
+                        break;
+                    case ACTION_STACK:
+                        action.stack = editor.cmdStack;
+                }
+                if (action.check == null || action.check())
+                    action.run();
+            }
+
         });
     },
     registActions: function () {
@@ -2483,10 +2501,13 @@ anra.gef.EditPartListener = Base.extend({
 anra.FigureUtil = {
     createGhostFigure: function (editPart) {
         var ghost = editPart.createFigure();
-        editPart.refreshVisual.call({
-            figure: ghost,
-            model: editPart.model
-        });
+
+        ghost.oncreated = function () {
+            editPart.refreshVisual.call({
+                figure: ghost,
+                model: editPart.model
+            });
+        };
         ghost.setOpacity(0.5);
         ghost.disableEvent();
         return ghost;

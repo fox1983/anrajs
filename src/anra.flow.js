@@ -70,15 +70,12 @@
  * 对外的API
  * @type {{}}
  */
-$AG = {};
-
-/**
- * 图形常量
- */
-$AG.figure = {
+$AG = {
     CIRCLE: anra.svg.Circle,
-    RECTANGLE: anra.svg.Rectangle,
-    IMAGE: anra.svg.Image
+    RECT: anra.svg.Rect,
+    IMAGE: anra.svg.Image,
+    TEXT:anra.svg.TEXT,
+    LINE:anra.gef.Line
 };
 
 /**
@@ -90,12 +87,13 @@ $AG.Editor = anra.gef.Editor.extend({
     constructor: function (config) {
         this.config = config;
         this.setInput(config);
+        this.createContent(config.id);
     },
     input2model: function (data, rootModel) {
         doInit.call(this, data, rootModel, this.config);
     },
     registActions: function () {
-        this.actionRegistry.regist(this.config.commands);
+        this.config.operations&&this.actionRegistry.regist(this.config.operations);
     },
     initRootEditPart: function (editPart) {
         editPart.config = this.config;
@@ -195,8 +193,7 @@ $AG.Editor = anra.gef.Editor.extend({
                 };
                 return l;
             }
-        } else
-            console.error('editor config must contains lines');
+        }
         return e;
     },
     getCustomPolicies: function () {
