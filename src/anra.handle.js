@@ -337,3 +337,10 @@ trackPool.put(anra.NORTH_WEST, new anra.gef.NorthWestTracker());
 trackPool.put(anra.NORTH_EAST, new anra.gef.NorthEastTracker());
 trackPool.put(anra.EAST, new anra.gef.EastTracker());
 trackPool.put(anra.WEST, new anra.gef.WestTracker());
+
+anra.gef.TextHandle = anra.Handle.extend(anra.svg.Text).extend({
+    refreshLocation: function (figure) {
+        this.bounds = {x: figure.bounds.x, y: figure.bounds.y + figure.bounds.width};
+    }
+
+});

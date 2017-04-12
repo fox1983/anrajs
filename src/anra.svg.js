@@ -502,44 +502,9 @@ anra.svg.Line = {
         this.setAttribute('y1', this.bounds.y);
         this.setAttribute('y2', this.bounds.height);
     }
-}
+};
 
-
-anra.svg.Polyline = {
-    points: null,
-    close: false,
-    tagName: 'path',
-    defaultEvent: {'pointer-events': 'stroke'},
-    applyBounds: function () {
-        var d = this.compute();
-        if (d != null)
-            this.setAttribute('d', d);
-    },
-    initProp: function () {
-        this.setAttribute({
-            fill: 'none'
-        });
-    },
-    compute: function () {
-        if (this.points == null || this.points.length < 2)
-            return null;
-        var l = this.locArea();
-        var result = '';
-
-        //未调用
-        this.setcomputeStrategy(this.Straight);
-
-        return this.strategy(this.points, l);
-    },
-    getStartPoint: function () {
-        return this.points == null || this.points.length == 0 ? null : this.points[0];
-    },
-    getEndPoint: function () {
-        return this.points == null || this.points.length == 0 ? null : this.points[this.points.length - 1];
-    },
-    setcomputeStrategy: function (strategy) {
-        this.strategy = strategy;
-    },
+anra.svg.LineStrategy = {
     Straight: function (points, l) {
         var result = '';
         for (var i = 0; i < points.length; i++) {
@@ -579,6 +544,37 @@ anra.svg.Polyline = {
 
     }
 };
+
+
+anra.svg.Polyline = {
+    points: null,
+    close: false,
+    tagName: 'path',
+    defaultEvent: {'pointer-events': 'stroke'},
+    strategy: anra.svg.LineStrategy.Straight,
+    applyBounds: function () {
+        var d = this.compute();
+        if (d != null)
+            this.setAttribute('d', d);
+    },
+    initProp: function () {
+        this.setAttribute({
+            fill: 'none'
+        });
+    },
+    compute: function () {
+        if (this.points == null || this.points.length < 2)
+            return null;
+        return this.strategy(this.points, this.locArea());
+    },
+    getStartPoint: function () {
+        return this.points == null || this.points.length == 0 ? null : this.points[0];
+    },
+    getEndPoint: function () {
+        return this.points == null || this.points.length == 0 ? null : this.points[this.points.length - 1];
+    }
+};
+
 
 
 /**
@@ -702,15 +698,15 @@ anra.svg.Circle = {
         var b = this.bounds;
         switch (dir) {
             case anra.EAST:
-                return {x: b['x'] + b['width']/2, y: b['y']};
+                return {x: b['x'] + b['width'] / 2, y: b['y']};
             case anra.SOUTH:
-                return {x: b['x'], y: b['y'] + b['width']/2};
+                return {x: b['x'], y: b['y'] + b['width'] / 2};
             case anra.WEST:
-                return {x: b['x']- b['width']/2, y: b['y']  };
+                return {x: b['x'] - b['width'] / 2, y: b['y']};
             case anra.NORTH:
-                return {x: b['x'], y: b['y'] - b['width']/2};
+                return {x: b['x'], y: b['y'] - b['width'] / 2};
             case anra.CENTER:
-                return {x: b['x'] , y: b['y']};
+                return {x: b['x'], y: b['y']};
         }
         return null;
     }
@@ -767,6 +763,7 @@ anra.svg.Text = {
             };
             this.setAttribute({});
             this.setStyle({
+                'font-size':15,
                 '-webkit-user-select': 'none',
                 '-moz-user-select': 'none',
                 '-ms-user-select': 'none',
@@ -1061,8 +1058,8 @@ anra.svg.DefMenu = Composite.extend({
         this.parent.setOpacity(opa);
     },
     show: function (editor, e) {
-        var selection=editor.rootEditPart.selection;
-        var cmdStack=editor.cmdStack;
+        var selection = editor.rootEditPart.selection;
+        var cmdStack = editor.cmdStack;
         if (this.selection == selection) {
             return;
         }
@@ -1097,7 +1094,7 @@ anra.svg.DefMenu = Composite.extend({
                 actions[i].stack = _t;
                 actions[i].selection = _t;
                 actions[i].editor = _t;
-                if (actions[i].name!=null && (actions[i].check == null || actions[i].check())) {
+                if (actions[i].name != null && (actions[i].check == null || actions[i].check())) {
                     actions[i].enable = true;
                     count++;
                     this.addMenuItem(actions[i]);

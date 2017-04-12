@@ -2289,9 +2289,8 @@ var setPoint = function (o, t) {
  * 曲线
  * @type {*|void}
  */
-anra.gef.Polyline = anra.gef.Line.extend({
-    points: null,
-    tagName: 'polyline'
+anra.gef.CurveLine = anra.gef.Line.extend({
+    strategy: anra.svg.LineStrategy.Curve
 });
 
 /**
@@ -2322,9 +2321,12 @@ anra.gef.BaseModel = Base.extend({
         }
     },
     set: function (key, value, unfire) {
-        if (this.store)
-            this.props = this.store.update(key, value).first();
-        else
+        var o = this.props[key];
+        if (this.store) {
+            var _tj = {};
+            _tj[key] = value;
+            this.props = this.store.update(_tj).first();
+        } else
             this.props[key] = value;
 
         if (this.pls && !unfire)

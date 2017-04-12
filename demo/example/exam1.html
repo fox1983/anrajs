@@ -15,7 +15,7 @@
         window.onload = function () {
 
             var rectNodeConfig = {
-                canDrag:true,
+                canDrag: true,
                 refresh: function () {
                     if (this.model != null && this.figure != null) {
                         var b = this.model.get('bounds');
@@ -28,10 +28,20 @@
                     {id: 0, dir: 's', offset: 5},
                     {id: 1, dir: 's', offset: 5}
                 ],
-                type: $AG.RECT
+                type: $AG.RECT,
+                policies: {
+                    'TextPolicy': $AG.policy.TextPolicyBuilder('id',function(f){
+
+                    })
+                }
             };
             var circleNodeConfig = {
-                canDrag:true,
+                canDrag: true,
+                on: {
+                    'dblclick': function () {
+                        alert("double click!");
+                    }
+                },
                 refresh: function () {
                     if (this.model != null && this.figure != null) {
                         var b = this.model.get('bounds');
@@ -43,7 +53,12 @@
                     {id: 0, dir: 'c', offset: 0},
                     {id: 1, dir: 'n', offset: 0}
                 ],
-                type: $AG.CIRCLE
+                type: $AG.CIRCLE,
+                policies: {
+                    'TextPolicy': $AG.policy.TextPolicyBuilder('name',function(f){
+
+                    })
+                }
             };
 
 
@@ -55,19 +70,44 @@
                 type: $AG.LINE
             };
 
+            var ManhattanLineConfig = {
+                style: {
+                    stroke: 'green',
+                    'stroke-width': 1
+                },
+                type: $AG.CURVE_LINE,
+                router: function (line) {
+                    if (line.points == null || line.points.length < 2)
+                        return null;
+                    var sp = line.getStartPoint(), ep = line.getEndPoint();
+                    var mid = (sp.x + ep.x) / 2;
+                    var p1 = {
+                        x: mid,
+                        y: sp.y
+                    };
+
+                    var p2 = {
+                        x: mid,
+                        y: ep.y
+                    };
+                    return [sp, p1, p2, ep];
+                }
+            };
+
             var editor = new $AG.Editor({
                 id: 'editorPanel',
                 data: [
-                    {id: 1, type: 'rectNode', bounds: [100, 100, 30, 30],color:'red'},
-                    {id: 2, type: 'rectNode', bounds: [150, 100, 30, 30],color:'blue'},
-                    {id: 3, type: 'circleNode', bounds: [200, 200, 40]}
+                    {id: 1, type: 'rectNode', bounds: [100, 100, 30, 30], color: 'red'},
+                    {id: 2, type: 'rectNode', bounds: [150, 100, 30, 30], color: 'blue'},
+                    {id: 3, type: 'circleNode', bounds: [200, 200, 40], name: 'Circle Node'}
                 ],
-                line:[
+                line: [
                     {id: 'line1', source: 1, type: 0, target: 3, exit: 0, entr: 0},
-                    {id: 'line2', source: 2, type: 0, target: 3, exit: 0, entr: 1}
+                    {id: 'line2', source: 2, type: 1, target: 3, exit: 0, entr: 1}
                 ],
-                lines:{
-                    0:lineConfig
+                lines: {
+                    0: lineConfig,
+                    1: ManhattanLineConfig
                 },
                 children: {
                     'rectNode': rectNodeConfig,
@@ -86,9 +126,9 @@
                         name: 'Test',
                         type: ACTION_SELECTION,
                         run: function () {
-                           alert('选中节点ID:'+this.selection.model.get('id'));
+                            alert('选中节点ID:' + this.selection.model.get('id'));
                         },
-                        check:function() {
+                        check: function () {
                             return this.selection != null && this.selection.model.get('type') == 'rectNode';
                         }
                     }

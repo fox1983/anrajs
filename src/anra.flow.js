@@ -74,8 +74,9 @@ $AG = {
     CIRCLE: anra.svg.Circle,
     RECT: anra.svg.Rect,
     IMAGE: anra.svg.Image,
-    TEXT:anra.svg.TEXT,
-    LINE:anra.gef.Line
+    TEXT: anra.svg.TEXT,
+    LINE: anra.gef.Line,
+    CURVE_LINE: anra.gef.CurveLine
 };
 
 /**
@@ -93,7 +94,7 @@ $AG.Editor = anra.gef.Editor.extend({
         doInit.call(this, data, rootModel, this.config);
     },
     registActions: function () {
-        this.config.operations&&this.actionRegistry.regist(this.config.operations);
+        this.config.operations && this.actionRegistry.regist(this.config.operations);
     },
     initRootEditPart: function (editPart) {
         editPart.config = this.config;
@@ -184,8 +185,8 @@ $AG.Editor = anra.gef.Editor.extend({
                 var l = new anra.gef.LineEditPart(model);
                 l.config = lineConfigs[model.get('type')];
 
-                if(l.config.selectable){
-                    l.installEditPolicy('line selection',new anra.gef.LineSelectionPolicy());
+                if (l.config.selectable) {
+                    l.installEditPolicy('line selection', new anra.gef.LineSelectionPolicy());
                 }
 
                 l.onCreateFigure = function (figure) {
@@ -271,3 +272,18 @@ $AG.LineTool = anra.gef.LinkLineTool.extend({
         anra.gef.LinkLineTool.prototype.constructor.call(this, line);
     }
 });
+
+$AG.policy = {
+    TextPolicyBuilder: function (key) {
+        return {
+            activate: function () {
+                this.handle = new anra.gef.TextHandle(this.getHost());
+                this.handle.setText(this.getHost().model.get(key));
+                this.getHandleLayer().addChild(this.handle);
+            },
+            deactivate: function () {
+                this.getHandleLayer().removeChild(this.handle);
+            }
+        }
+    }
+};
