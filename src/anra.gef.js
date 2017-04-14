@@ -128,10 +128,11 @@ anra.gef.Figure = anra.svg.Composite.extend({
             }
     },
     fireRepaintListener: function () {
-        if (this.repaintListeners != null)
+        if (this.repaintListeners != null) {
             this.repaintListeners.forEach(function (_f, _k) {
                 _k(this);
             }, this);
+        }
     },
     addRepaintListener: function (listener) {
         if (this.repaintListeners == null)
@@ -309,6 +310,7 @@ anra.gef.EditPart = Base.extend({
     activate: function () {
         this.setFlag(FLAG_ACTIVE, true);
         this.doActive();
+        this._initFigureListeners();
 
         this.activePolicies();
         var i;
@@ -322,7 +324,6 @@ anra.gef.EditPart = Base.extend({
         }
     },
     doActive: function () {
-        this._initFigureListeners();
     },
     fireActivated: function () {
         var listeners = this.eventTable.getListeners(anra.gef.EditPartListener.prototype.class);
@@ -581,6 +582,13 @@ anra.gef.EditPart = Base.extend({
         return this.getFlag(FLAG_FOCUS);
     },
     performRequest: function (request) {
+        if (!this.isActive())
+            return;
+        if (this.policies != null) {
+            this.policies.forEach(function (v, k) {
+                v.performRequest(request);
+            });
+        }
     },
     refresh: function () {
         this.refreshVisual();
@@ -648,7 +656,6 @@ anra.gef.EditPart = Base.extend({
 anra.gef.NodeEditPart = anra.gef.EditPart.extend({
     sConns: null,
     tConns: null,
-    lineCache: null,
     getSourceAnchor: function (req) {
         return this.figure.getSourceAnchor(req);
     },
@@ -664,12 +671,12 @@ anra.gef.NodeEditPart = anra.gef.EditPart.extend({
     getAnchors: function () {
         return this.figure.getAnchors();
     },
-    getTargetTerminal: function (id) {
-        return this.figure.getTargetTerminal(id);
-    },
-    getSourceTerminal: function (id) {
-        return this.figure.getSourceTerminal(id);
-    },
+    // getTargetTerminal: function (id) {
+    //     return this.figure.getTargetTerminal(id);
+    // },
+    // getSourceTerminal: function (id) {
+    //     return this.figure.getSourceTerminal(id);
+    // },
     getSourceAnchorByTerminal: function (id) {
         return this.figure.getSourceAnchorByTerminal(id);
     },
@@ -2209,15 +2216,18 @@ anra.gef.Line = anra.gef.Figure.extend(anra.svg.Polyline).extend({
         if (m != null) {
             this.svg.defs.removeChild(m);
             this.removeAttribute(key);
-            if (m.propertyChanged != null && this.model != null)
-                this.model.removePropertyListener(m, m.propKey);
+            this.removeRepaintListener(marker.repaintListener);
         }
         this[key] = marker;
         if (marker != null) {
-            if (marker.propertyChanged != null && this.model != null)
-                this.model.addPropertyListener(marker, marker.propKey);
+            // if (marker.propertyChanged != null && this.model != null)
+            //     this.model.addPropertyListener(marker, marker.propKey);
             this.svg.defs.addChild(marker);
             this.setAttribute(key, 'url(#' + marker.id + ')');
+            marker.repaintListener=function(e){
+                marker.refresh(e);
+            };
+            this.addRepaintListener(marker.repaintListener);
         }
     },
     dispose: function () {

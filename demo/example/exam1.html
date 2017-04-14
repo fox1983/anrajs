@@ -14,8 +14,21 @@
     <script>
         window.onload = function () {
 
+            var testPolicy = {
+                activate: function () {
+                    this.dbl = function () {
+                        alert(1);
+                    };
+                    this.getHostFigure().on('dblclick', this.dbl);
+                },
+                deactivate: function () {
+                    this.getHostFigure().off('dblclick', this.dbl);
+                }
+            };
+
             var rectNodeConfig = {
                 canDrag: true,
+                selectable: true,
                 refresh: function () {
                     if (this.model != null && this.figure != null) {
                         var b = this.model.get('bounds');
@@ -25,23 +38,23 @@
                     this.figure.paint();
                 },
                 anchor: [
-                    {id: 0, dir: 's', offset: 5},
+                    {id: 0, dir: 'w', offset: -15},
                     {id: 1, dir: 's', offset: 5}
                 ],
                 type: $AG.RECT,
                 policies: {
-                    'TextPolicy': $AG.policy.TextPolicyBuilder('id',function(f){
-
-                    })
+                    'TextPolicy': $AG.policy.TextPolicy('id', function (figure) {
+                        this.bounds = {
+                            x: figure.bounds.x,
+                            y: figure.bounds.y + figure.bounds.height
+                        };
+                    }),
+                    'douhble click': testPolicy
                 }
             };
             var circleNodeConfig = {
                 canDrag: true,
-                on: {
-                    'dblclick': function () {
-                        alert("double click!");
-                    }
-                },
+                on: {},
                 refresh: function () {
                     if (this.model != null && this.figure != null) {
                         var b = this.model.get('bounds');
@@ -55,9 +68,13 @@
                 ],
                 type: $AG.CIRCLE,
                 policies: {
-                    'TextPolicy': $AG.policy.TextPolicyBuilder('name',function(f){
-
-                    })
+                    'TextPolicy': $AG.policy.TextPolicy('name', function (figure) {
+                        this.bounds = {
+                            x: figure.fattr('cx') - figure.fattr('r'),
+                            y: figure.fattr('cy') + figure.fattr('r') + 10
+                        };
+                    }),
+                    'asfasf': testPolicy
                 }
             };
 
@@ -65,7 +82,11 @@
             var lineConfig = {
                 style: {
                     stroke: 'green',
-                    'stroke-width': 1
+                    'stroke-width': 3
+                },
+                endMarker: {
+                    type: $AG.Marker.TRIANGLE,
+                    size: 5
                 },
                 type: $AG.LINE
             };
@@ -76,6 +97,7 @@
                     'stroke-width': 1
                 },
                 type: $AG.CURVE_LINE,
+//                type: $AG.LINE,
                 router: function (line) {
                     if (line.points == null || line.points.length < 2)
                         return null;
@@ -98,11 +120,12 @@
                 id: 'editorPanel',
                 data: [
                     {id: 1, type: 'rectNode', bounds: [100, 100, 30, 30], color: 'red'},
-                    {id: 2, type: 'rectNode', bounds: [150, 100, 30, 30], color: 'blue'},
-                    {id: 3, type: 'circleNode', bounds: [200, 200, 40], name: 'Circle Node'}
+                    {id: 2, type: 'rectNode', bounds: [150, 100, 30, 30], color: '#f1F'},
+                    {id: 3, type: 'circleNode', bounds: [200, 200, 40], name: 'Circle Node'},
+                    {id: 4, type: 'rectNode', bounds: [100, 200, 90, 30], name: 'Circle Node'}
                 ],
                 line: [
-                    {id: 'line1', source: 1, type: 0, target: 3, exit: 0, entr: 0},
+                    {id: 'line1', source: 1, type: 0, target: 4, exit: 0, entr: 0},
                     {id: 'line2', source: 2, type: 1, target: 3, exit: 0, entr: 1}
                 ],
                 lines: {

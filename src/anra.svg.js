@@ -316,8 +316,8 @@ var _Composite = {
             if (!this.children.contains(c)) {
                 this.children.push(c);
                 c.create();
-                c.oncreated && c.oncreated();
                 c.setParent(this);
+                c.oncreated && c.oncreated();
                 if (!norefresh)
                     this.paint();
             }
@@ -412,9 +412,13 @@ anra.svg.Marker = Composite.extend({
     id: null,
     figure: null,
     tagName: 'marker',
-    constructor: function () {
+    size: 3,
+    constructor: function (config) {
         Composite.prototype.constructor.call(this);
         this.setId(anra.genUUID());
+        // this.config = config;
+        if (config)
+            this.size = config.size;
     },
     setId: function (id) {
         this.id = id;
@@ -435,12 +439,46 @@ anra.svg.Marker = Composite.extend({
         this.addChild(this.figure);
         if (this.figureAttr != null)
             this.figure.setAttribute(this.figureAttr);
+
+        // console.log(this.figure)
+    },
+    refresh: function (e) {
+        // this.setStyle(this.figure);
+        if (e) {
+            // console.log(e.style.fill,e.style.stroke,e.getAttr('fill'));
+            var stroke = e.style.stroke ? e.style.stroke : e.getAttr('stroke');
+            this.setStyle({
+                fill:stroke,
+                stroke:stroke
+            });
+        }
     },
     propertyChanged: function (k, o, v) {
         if (this.propKey != null && this.propKey == k) {
             this.setFigureAttribute({'stroke': v});
             this.setFigureAttribute({'fill': v});
         }
+    },
+    initProp: function () {
+        this.setAttribute({
+            refX: "1",
+            refY: "5",
+            markerWidth: this.size ? this.size : 5,
+            markerHeight: this.size ? this.size : 5,
+            orient: "auto",
+            viewBox: "-5 0 15 15"
+        });
+    }
+});
+
+
+anra.svg.PointMarker = anra.svg.Marker.extend({
+    createContent: function () {
+        var p = new anra.svg.Path();
+        this.setFigure(p);
+        p.setAttribute({
+            d: 'M -4 0 C 5 5 L -4 10 z'
+        });
     }
 });
 
@@ -450,23 +488,6 @@ anra.svg.TriangleMarker = anra.svg.Marker.extend({
         this.setFigure(p);
         p.setAttribute({
             d: 'M -4 0 L 5 5 L -4 10 z'
-        });
-    },
-    _init: function () {
-        if (this.init != null) this.init();
-    },
-    afterRemoveListener: function () {
-    },
-    afterAddListener: function () {
-    },
-    initProp: function () {
-        this.setAttribute({
-            refX: "1",
-            refY: "5",
-            markerWidth: "6",
-            markerHeight: "6",
-            orient: "auto",
-            viewBox: "-5 0 15 15"
         });
     }
 });
@@ -576,7 +597,6 @@ anra.svg.Polyline = {
 };
 
 
-
 /**
  * 动画
  * @type {*|void}
@@ -682,7 +702,7 @@ anra.svg.Rect = {};
 anra.svg.Circle = {
     tagName: 'circle',
     getClientArea: function () {
-        return [this.fattr('cx'), this.fattr('cy'), this.fattr['r'] * 2];
+        return [this.fattr('cx'), this.fattr('cy'), this.fattr['r'] * 2, this.fattr['r'] * 2];
     },
     applyBounds: function () {
         var l = this.locArea();
@@ -763,7 +783,7 @@ anra.svg.Text = {
             };
             this.setAttribute({});
             this.setStyle({
-                'font-size':15,
+                'font-size': 15,
                 '-webkit-user-select': 'none',
                 '-moz-user-select': 'none',
                 '-ms-user-select': 'none',

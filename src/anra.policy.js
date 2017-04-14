@@ -465,6 +465,7 @@ anra.gef.ConnectionPolicy = anra.gef.AbstractEditPolicy.extend({
  */
 anra.gef.SelectionPolicy = anra.gef.AbstractEditPolicy.extend({
     handles: [],
+    class:'selection policy',
     selectionListener: null,
     activate: function () {
         this.addSelectionListener();
@@ -476,7 +477,7 @@ anra.gef.SelectionPolicy = anra.gef.AbstractEditPolicy.extend({
     validatePolicy: function () {
         if (this.handles.length > 0) {
             for (var i = 0; i < this.handles.length; i++) {
-                this.handles[i].refreshLocation();
+                this.handles[i].refreshLocation(this.getHostFigure());
             }
         }
     },
@@ -576,6 +577,7 @@ anra.gef.LineSelectionPolicy = anra.gef.SelectionPolicy.extend({
 });
 
 anra.gef.ResizableEditPolicy = anra.gef.SelectionPolicy.extend({
+    class:'resize policy',
     createSelectionHandles: function () {
         var handles = [];
         var editPart = this.getHost();

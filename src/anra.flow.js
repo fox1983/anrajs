@@ -79,6 +79,10 @@ $AG = {
     CURVE_LINE: anra.gef.CurveLine
 };
 
+$AG.Marker = {
+    TRIANGLE: anra.svg.TriangleMarker
+};
+
 /**
  * 编辑器的API
  * @type {{}}
@@ -169,8 +173,10 @@ $AG.Editor = anra.gef.Editor.extend({
 
         if (nodeConfig.selectable) {
             var p = new anra.gef.ResizableEditPolicy();
-            p.selected = nodeConfig.selected;
-            p.unselected = nodeConfig.unselected;
+            if (nodeConfig.selected)
+                p.selected = nodeConfig.selected;
+            if (nodeConfig.unselected)
+                p.unselected = nodeConfig.unselected;
             e.installEditPolicy('selection', p);
             nodeConfig.onselect && e.addSelectionListener(nodeConfig.onselect);
         }
@@ -191,6 +197,14 @@ $AG.Editor = anra.gef.Editor.extend({
 
                 l.onCreateFigure = function (figure) {
                     figure.router = l.config.router;
+                    figure.oncreated = function () {
+                        if (l.config.startMarker) {
+                            figure.setStartMarker(new l.config.startMarker.type(l.config.startMarker));
+                        }
+                        if (l.config.endMarker) {
+                            figure.setEndMarker(new l.config.endMarker.type(l.config.endMarker));
+                        }
+                    }
                 };
                 return l;
             }
@@ -274,10 +288,12 @@ $AG.LineTool = anra.gef.LinkLineTool.extend({
 });
 
 $AG.policy = {
-    TextPolicyBuilder: function (key) {
+    TextPolicy: function (key, loc) {
         return {
             activate: function () {
                 this.handle = new anra.gef.TextHandle(this.getHost());
+                if (loc)
+                    this.handle.refreshLocation = loc;
                 this.handle.setText(this.getHost().model.get(key));
                 this.getHandleLayer().addChild(this.handle);
             },
