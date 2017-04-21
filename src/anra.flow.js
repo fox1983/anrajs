@@ -122,7 +122,7 @@ $AG.Editor = anra.gef.Editor.extend({
     },
     find: function (id) {
         var model = this.rootEditPart.model.getChild(id);
-        return this.rootEditPart.getEditPart(model);
+        return model==null?null:this.rootEditPart.getEditPart(model);
     },
     exec: function (cmd) {
         if (this.cmdStack)

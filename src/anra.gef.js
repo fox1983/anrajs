@@ -586,7 +586,8 @@ anra.gef.EditPart = Base.extend({
             return;
         if (this.policies != null) {
             this.policies.forEach(function (v, k) {
-                v.performRequest(request);
+                if (v.performRequest)
+                    v.performRequest(request);
             });
         }
     },
@@ -1643,9 +1644,9 @@ anra.gef.RelocalCommand = anra.Command.extend({
         var b = this.editPart.model.get('bounds');
         b[0] = this.ep.x;
         b[1] = this.ep.y;
-        
+
         this.editPart.model.set('bounds', b);
-        
+
         //this.editPart.model.get('bounds')[0] = this.ep.x;
         //this.editPart.model.get('bounds')[1] = this.ep.y;
         this.editPart.refresh();
@@ -1941,6 +1942,10 @@ anra.gef.Policy = Base.extend({
     getHost: function () {
         return this.editPart;
     },
+    performRequest:function(req){
+        if (this.config && this.config.performRequest)
+            this.config.performRequest.call(this,req);
+    },
     activate: function () {
         if (this.config && this.config.activate)
             this.config.activate.call(this);
@@ -2230,7 +2235,7 @@ anra.gef.Line = anra.gef.Figure.extend(anra.svg.Polyline).extend({
             //     this.model.addPropertyListener(marker, marker.propKey);
             this.svg.defs.addChild(marker);
             this.setAttribute(key, 'url(#' + marker.id + ')');
-            marker.repaintListener=function(e){
+            marker.repaintListener = function (e) {
                 marker.refresh(e);
             };
             this.addRepaintListener(marker.repaintListener);

@@ -49,7 +49,16 @@
                             y: figure.bounds.y + figure.bounds.height
                         };
                     }),
-                    'douhble click': testPolicy
+                    'douhble click': testPolicy,
+                    'Request Handle': {
+                        performRequest: function (req) {
+                            if ('Handle Custom Input' == req.type) {
+                                this.getHostFigure().setStyle({
+                                    fill: req.color
+                                });
+                            }
+                        }
+                    }
                 }
             };
             var circleNodeConfig = {
@@ -74,7 +83,16 @@
                             y: figure.fattr('cy') + figure.fattr('r') + 10
                         };
                     }),
-                    'asfasf': testPolicy
+                    'asfasf': testPolicy,
+                    'Request Handle': {
+                        performRequest: function (req) {
+                            if ('Handle Custom Input' == req.type) {
+                                var bounds = this.getHost().model.get('bounds');
+                                bounds[2] = 120;
+                                this.getHost().refresh();
+                            }
+                        }
+                    }
                 }
             };
 
@@ -82,11 +100,11 @@
             var lineConfig = {
                 style: {
                     stroke: 'green',
-                    'stroke-width': 3
+                    'stroke-width': 1
                 },
                 endMarker: {
                     type: $AG.Marker.TRIANGLE,
-                    size: 5
+                    size: 10
                 },
                 type: $AG.LINE
             };
@@ -158,6 +176,20 @@
                 ]
             });
 
+            perform = function (color) {
+                var nodeId = document.getElementById('nodeId').value;
+                var editPart = editor.find(nodeId);
+                if (editPart == null) {
+                    alert('can not found node: ' + nodeId);
+                    return;
+                }
+
+                editPart.performRequest({
+                    type: 'Handle Custom Input',
+                    color:color
+                })
+            }
+
         }
     </script>
     <style>
@@ -168,6 +200,13 @@
 <div id="editorPanel"
      style="position: absolute;left:0px;top: 0px;width: 100%;height: 100%;background-color: rgb(13,13,13);float: left;">
 
+</div>
+
+<div style="position:absolute;right:20px;top:10px;width:200px;height:140px;background-color:lightslategray;">
+    id:<input id="nodeId" type="number"/>
+    <button onclick="perform('red')">red</button>
+    <button onclick="perform('yellow')">yellow</button>
+    <button onclick="perform('blue')">blue</button>
 </div>
 </body>
 
