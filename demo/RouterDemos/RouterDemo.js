@@ -67,8 +67,8 @@ DynamicMapEditor = anra.gef.Editor.extend({
         source.refresh();
         target.refresh();
         
-        rootModel.addChild(source);
         rootModel.addChild(target);
+        rootModel.addChild(source);
     },
     createEditPart: function (context, model) {
         if (this.editorParts == null)

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <script src="../../lib/taffy-min.js"></script>
+    <script src="../../src/Base.js"></script>
+    <script src="../../src/anra.common.js"></script>
+    <script src="../../src/anra.svg.js"></script>
+    <script src="../../src/anra.gef.js"></script>
+    <script src="../../src/anra.layout.js"></script>
+    <script src="../../src/anra.policy.js"></script>
+    <script src="../../src/anra.flow.js"></script>
+    <script src="../../src/anra.handle.js"></script>
+    <script src="gef.js"></script>
+    <script src="childGef.js"></script>
+    <script src="test.js"></script>
+    <script src="route.js"></script>
+    <script>
+        window.onload = function() {
+            Platform.main = new $AG.Editor(mainEditor);
+            var reader = Platform.main.rootEditPart.getReader();
+        }
+
+    </script>
+    <style>
+        .pltItem {
+            width: 30px;
+            height: 30px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div id="mainEditor" style="position: absolute;left:0px;top: 0px;width: 100%;height: 100%;background-color: rgb(13,13,13);float: left;">
+    </div>
+
+    <div id="childEditor" style="position: absolute;left:50%;top: 0;width: 50%;height: 100%;background-color: rgb(13,13,13);float:right;display:none"></div>
+</body>
+
+</html>

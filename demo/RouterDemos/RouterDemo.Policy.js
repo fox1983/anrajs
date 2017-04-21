@@ -34,14 +34,14 @@ CreateWallPolicy = anra.gef.Policy.extend({
                 mn = new WallNodeModel(x, y);
 
             host.editor.rootModel.addChild(mn);
-            MapStruct.wallStruct.put(mn.id, new wallPoint(mn.get('x'), mn.get('y')));
+            MapStruct.wallStruct.put(mn.get('id'), new wallPoint(mn.get('x'), mn.get('y')));
 
             host.refresh();
         };
-        this.getHost().getFigure().addListener(anra.EVENT.MouseDown, this.listener);
+        this.getHost().getFigure().on(anra.EVENT.MouseDown, this.listener);
     },
     deactivate: function () {
-        this.getHost().getFigure().removeListener(anra.EVENT.MouseDown, this.listener);
+        this.getHost().getFigure().off(anra.EVENT.MouseDown, this.listener);
     }
 });
 
@@ -54,10 +54,10 @@ ClickDestroyPolicy = anra.gef.Policy.extend({
             MapStruct.wallStruct.remove(host.model.id);
             host.getRoot().refresh();
         }
-        this.getHost().getFigure().addListener(anra.EVENT.MouseDown, this.listener);
+        this.getHost().getFigure().on(anra.EVENT.MouseDown, this.listener);
     },
     deactivate: function () {
-        this.getHost().getFigure().removeListener(anra.EVENT.MouseDown, this.listener);
+        this.getHost().getFigure().off(anra.EVENT.MouseDown, this.listener);
     }
 });
 
@@ -66,10 +66,10 @@ RouterPolicy = anra.gef.Policy.extend({
     activate: function () {
         //this.initProcessor(new ROUTER());
         this.initListener();
-        this.getHost().getFigure().addListener(anra.EVENT.MouseUp, this.listener);
+        this.getHost().getFigure().on(anra.EVENT.MouseUp, this.listener);
     },
     deactivate: function () {
-        this.getHost().getFigure().removeListener(anra.EVENT.MouseUp, this.listener);
+        this.getHost().getFigure().off(anra.EVENT.MouseUp, this.listener);
     },
     initProcessor: function (routerProcessor) {
         if (!routerProcessor instanceof BasicRouterProcessor)
@@ -83,7 +83,7 @@ RouterPolicy = anra.gef.Policy.extend({
     },
     initListener: function () {
         var policy = this;
-        this.isFinding = false,
+        this.isFinding = false;
 
             this.listener = function (e) {
                 if (policy.isFinding) {
@@ -96,6 +96,7 @@ RouterPolicy = anra.gef.Policy.extend({
             
                 if (policy.getHost().model.hasSourceLine(new RouterLineModel())) return;
 
+                policy._handleRecord = new Map();
                 FindingTool.reset();
                 policy.initProcessor(new ROUTER());
                 policy.isFinding = true;
@@ -139,19 +140,17 @@ RouterPolicy = anra.gef.Policy.extend({
     createLine: function () {
         var root = this.getHost().getRoot(),
             ld = new RouterLineModel();
-
+        
         source.addSourceLine(ld);
         target.addTargetLine(ld);
         ld.initRouterLine();
+        
         ld.set('route', this.routerProcessor.getPath());
-
+        
         root.getEditPart(source).refresh();
         root.getEditPart(target).refresh();
     },
     destroyCoverHandle: function (handle) {
-        if (this._handleRecord == null)
-            this._handleRecord = new Map();
-
         if (this._handleRecord.has(handle.toString()))
             this.getHost().getRoot().getLineLayer().removeChild(this._handleRecord.get(handle.toString()));
 
@@ -163,10 +162,10 @@ RouterPolicy = anra.gef.Policy.extend({
 DestroyRouterPolicy = anra.gef.Policy.extend({
     activate: function () {
         this.initListener();
-        this.getHost().getFigure().addListener(anra.EVENT.MouseUp, this.listener);
+        this.getHost().getFigure().on(anra.EVENT.MouseUp, this.listener);
     },
     deactivate: function () {
-        this.getHost().getFigure().removeListener(anra.EVENT.MouseUp, this.listener);
+        this.getHost().getFigure().off(anra.EVENT.MouseUp, this.listener);
     },
     initListener: function () {
         var policy = this;

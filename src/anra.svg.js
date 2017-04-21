@@ -542,27 +542,123 @@ anra.svg.LineStrategy = {
     },
     x: function (points, l) {
         if (points.length > 2) {
-            var p = []
-                , j = 0
-                , slope1, slope2;
+            var p = [], j = 0, slope1, slope2, offx1, offx2;
             p.push(points[0]);
             while (j < points.length - 2) {
-                slope1 = (points[j].y - points[j + 1].y) / (points[j].x - points[j + 1].x);
-                slope2 = (points[j].y - points[j + 2].y) / (points[j].x - points[j + 2].x);
-                if (slope1 != slope2) {
-                    p.push(points[j + 1]);
+                offx1 = points[j].x - points[j + 1].x;
+                offx2 = points[j].x - points[j + 2].x;
+                
+                if (Math.abs(offx1) + Math.abs(offx2) != 0) {
+                    slope1 = (points[j].y - points[j + 1].y) / (offx1);
+                    slope2 = (points[j].y - points[j + 2].y) / (offx2);
+                    
+                    if (slope1 != slope2) {
+                        p.push(points[j + 1]);
+                    }
                 }
                 j++;
             }
             p.push(points.last());
+            return this.Curve(p, l);
         }
+    },
+    CornerCurve: function (points, l) {
+        var result = 'M' + (points[0].x + l[0]) + ',' + (points[0].y + l[1]) + 　' ',
+            abs = Math.abs,
+            min = Math.min,
+            max = Math.max,
+            x, y, preX, preY, nextX, nextY, gap;
+        
+        if (points.length == 2) {
+            return result += 'L' + (points[1].x + l[0]) + ',' + (points[1].y + l[1]); 
+        }
+        
+        nextX = points[1].x - points[0].x;
+        nextY = points[1].y - points[0].y;
 
-        var result = '';
-        for (var i = 0; i < p.length; i++) {
-            result += (i == 0 ? 'M' : p.length - i - 1 < (p.length - 1) % 3 ? 'L' : i % 3 == 1 ? 'C' : '') + (p[i].x + l[0]) + ',' + (p[i].y + l[1]) + ' ';
+        for (var i = 1; i < points.length; i++) {
+            x = points[i].x + l[0];
+            y = points[i].y + l[1];
+
+            if (i + 1 < points.length) {
+                //与前驱点的XY差值
+                preX = -nextX;
+                preY = -nextY;
+                
+                //与后驱点的XY差值
+                nextX = (points[i + 1].x + l[0]) - x;
+                nextY = (points[i + 1].y + l[1]) - y;
+                
+                //
+                gap = min(12.5, min(abs(preX + preY), abs(nextX + nextY)) / 2);
+                result += 'L' + (x + (preX / max(abs(preX), 1)) * gap) + ',' + (y + (preY / max(abs(preY), 1)) * gap) + ' Q' + x + ',' + y + ' ' +
+                    (x + (nextX / max(abs(nextX), 1)) * gap) + ',' + (y + (nextY / max(abs(nextY), 1)) * gap) + ' ';
+            } else {
+                result += 'L' + x + ',' + y;
+            }
         }
         return result;
+    },
+    //支持所有方向
+    CornerCurveProfessional : function(points, l) {
+        var result = 'M' + (points[0].x + l[0]) + ',' + (points[0].y + l[1]) + 　' ',
+            abs = Math.abs,
+            min = Math.min,
+            max = Math.max,
+            x, y, preX, preY, nextX , nextY, gap;
+        
+        if (points.length == 2) {
+            return result += 'L' + (points[1].x + l[0]) + ',' + (points[1].y + l[1]); 
+        }
+        
+        nextX = points[1].x - points[0].x;
+        nextY = points[1].y - points[0].y;
 
+        for (var i = 1; i < points.length; i++) {
+            x = points[i].x + l[0];
+            y = points[i].y + l[1];
+
+            if (i + 1 < points.length) {
+                
+                //与前驱点的XY差值
+                preX = -nextX;
+                preY = -nextY;
+                
+                //与后驱点的XY差值
+                nextX = (points[i + 1].x + l[0]) - x;
+                nextY = (points[i + 1].y + l[1]) - y;
+                
+                //
+                
+                var p = preX*preX + preY*preY,
+                    n = nextX*nextX + nextY*nextY, 
+                    minX, minY, anX, anY;
+                gap = min(25*25, p, n);
+                
+                if (gap == 25) {
+                    //暴力算出来
+                } else if (gap == p) {
+                    minX = x + preX;
+                    minY = y + preY;
+                    anX = x + nextX;
+                    anY = y + nextY;
+                } else {
+                    minX = x + nextX;
+                    minY = y + nextX;
+                    anX = x + preX;
+                    anY = y + preY;
+                }
+                
+                
+                gap = min(12.5, min(abs(preX + preY), abs(nextX + nextY)) / 2);
+                
+                result += 'L' + (x + (preX / max(abs(preX), 1)) * gap) + ',' + (y + (preY / max(abs(preY), 1)) * gap) + ' Q' + x + ',' + y + ' ' +
+                    (x + (nextX / max(abs(nextX), 1)) * gap) + ',' + (y + (nextY / max(abs(nextY), 1)) * gap) + ' ';
+            } else {
+                result += 'L' + x + ',' + y;
+            }
+        }
+        return result;
     }
 };
 

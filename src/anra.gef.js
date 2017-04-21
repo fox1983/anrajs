@@ -1640,8 +1640,14 @@ anra.gef.RelocalCommand = anra.Command.extend({
     },
     execute: function () {
         this.editPart = this.root.getEditPart(this.model);
-        this.editPart.model.get('bounds')[0] = this.ep.x;
-        this.editPart.model.get('bounds')[1] = this.ep.y;
+        var b = this.editPart.model.get('bounds');
+        b[0] = this.ep.x;
+        b[1] = this.ep.y;
+        
+        this.editPart.model.set('bounds', b);
+        
+        //this.editPart.model.get('bounds')[0] = this.ep.x;
+        //this.editPart.model.get('bounds')[1] = this.ep.y;
         this.editPart.refresh();
     },
     undo: function () {
@@ -1704,7 +1710,7 @@ anra.gef.DeleteNodeCommand = anra.Command.extend({
         else if (selection instanceof anra.gef.BaseModel) {
             this.node = this.root.getEditPart(selection);
             if (this.node == null)
-                throw 'can not delete model ' + selection.id;
+                throw 'can not delete model ' + selection.props.id;
         }
     },
     canExecute: function () {
@@ -2052,7 +2058,7 @@ anra.gef.Editor = Base.extend({
             anra.Platform.error('GEF的父级元素不能为空');
             return;
         }
-//        this.palette = this.createPalette(parentId);
+        this.palette = this.createPalette(parentId);
         this.canvas = this.createCanvas(parentId);
 
         this._initCanvasListeners(this.canvas);
@@ -2216,7 +2222,7 @@ anra.gef.Line = anra.gef.Figure.extend(anra.svg.Polyline).extend({
         if (m != null) {
             this.svg.defs.removeChild(m);
             this.removeAttribute(key);
-            this.removeRepaintListener(marker.repaintListener);
+            this.removeRepaintListener(m.repaintListener);
         }
         this[key] = marker;
         if (marker != null) {
@@ -2300,7 +2306,7 @@ var setPoint = function (o, t) {
  * @type {*|void}
  */
 anra.gef.CurveLine = anra.gef.Line.extend({
-    strategy: anra.svg.LineStrategy.Curve
+    strategy: anra.svg.LineStrategy.Straight
 });
 
 /**
@@ -2373,7 +2379,7 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
     },
     hasSourceLine: function (line) {
         if (line instanceof anra.gef.LineModel) {
-            return this.sourceLines.has(this.lineId(line.id))
+            return this.sourceLines.has(this.lineId(line.props.id))
         } else {
             return this.sourceLines.has(line);
         }
@@ -2399,7 +2405,7 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
             }
             return true;
         }
-        console.log('duplicate line id: ' + line.id);
+        console.log('duplicate line id: ' + line.props.id);
         return false;
     },
     addTargetLine: function (line) {
@@ -2416,7 +2422,7 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
             }
             return true;
         }
-        console.log('duplicate line id: ' + line.id);
+        console.log('duplicate line id: ' + line.props.id);
         return false;
     },
     getSourceLine: function (id) {
@@ -2426,12 +2432,12 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
         return this.targetLines.get(this.lineId(id));
     },
     lineId: function (id) {
-        return this.id + '_' + id;
+        return this.props.id + '_' + id;
     },
     removeSourceLine: function (line) {
         var l, lk;
         if (line instanceof anra.gef.LineModel)
-            lk = this.lineId(line.id);
+            lk = this.lineId(line.props.id);
         else
             lk = this.lineId(line);
         l = this.sourceLines.remove(lk);
@@ -2484,7 +2490,7 @@ anra.gef.NodeModel = anra.gef.BaseModel.extend({
         return c;
     },
     equals: function (o) {
-        return this == o || this.id == o.id;
+        return this == o || this.props.id == o.props.id;
     }
 });
 
@@ -2492,7 +2498,7 @@ anra.gef.ContentModel = anra.gef.NodeModel.extend({});
 
 anra.gef.LineModel = anra.gef.BaseModel.extend({
     equals: function (o) {
-        return this == o || this.id == o.id;
+        return this == o || this.props.id == o.props.id;
     }
 });
 

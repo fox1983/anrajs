@@ -1,0 +1,651 @@
+{
+
+  "Root": {
+
+    "UUID": "80EF63689315404C8F4530C23B6E2686",
+
+    "DateInfo": {
+
+      "CreateDate": "2017-03-20 02:47",
+
+      "ModifyDate": "2017-03-21 04:21"
+
+    },
+
+    "NodeMaxnimum": "60",
+
+    "Regulation": {
+
+      "Step": [
+
+        {
+
+          "UUID": "08B9C60BE51242B0A4F73E714F0B628B",
+
+          "Quote": "0",
+
+          "Type": "5",
+
+          "Id": "1",
+
+          "Desp": "步骤一",
+
+          "RefImpl": "DemoStep",
+
+          "Remarks": "0",
+
+          "Skip": {
+
+            "Enabled": "0",
+
+            "Branch": "1"
+
+          },
+
+          "HasSql": "false",
+
+          "Constraint": {
+
+            "Location": "66,74",
+
+            "Size": "160,46"
+
+          },
+
+          "Security": {
+
+            "Readonly": "0ED2432AE044679F",
+
+            "TokenLevel": "9D0CCD18E96A3562"
+
+          },
+
+          "SourceConnections": {
+
+            "Connection": {
+
+              "targetId": "2",
+
+              "SourceTerminal": "1",
+
+              "TargetTerminal": "N"
+
+            }
+
+          },
+
+          "Implementation": {
+
+            "Node": [
+
+              {
+
+                "UUID": "4B0DCE4C624E4FFDA5BC79AD9C2302B5",
+
+                "Id": "1",
+
+                "Name": "开始",
+
+                "Desp": "开始",
+
+                "Type": "2",
+
+                "Target": "Begin",
+
+                "Style": "0",
+
+                "Tooltip": "开始",
+
+                "Visible": "null",
+
+                "Collapse": "0",
+
+                "Constraint": {
+
+                  "Location": "135,20",
+
+                  "Size": "63,63"
+
+                },
+
+                "SourceConnections": {
+
+                  "Connection": {
+
+                    "targetId": "2",
+
+                    "SourceTerminal": "1",
+
+                    "TargetTerminal": "N"
+
+                  }
+
+                },
+
+                "Terminals": {
+
+                  "Terminal": {
+
+                    "Name": "1",
+
+                    "Desp": "锚点一"
+
+                  }
+
+                },
+
+                "Logic": {
+
+                  "Total": "1",
+
+                  "RET1": "2"
+
+                }
+
+              },
+
+              {
+
+                "UUID": "3D2C87967BBC4A3A9B7EFE2D47CEDFA9",
+
+                "Id": "3",
+
+                "Name": "正常结束",
+
+                "Desp": "正常结束",
+
+                "Type": "3",
+
+                "Target": "END",
+
+                "Style": "0",
+
+                "Tooltip": "正常结束",
+
+                "Visible": "1",
+
+                "Collapse": "0",
+
+                "Constraint": {
+
+                  "Location": "320,320",
+
+                  "Size": "63,63"
+
+                },
+
+                "Logic": { "Total": "0" }
+
+              },
+
+              {
+
+                "UUID": "FB1B81ACFDE64F40A184956691056A28",
+
+                "Id": "2",
+
+                "Name": "默认逻辑错误委托",
+
+                "Desp": "默认逻辑错误委托",
+
+                "Type": "6",
+
+                "Target": "DefaultException",
+
+                "Style": "2",
+
+                "Tooltip": "默认逻辑错误委托",
+
+                "Visible": "1",
+
+                "Collapse": "2",
+
+                "Constraint": {
+
+                  "Location": "128,132",
+
+                  "Size": "160,46"
+
+                },
+
+                "SourceConnections": {
+
+                  "Connection": [
+
+                    {
+
+                      "targetId": "4",
+
+                      "SourceTerminal": "0",
+
+                      "TargetTerminal": "N"
+
+                    },
+
+                    {
+
+                      "targetId": "3",
+
+                      "SourceTerminal": "1",
+
+                      "TargetTerminal": "N"
+
+                    }
+
+                  ]
+
+                },
+
+                "Terminals": {
+
+                  "Terminal": [
+
+                    {
+
+                      "Name": "0",
+
+                      "Desp": "失败"
+
+                    },
+
+                    {
+
+                      "Name": "1",
+
+                      "Desp": "成功"
+
+                    }
+
+                  ]
+
+                },
+
+                "Logic": {
+
+                  "Total": "2",
+
+                  "RET0": "4",
+
+                  "RET1": "3"
+
+                }
+
+              },
+
+              {
+
+                "UUID": "21188B6621FF467DA1D7CA8FEFEC9167",
+
+                "Id": "4",
+
+                "Name": "异常结束",
+
+                "Desp": "异常结束",
+
+                "Type": "4",
+
+                "Target": "END",
+
+                "Style": "0",
+
+                "Tooltip": "异常结束",
+
+                "Visible": "1",
+
+                "Collapse": "0",
+
+                "Constraint": {
+
+                  "Location": "100,300",
+
+                  "Size": "63,63"
+
+                },
+
+                "Logic": { "Total": "0" }
+
+              }
+
+            ],
+
+            "Usage": "1"
+
+          },
+
+          "Terminals": {
+
+            "Terminal": [
+
+              {
+
+                "Name": "0",
+
+                "Desp": "失败"
+
+              },
+
+              {
+
+                "Name": "1",
+
+                "Desp": "成功"
+
+              }
+
+            ]
+
+          },
+
+          "True": "2",
+
+          "False": "0"
+
+        },
+
+        {
+
+          "UUID": "93ADAFA36E874CBA9ED5AD806CBB0524",
+
+          "Quote": "0",
+
+          "Type": "5",
+
+          "Id": "2",
+
+          "Desp": "步骤二",
+
+          "RefImpl": "TestStep",
+
+          "Remarks": "0",
+
+          "Skip": {
+
+            "Enabled": "0",
+
+            "Branch": "1"
+
+          },
+
+          "HasSql": "false",
+
+          "Constraint": {
+
+            "Location": "80,260",
+
+            "Size": "160,46"
+
+          },
+
+          "Security": {
+
+            "Readonly": "554CF29138B3D94C",
+
+            "TokenLevel": "78931492830E8B98"
+
+          },
+
+          "Implementation": {
+
+            "Node": [
+
+              {
+
+                "UUID": "81492FF710AE406B8DB19720C51CF074",
+
+                "Id": "1",
+
+                "Name": "开始",
+
+                "Desp": "开始",
+
+                "Type": "2",
+
+                "Target": "Begin",
+
+                "Style": "0",
+
+                "Tooltip": "开始",
+
+                "Visible": "null",
+
+                "Collapse": "0",
+
+                "Constraint": {
+
+                  "Location": "180,20",
+
+                  "Size": "63,63"
+
+                },
+
+                "SourceConnections": {
+
+                  "Connection": {
+
+                    "targetId": "3",
+
+                    "SourceTerminal": "1",
+
+                    "TargetTerminal": "N"
+
+                  }
+
+                },
+
+                "Terminals": {
+
+                  "Terminal": {
+
+                    "Name": "1",
+
+                    "Desp": "锚点一"
+
+                  }
+
+                },
+
+                "Logic": {
+
+                  "Total": "1",
+
+                  "RET1": "3"
+
+                }
+
+              },
+
+              {
+
+                "UUID": "D34D1AF777BA4646B623B083E33D40A0",
+
+                "Id": "2",
+
+                "Name": "正常结束",
+
+                "Desp": "正常结束",
+
+                "Type": "3",
+
+                "Target": "END",
+
+                "Style": "0",
+
+                "Tooltip": "正常结束",
+
+                "Visible": "1",
+
+                "Collapse": "0",
+
+                "Constraint": {
+
+                  "Location": "200,440",
+
+                  "Size": "63,63"
+
+                },
+
+                "Logic": { "Total": "0" }
+
+              },
+
+              {
+
+                "UUID": "6158C15B4FEC4ACF9A8754BEA8904045",
+
+                "Id": "3",
+
+                "Name": "动态调用",
+
+                "Desp": "动态调用",
+
+                "Type": "7",
+
+                "Target": "cn.com.agree.afa.jcomponent.bc.BComponentInvoker",
+
+                "Tooltip": "动态调用",
+
+                "Visible": "1",
+
+                "Collapse": "0",
+
+                "Skip": {
+
+                  "Enabled": "0",
+
+                  "Branch": "1"
+
+                },
+
+                "Constraint": {
+
+                  "Location": "132,220",
+
+                  "Size": "160,46"
+
+                },
+
+                "IsError": "0",
+
+                "SourceConnections": {
+
+                  "Connection": {
+
+                    "targetId": "2",
+
+                    "SourceTerminal": "1",
+
+                    "TargetTerminal": "N"
+
+                  }
+
+                },
+
+                "Terminals": {
+
+                  "Terminal": [
+
+                    {
+
+                      "Name": "0",
+
+                      "Desp": "失败"
+
+                    },
+
+                    {
+
+                      "Name": "1",
+
+                      "Desp": "成功"
+
+                    }
+
+                  ]
+
+                },
+
+                "InArgs": {
+
+                  "Arg": [
+
+                    {
+
+                      "Name": "包名",
+
+                      "Key": "pkgName",
+
+                      "Arg": "\"tc.platform\"",
+
+                      "Level": "4"
+
+                    },
+
+                    {
+
+                      "Name": "业务组件名",
+
+                      "Key": "bcName",
+
+                      "Arg": "\"P_javadict\"",
+
+                      "Level": "4"
+
+                    }
+
+                  ]
+
+                },
+
+                "Logic": {
+
+                  "Total": "1",
+
+                  "RET1": "2"
+
+                }
+
+              }
+
+            ],
+
+            "Usage": "1"
+
+          },
+
+          "Terminals": {
+
+            "Terminal": [
+
+              {
+
+                "Name": "0",
+
+                "Desp": "失败"
+
+              },
+
+              {
+
+                "Name": "1",
+
+                "Desp": "成功"
+
+              }
+
+            ]
+
+          },
+
+          "True": "0",
+
+          "False": "0"
+
+        }
+
+      ]
+
+    }
+
+  }
+
+}

@@ -27,11 +27,11 @@ ROUTER = RouterList[0];
 DISTANCE = DistanceList[0];
 
 /*寻路延迟*/
-DELAY = 50;
+DELAY = 5;
 
 /*用于计算的斜边长度与直角边长度*/
 BE = 14;
 RE = 10;
 
 /*是否可以走斜边*/
-DIAGONAL = true;
+DIAGONAL = false;

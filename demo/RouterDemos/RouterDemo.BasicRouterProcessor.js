@@ -55,7 +55,8 @@ SingleRouterProcessor = BasicRouterProcessor.extend({
     },
     getPath: function () {
         if (this.flag)
-            return Util.calculatePath(this.end);
+            //return Util.calculatePath(this.end);
+            return simplify(this.end);
         else
             return null;
     }

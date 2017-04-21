@@ -199,3 +199,33 @@ addPointList = function (x, y, list) {
     if (isValid(new Point(x, y)))
         list.unshift(getMapPoint(x, y))
 };
+
+
+simplify = function(point) {
+    var father, current = point, grand;
+    while (true) {
+        father = current.parent;
+        
+        if (father == null) {
+            break;
+        }
+        
+        grand = father.parent;
+        
+        if (grand == null) {
+            break;
+        }
+        
+        if (father.equals(grand)) {
+            break;
+        }
+        
+        if ((father.x == current.x && current.x == grand.x) || (father.y == current.y && current.y == grand.y)) {
+            current.setParent(grand);
+        } else {
+            current = father;
+        }
+    }
+    
+    return calculatePath(point);
+};
