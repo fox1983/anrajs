@@ -582,20 +582,29 @@ anra.event.EventTable = Base.extend({
  */
 anra.Command = Base.extend({
 
+    constructor: function (config) {
+        this.config = config;
+    },
     execute: function () {
+        this.config && this.config.execute && this.config.execute.call(this);
     },
     canExecute: function () {
-        return true;
+        return (this.config && this.config.canExecute) ? this.config.canExecute.call(this) : true;
     },
     redo: function () {
-        this.execute();
+        if (this.config && this.config.redo) {
+            this.config.redo();
+        } else
+            this.execute();
     },
     undo: function () {
+        this.config && this.config.undo && this.config.undo.call(this);
     },
     canUndo: function () {
-        return true;
+        return (this.config && this.config.canUndo) ? this.config.canUndo.call(this) : true;
     },
     dispose: function () {
+        return this.config && this.config.dispose && this.config.dispose.call(this);
     },
     chain: function (command) {
         if (command == null)

@@ -26,6 +26,28 @@
                 }
             };
 
+
+            EllipseWidget = {
+                tagName: 'ellipse',
+                getClientArea: function () {
+                    return [this.fattr('cx'), this.fattr('cy'), this.fattr['rx'] * 2, this.fattr['ry'] * 2];
+                },
+                applyBounds: function () {
+                    var l = this.locArea();
+                    var rx = this.bounds.width / 2;
+                    var ry = this.bounds.height / 2;
+                    this.setAttribute({
+                        rx: rx,
+                        ry: ry,
+                        cx: this.bounds.x + rx + l[0],
+                        cy: this.bounds.y + ry + l[1]
+                    });
+                },
+                calAnchor: function (dir, offset) {
+                    return {x: this.fattr('cx'), y: this.fattr('cy')}
+                }
+            };
+
             var rectNodeConfig = {
                 canDrag: true,
                 selectable: true,
@@ -41,7 +63,7 @@
                     {id: 0, dir: 'w', offset: -15},
                     {id: 1, dir: 's', offset: 5}
                 ],
-                type: $AG.RECT,
+                type: EllipseWidget,
                 policies: {
                     'TextPolicy': $AG.policy.TextPolicy('id', function (figure) {
                         this.bounds = {
@@ -136,6 +158,7 @@
 
             var editor = new $AG.Editor({
                 id: 'editorPanel',
+                canUndoAndRedo: true,
                 data: [
                     {id: 1, type: 'rectNode', bounds: [100, 100, 30, 30], color: 'red'},
                     {id: 2, type: 'rectNode', bounds: [150, 100, 30, 30], color: '#f1F'},
@@ -170,13 +193,13 @@
                             alert('选中节点ID:' + this.selection.model.get('id'));
                         },
                         check: function () {
-                            return this.selection != null && this.selection.model.get('type') == 'rectNode';
+                            return this.selection != null && this.selection.model != null && this.selection.model.get('type') == 'rectNode';
                         }
                     }
                 ]
             });
 
-            perform = function (color) {
+            changeColor = function (color) {
                 var nodeId = document.getElementById('nodeId').value;
                 var editPart = editor.find(nodeId);
                 if (editPart == null) {
@@ -186,8 +209,33 @@
 
                 editPart.performRequest({
                     type: 'Handle Custom Input',
-                    color:color
+                    color: color
                 })
+            };
+
+            moveX = function () {
+                var nodeId = document.getElementById('nodeId').value;
+                var editPart = editor.find(nodeId);
+                if (editPart == null) {
+                    alert('can not found node: ' + nodeId);
+                    return;
+                }
+
+                var xoff = document.getElementById('xoff').value;
+
+                var oldBounds = editPart.model.get('bounds');
+
+                var moveCommand = new anra.Command({
+                    execute: function () {
+                        oldBounds[0] = oldBounds[0] + parseInt(xoff);
+                        editPart.refresh();
+                    },
+                    undo: function () {
+                        oldBounds[0] = oldBounds[0] - parseInt(xoff);
+                        editPart.refresh();
+                    }
+                });
+                editor.exec(moveCommand);
             }
 
         }
@@ -204,9 +252,14 @@
 
 <div style="position:absolute;right:20px;top:10px;width:200px;height:140px;background-color:lightslategray;">
     id:<input id="nodeId" type="number"/>
-    <button onclick="perform('red')">red</button>
-    <button onclick="perform('yellow')">yellow</button>
-    <button onclick="perform('blue')">blue</button>
+    <button onclick="changeColor('red')">red</button>
+    <button onclick="changeColor('yellow')">yellow</button>
+    <button onclick="changeColor('blue')">blue</button>
+    <br/>
+    ----------------
+    <br/>
+    x:<input id="xoff" type="number"/>
+    <button onclick="moveX()">moveX</button>
 </div>
 </body>
 

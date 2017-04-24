@@ -98,6 +98,31 @@ $AG.Editor = anra.gef.Editor.extend({
         doInit.call(this, data, rootModel, this.config);
     },
     registActions: function () {
+        if (this.config.canUndoAndRedo) {
+            this.actionRegistry.regist([
+                {
+                    id: -1002,
+                    type: ACTION_STACK,
+                    key: 'ctrl+z',
+                    run: function () {
+                        this.stack.undo();
+                    },
+                    check: function () {
+                        return this.stack.canUndo();
+                    }
+                }, {
+                    id: -1001,
+                    type: ACTION_STACK,
+                    key: 'ctrl+y',
+                    run: function () {
+                        this.stack.redo();
+                    },
+                    check: function () {
+                        return this.stack.canRedo();
+                    }
+                }
+            ]);
+        }
         this.config.operations && this.actionRegistry.regist(this.config.operations);
     },
     initRootEditPart: function (editPart) {
@@ -122,7 +147,7 @@ $AG.Editor = anra.gef.Editor.extend({
     },
     find: function (id) {
         var model = this.rootEditPart.model.getChild(id);
-        return model==null?null:this.rootEditPart.getEditPart(model);
+        return model == null ? null : this.rootEditPart.getEditPart(model);
     },
     exec: function (cmd) {
         if (this.cmdStack)
@@ -136,13 +161,13 @@ $AG.Editor = anra.gef.Editor.extend({
         if (this.cmdStack)
             this.cmdStack.redo();
     },
-    canUndo: function (cmd) {
+    canUndo: function () {
         if (this.cmdStack)
             this.cmdStack.canUndo();
     },
-    canRedo: function (cmd) {
+    canRedo: function () {
         if (this.cmdStack)
-            this.cmdStack.canRedo(cmd);
+            this.cmdStack.canRedo();
     },
     createEditPart: function (parentControl, model) {
         var nodeConfig = this.config.children[model.props.type];
